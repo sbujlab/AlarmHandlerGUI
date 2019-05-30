@@ -11,6 +11,14 @@ import tkinter as tk
 from tkinter import ttk
 import utils as u
 
+class OBJECT_LIST():
+  def __init__(self,filearray):
+    self.objectList = u.create_objects(filearray)
+    self.selectedButtonColumnIndices = []
+    for i in range(0,len(self.objectList)):
+      self.selectedButtonColumnIndices.append(0) # This looks stupid because I'm being safe
+
+
 class ALARM_OBJECT():
   def __init__(self):
     self.indexStart = 0

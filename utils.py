@@ -28,20 +28,20 @@ def parse_textfile(filename,delim):
       filearray.append(rowList)
   return filearray
 
-def write_textfile(objectList,filename,delim):
+def write_textfile(OL,filename,delim):
   filearray = []
-  # for each in objectList
+  # for each in OL.objectList
   #   define the start and stop indices
   #   find all child columns whose start and stop indices lie within
   #   while that condition is true print from left to right
-  if len(objectList)>1:
-    i = len(objectList)-1
-    for j in range(0,len(objectList[i])): # Take the 5th column and make objects out of all of its parents, in sequence
+  if len(OL.objectList)>1:
+    i = len(OL.objectList)-1
+    for j in range(0,len(OL.objectList[i])): # Take the 5th column and make objects out of all of its parents, in sequence
       entryarray = []
-      parents = objectList[i][j].parentIndices
+      parents = OL.objectList[i][j].parentIndices
       for k in range(0,len(parents)):
-        entryarray.append(objectList[k][parents[k]].value)
-      entryarray.append(objectList[i][j].value)
+        entryarray.append(OL.objectList[k][parents[k]].value)
+      entryarray.append(OL.objectList[i][j].value)
       filearray.append(entryarray)
   outFile = open(filename,'w+')
   wr = csv.writer(outFile,delimiter=delim)
@@ -54,11 +54,11 @@ def create_objects(filearray):
   #if len(filearray)>0: 
   #  ncolumns = len(filearray[len(filearray)-1]) # FIXME should this just be hardcoded to 5 layers or should I keep it generic??
   nlines = len(filearray)
-  objectList = []
+  localObjectList = []
   colRow = []
   line_previous = []
   for i in range(0,ncolumns):
-    objectList.append([]) # Check this
+    localObjectList.append([]) # Check this
     colRow.append(0)
     line_previous.append("NULL")
   for lineN in range(0,nlines):
@@ -80,30 +80,30 @@ def create_objects(filearray):
         newObject.add_parameter_history(newObject.identifier,newObject.value)
         newObject.color = lightgrey_color
         newObject.alarm_status = 0
-        objectList[column].append(newObject)
+        localObjectList[column].append(newObject)
         if column != 0:
           for indices in range(0,column): # for parent objects grab their index (assuming my parent was the most recently added one to the object list)
-            objectList[column][colRow[column]-1].parentIndices.append(0)
-            objectList[column][colRow[column]-1].parentIndices[indices] = objectList[indices][len(objectList[indices])-1].columnIndex
+            localObjectList[column][colRow[column]-1].parentIndices.append(0)
+            localObjectList[column][colRow[column]-1].parentIndices[indices] = localObjectList[indices][len(localObjectList[indices])-1].columnIndex
         # FIXME try to find a way to catalogue the following children in a level 2 object
         if (column==4 and isnew==1):
-          objectList[2][objectList[column][colRow[2]-1].parentIndices[2]].add_parameter(objectList[3][colRow[3]-1].value,objectList[4][colRow[4]-1].value)
-          objectList[2][objectList[column][colRow[2]-1].parentIndices[2]].add_parameter_history(objectList[3][colRow[3]-1].value,objectList[4][colRow[4]-1].value)
-          #objectList[2][colRow[2]-1].add_parameter(objectList[3][colRow[3]-1].value,objectList[4][colRow[4]-1].value)
+          localObjectList[2][localObjectList[column][colRow[2]-1].parentIndices[2]].add_parameter(localObjectList[3][colRow[3]-1].value,localObjectList[4][colRow[4]-1].value)
+          localObjectList[2][localObjectList[column][colRow[2]-1].parentIndices[2]].add_parameter_history(localObjectList[3][colRow[3]-1].value,localObjectList[4][colRow[4]-1].value)
+          #localObjectList[2][colRow[2]-1].add_parameter(localObjectList[3][colRow[3]-1].value,localObjectList[4][colRow[4]-1].value)
         if (column==4 and isnew!=1):
-          objectList[2][objectList[column][colRow[2]-1].parentIndices[2]].add_parameter_history(objectList[3][colRow[3]-1].value,objectList[4][colRow[4]-1].value)
+          localObjectList[2][localObjectList[column][colRow[2]-1].parentIndices[2]].add_parameter_history(localObjectList[3][colRow[3]-1].value,localObjectList[4][colRow[4]-1].value)
         #for colN in range(column+1,len(line)): # Tell the sub-types not to care if they are repeat values
         #  line_previous[colN]="NULL"
       else:
-        objectList[column][colRow[column]-1].indexEnd=lineN
+        localObjectList[column][colRow[column]-1].indexEnd=lineN
       line_previous[column]=line[column]
-  return objectList
+  return localObjectList
   
 
-def add_object(objList,coli):
-  colLen = len(objList[coli])
+def add_object(OL,coli):
+  colLen = len(OL.objectList[coli])
   if colLen>0:
-    lastIndexCol = objList[coli][colLen-1].indexEnd+1
+    lastIndexCol = OL.objectList[coli][colLen-1].indexEnd+1
   else:
     lastIndexCol = 0 # This is the first object of any row
   newObject = alarm_object.ALARM_OBJECT()
@@ -113,15 +113,12 @@ def add_object(objList,coli):
   newObject.columnIndex = colLen
   if coli!=0:
     if colLen!=0:
-      newObject.parentIndices = objList[coli][colLen-1].parentIndices # FIXME this needs to be done inteligently
+      #newObject.parentIndices = OL.objectList[coli][colLen-1].parentIndices # FIXME this needs to be done inteligently
+      tempPI = OL.objectList[coli-1][len(OL.objectList[coli-1])-1].parentIndices
+      newObject.parentIndices = tempPI.append(OL.objectList[coli-1][len(OL.objectList[coli-1])-1].columnIndex)
     # because the lastIndexCol will be non-addressable in event of this is the first thing added to the column, in which case we need to know which parent was actually activated to generate this column
     else:
       pass
-  # objList.write_object(newObject) # fixme - do this method next
-  objList[coli].append(newObject)
+  # OL.objectList.write_object(newObject) # fixme - do this method next
+  OL.objectList[coli].append(newObject)
 
-def alarm_loop(alarmHandler):
-  if (alarmHandler.fGlobalLoopStatus==1):
-    alarmHandler.win.after(1)
-    write_textfile(alarmHandler.objectList,alarmHandler.filename,alarmHandler.delim)
-  # Loop over the global objectData and call data updating methods
