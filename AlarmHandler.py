@@ -30,25 +30,13 @@ class AlarmHandler:
         self.get_alarm_handler_style()
         self.filename = "/adaqfs/home/apar/bin/alarm.csv"
         self.delim = ','
-        self.filearray = None
-        #self.objectList = None 
-        self.parse_textfile()
+        self.filearray = u.parse_textfile(self.filename,self.delim)
         self.objectList = u.create_objects(self.filearray) 
         #self.create_objects()
         self.fGlobalAlarmStatus = 0 # Start in non-alarmed state
         self.fGlobalLoopStatus = 1 # Start in looping state
+        u.alarm_loop(self)
         self.create_widgets()
-
-    def parse_textfile(self):
-      self.filearray = []
-      with open(self.filename) as csv_file:
-        csv_reader = csv.reader(csv_file, delimiter=self.delim)
-        for row in csv_reader:
-          rowList = []
-          for col in row:
-            rowList.append(col)
-          self.filearray.append(rowList)
-  #return filearray
 
     def get_alarm_handler_style(self):
         style = ttk.Style()
