@@ -14,6 +14,7 @@ import alarm_object
 
 green_color = '#3C8373'
 lightgrey_color = '#E0E0E0'
+grey_color = '#C0C0C0'
 
 SOCK_OK = 0; SOCK_ERROR = -1
 
@@ -67,51 +68,75 @@ def send_command(crate_num, packet):
 
 # Cameron Alarm Methods
 
-def parse_textfile(filename,delim):
-  filearray = []
-  with open(filename) as csv_file:
-    csv_reader = csv.reader(csv_file, delimiter=delim)
-    for row in csv_reader:
-      for i in range(len(row)):
-        row[i] = int(row[i])
-      filearray.append(row)
-  return filearray
-      
+#def parse_textfile(fAlarmHandler):
+#  fAlarmHandler.filearray = []
+#  with open(fAlarmHandler.filename) as csv_file:
+#    csv_reader = csv.reader(csv_file, delimiter=fAlarmHandler.delim)
+#    for row in csv_reader:
+#      fAlarmHandler.filearray.append(row)
+#  #return filearray
+
 def create_objects(filearray):
-  ncolumns = len(filearray[len(filearray)])
+  #ncolumns = len(filearray[0]) # FIXME array 0?
+  ncolumns = len(filearray[len(filearray)-1]) # FIXME array 0?
   nlines = len(filearray)
   objectList = []
-  colRows = []
+  colRow = []
   line_previous = []
-  for i in range(ncolumns):
+  for i in range(0,ncolumns):
     objectList.append([]) # Check this
-    colRows.append(0)
+    colRow.append(0)
     line_previous.append("NULL")
-  for lineN in range(nlines):
+  for lineN in range(0,nlines):
     line = filearray[lineN]
-    for column in range(ncolumns):
-      if ((line[column] != line_previous[column]) or (line[column] == "NULL")): # This is a new value, so initialize it and store values
-        newObject = alarm_object.ALARM_OBJECT # call initializer
+    isnew = 0
+    for column in range(0,ncolumns):
+      if (isnew == 1 or (line[column] != line_previous[column]) or (line[column] == "NULL")): # This is a new value, so initialize it and store values
+        isnew = 1
+        colRow[column] += 1
+        newObject = alarm_object.ALARM_OBJECT() # call initializer
         newObject.indexStart = lineN
         newObject.indexEnd = lineN
+        newObject.parentIndices = []
         newObject.column = column
-        newObject.columnIndex = colRow[column]
+        newObject.columnIndex = colRow[column]-1
         newObject.identifier = "Name"
         newObject.value = line[column]
-        newObject.add_parameter(identifier,value)
+        newObject.add_parameter(newObject.identifier,newObject.value)          # FIXME having its own name in its parameter list is probably not needed....
+        newObject.add_parameter_history(newObject.identifier,newObject.value)
         newObject.color = lightgrey_color
-        newObject.alarm_status = green
+        newObject.alarm_status = 0
         objectList[column].append(newObject)
-        for indices in range(1,column): # for parent objects grab their index (assuming my parent was the most recently added one to the object list)
-          objectList[column][colRow[column]].parent_index[indices]=objectList[indices][objectList[indices].size()].columnIndex
-        if column==4:
-          objectList[3][parent_index[3]].add_parameter(objectList[4][colRow[4]].value,objectList[5][colRow[5]].value)
-        colRow[column] += 1
-        for colN in range(column+1,len(line)): # Tell the sub-types not to care if they are repeat values
-          line_previous[colN]="NULL"
+        if column != 0:
+          for indices in range(0,column): # for parent objects grab their index (assuming my parent was the most recently added one to the object list)
+            objectList[column][colRow[column]-1].parentIndices.append(0)
+            objectList[column][colRow[column]-1].parentIndices[indices] = objectList[indices][len(objectList[indices])-1].columnIndex
+        # FIXME try to find a way to catalogue the following children in a level 2 object
+        if (column==4 and isnew==1):
+          objectList[2][objectList[column][colRow[2]-1].parentIndices[2]].add_parameter(objectList[3][colRow[3]-1].value,objectList[4][colRow[4]-1].value)
+          objectList[2][objectList[column][colRow[2]-1].parentIndices[2]].add_parameter_history(objectList[3][colRow[3]-1].value,objectList[4][colRow[4]-1].value)
+          #objectList[2][colRow[2]-1].add_parameter(objectList[3][colRow[3]-1].value,objectList[4][colRow[4]-1].value)
+        if (column==4 and isnew!=1):
+          objectList[2][objectList[column][colRow[2]-1].parentIndices[2]].add_parameter_history(objectList[3][colRow[3]-1].value,objectList[4][colRow[4]-1].value)
+        #for colN in range(column+1,len(line)): # Tell the sub-types not to care if they are repeat values
+        #  line_previous[colN]="NULL"
       else:
-        objectList[column][colRow[column]].indexEnd=lineN
+        objectList[column][colRow[column]-1].indexEnd=lineN
       line_previous[column]=line[column]
-
   return objectList
+  
 
+def add_object(objList,coli):
+  colLen = len(objList[coli])
+  lastIndexCol = objList[coli][colLen-1].indexEnd
+  newObject = alarm_object.ALARM_OBJECT()
+  newObject.indexStart = lastIndexCol+1
+  newObject.indexEnd = lastIndexCol+1
+  newObject.column = coli
+  newObject.columnIndex = colLen-1
+  # objList.write_object(newObject) # fixme - do this method next
+  objList[coli].append(newObject)
+
+def alarm_loop():
+  pass
+  # Loop over the global objectData and call data updating methods

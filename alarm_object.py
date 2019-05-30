@@ -31,11 +31,15 @@ class ALARM_OBJECT():
     self.identifier = "NULL"
     self.value = "NULL"
     self.parameterList = []
-    self.color = lightgrey_color
-    self.alarm_status = green
+    self.parameterListHistory = []
+    self.color = u.lightgrey_color
+    self.alarm_status = 0
 
-  def add_parameter(val1,val2):
+  def add_parameter(self,val1,val2):
     self.parameterList.append([val1,val2])
+
+  def add_parameter_history(self,val1,val2):
+    self.parameterListHistory.append([val1,val2])
     # add a pair to a list of parameter names and values
 
 #  def click_button():
@@ -53,19 +57,19 @@ class ALARM_OBJECT():
 
 class VQWK(tk.Frame):
   def __init__(self, tab):
-    self.ch_frame = tk.LabelFrame(tab, text='CH', background=u.green_color, width=500)
+    self.alarm_frame = tk.LabelFrame(tab, text='CH', background=u.green_color, width=500)
     self.inj_frame = tk.LabelFrame(tab, text='Inj', background=u.green_color, width=500)
     self.lft_spec_frame = tk.LabelFrame(tab, text='LftSpec', background=u.green_color, width=500)
     self.rt_spec_frame = tk.LabelFrame(tab, text='RtSpec', background=u.green_color, width=500)
 
-    self.samples_ch_l = tk.Label(self.ch_frame, text='Samples Per Block', background=u.green_color)
-    self.gate_ch_l = tk.Label(self.ch_frame, text='Gate Delay', background=u.green_color)
-    self.blocks_ch_l = tk.Label(self.ch_frame, text='Number of Blocks', background=u.green_color)
-    self.samples_ch_e = tk.Entry(self.ch_frame)
-    self.gate_ch_e = tk.Entry(self.ch_frame)
-    self.blocks_ch_e = tk.Entry(self.ch_frame)
+    self.samples_ch_l = tk.Label(self.alarm_frame, text='Samples Per Block', background=u.green_color)
+    self.gate_ch_l = tk.Label(self.alarm_frame, text='Gate Delay', background=u.green_color)
+    self.blocks_ch_l = tk.Label(self.alarm_frame, text='Number of Blocks', background=u.green_color)
+    self.samples_ch_e = tk.Entry(self.alarm_frame)
+    self.gate_ch_e = tk.Entry(self.alarm_frame)
+    self.blocks_ch_e = tk.Entry(self.alarm_frame)
     self.fill_ch_frame()
-    self.ch_frame.grid(row=0, column=0, padx=20, pady=10)
+    self.alarm_frame.grid(row=0, column=0, padx=20, pady=10)
 
     self.samples_inj_l = tk.Label(self.inj_frame, text='Samples Per Block', background=u.green_color)
     self.gate_inj_l = tk.Label(self.inj_frame, text='Gate Delay', background=u.green_color)
@@ -106,9 +110,9 @@ class VQWK(tk.Frame):
     u.set_text(self.samples_ch_e, '0').grid(row=0, column=1)
     u.set_text(self.gate_ch_e, '0').grid(row=1, column=1)
     u.set_text(self.blocks_ch_e, '0').grid(row=2, column=1)
-    tk.Button(self.ch_frame, text='Get Settings', background=u.green_color, command=self.check_values_ch).grid(
+    tk.Button(self.alarm_frame, text='Get Settings', background=u.green_color, command=self.check_values_ch).grid(
         row=3, column=0, pady=10)
-    tk.Button(self.ch_frame, text='Apply Settings', background=u.green_color, command=self.set_values_ch).grid(
+    tk.Button(self.alarm_frame, text='Apply Settings', background=u.green_color, command=self.set_values_ch).grid(
         row=3, column=1, pady=10)
 
   def fill_inj_frame(self):

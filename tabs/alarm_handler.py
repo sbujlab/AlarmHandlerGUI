@@ -9,240 +9,129 @@ Cameron Clarke 2019-05-28
 
 import tkinter as tk
 from tkinter import ttk
+from functools import partial
 import utils as u
 
-ALARM_GET_NUMBUTTON	=1001
-ALARM_GET_LABEL		=1002
-ALARM_GET_CSR		=1003
-ALARM_eET_CONV		=1004
-ALARM_SET_INT		=1005
-ALARM_SET_PED		=1006
-ALARM_GET_CONV		=1007
-ALARM_GET_INT		=1008
-ALARM_GET_PED		=1009
-ALARM_SET_DAC		=1010
-ALARM_GET_DAC		=1011
-ALARM_SET_SAMP		=1012
-ALARM_GET_SAMP		=1013
-ALARM_MAXBUTTON		=20
-DACRADIO18		=100
-ALARM_BUTTON_GET		=101
-ALARM_BUTTON_SET		=201
-DACTRI			=0
-DACSAW			=1
-DACCONST		=2
-DACOFF18		=3
+class Callback:
+  def __init__(self, func, *args, **kwargs):
+    self.func = func
+    self.args = args
+    self.kwargs = kwargs
+  def __call__(self):
+    self.func(*self.args,**self.kwargs)
 
 class ALARM_HANDLER(tk.Frame):
-  def __init__(self, tab):
-    global numBUTTON
-    numBUTTON = self.get_num_button()
-    BUTTONlabels = []
+  def __init__(self, tab, objectList):
 
-    i = 0
-    while i < numBUTTON:
-      BUTTONlabels.append(self.get_label_button(i))
-      i += 1
-
-    self.ch_frame = tk.LabelFrame(tab, text='CH', background=u.lightgrey_color)
+    self.alarm_frame = tk.LabelFrame(tab, text='Alarm Handler', background=u.lightgrey_color)
+    #self.alarm_frame.grid(row=0,column=0,pady=10,padx=10,sticky='W')
     self.button_ls = []
     self.int_es = []
     self.conv_es = []
     self.dac_settings = []
     self.sample_settings = []
 
-    i = 0
-    while i < numBUTTON:
-      self.button_ls.append(tk.Label(self.ch_frame, text='BUTTON '+str(BUTTONlabels[i]), background=u.lightgrey_color))
-      self.int_es.append(tk.Entry(self.ch_frame, width=3))
-      self.conv_es.append(tk.Entry(self.ch_frame, width=3))
-      self.dac_settings.append(tk.StringVar())
-      self.sample_settings.append(tk.IntVar())
-      i += 1
-      
-    labels = ['Label', 'Int', 'Conv', '-----', 'DAC', 'Settings', '-----', 'Sample by:']
-    for i, label in enumerate(labels):
-      tk.Label(self.ch_frame, text=label, background=u.lightgrey_color).grid(
-          row=0, column=i, padx=8, pady=10, sticky='W')
-    
-    self.create_table(numBUTTON)
-    self.check_values()
+    self.alarmColumns = []
+    self.columnTitles = ["Kinds","Channel","Type","Parameter"]
+    self.columnButtons = []
+    self.newText = ["New\nKind","New\nChannel","New\nType","New\nParameter"]
+    self.buttons = self.initialize_buttons(objectList)
 
-  def get_num_button(self):
-    packet = [u.COMMAND_ALARM, ALARM_GET_NUMBUTTON, 0, 0, 0, "BUTTON Get Number", "Y"]
-    err_flag, reply = u.send_command(u.Crate_CH, packet)
+    #self.select_buttons = []
+    #self.select_add_buttons = []
 
-    if err_flag == u.SOCK_OK:
-      return int(reply[3])
+    self.alarm_frame.pack(padx=20,pady=20,anchor='w')
 
-    else:
-      print("ERROR, Could not access socket.")
-      return -1
-
-  def get_label_button(self, index):
-    packet = [u.COMMAND_ALARM, ALARM_GET_LABEL, index, 0, 0, "BUTTON Get Label", "Y"]
-    err_flag, reply = u.send_command(u.Crate_CH, packet)
-    
-    if err_flag == u.SOCK_OK:
-      return int(reply[3])
-
-    else:
-      print("ERROR, Could not access socket.")
-      return -1
-    
-    
-  def create_table(self, value):
-    for i in range(1, value+1):
-      self.button_ls[i-1].grid(row=i, column=0, padx=10, pady=10, sticky='W')
-      u.set_text(self.int_es[i-1], '3').grid(row=i, column=1, padx=10, pady=10)
-      u.set_text(self.conv_es[i-1], '0').grid(row=i, column=2, padx=10, pady=10)
-      setting = self.dac_settings[i-1]
-      settings = ['Tri', 'Saw', 'Const', 'Off']
-      setting.set('Tri')
-      for j,s in enumerate(settings):
-        tk.Radiobutton(self.ch_frame, text=s, variable=setting, value=s, background=u.lightgrey_color).grid(
-          row=i, column=j+3, padx=5, pady=10, sticky='W')
-      sample_by = self.sample_settings[i-1]
-      sample_by.set(1)
-      tk.OptionMenu(self.ch_frame, sample_by, 1, 2, 4, 8).grid(row=i, column=7)
-    tk.Button(self.ch_frame, text='Get Settings', background=u.lightgrey_color, command=self.check_values).grid(
-        row=6, column=1, columnspan=2, pady=50, sticky='S')
-    tk.Button(self.ch_frame, text='Apply Settings', background=u.lightgrey_color, command=self.set_values).grid(
-        row=6, column=3, columnspan=2, pady=50, sticky='S')
-    tk.Button(self.ch_frame, text='Cancel', background=u.lightgrey_color, command=self.check_values).grid(
-        row=6, column=5, pady=50, sticky='S')
-    self.ch_frame.pack(padx=20, pady=20)
-
-  def check_values(self):
-    fSample = []
-    fIntGain = []
-    fConvGain = []
-    fDAC = []
-    value = numBUTTON
-
-    i = 0
-    while i < value:
-      packet = [u.COMMAND_ALARM, ALARM_GET_SAMP, i, 0, 0, "ALARM Get Sample", "Y"]
-      err_flag, reply = u.send_command(u.Crate_CH, packet)
-    
-      if err_flag == u.SOCK_OK:
-        fSample.append(reply[3])
-        self.sample_settings[i].set(reply[3])
-
-      else:
-        print("ERROR, Could not access socket.")
-        return -1
-
-      packet = [u.COMMAND_ALARM, ALARM_GET_INT, i, 0, 0, "ALARM Get Int", "Y"]
-      err_flag, reply = u.send_command(u.Crate_CH, packet)
-    
-      if err_flag == u.SOCK_OK:
-        fIntGain.append(reply[3])
-        self.int_es[i].delete(0, tk.END)
-        self.int_es[i].insert(0, str(reply[3]))
-
-      else:
-        print("ERROR, Could not access socket.")
-        return -1
-
-      packet = [u.COMMAND_ALARM, ALARM_GET_CONV, i, 0, 0, "ALARM Get Conv", "Y"]
-      err_flag, reply = u.send_command(u.Crate_CH, packet)
-    
-      if err_flag == u.SOCK_OK:
-        fConvGain.append(reply[3])
-        self.conv_es[i].delete(0, tk.END)
-        self.conv_es[i].insert(0, str(reply[3]))
-
-      else:
-        print("ERROR, Could not access socket.")
-        return -1
-
-      packet = [u.COMMAND_ALARM, ALARM_GET_DAC, i, 0, 0, "ALARM Get DAC", "Y"]
-      err_flag, reply = u.send_command(u.Crate_CH, packet)
-    
-      if err_flag == u.SOCK_OK:
-        fDAC.append(reply[3])
-        if reply[3] == DACSAW:
-          self.dac_settings[i].set('Saw')
-        elif reply[3] == DACCONST:
-          self.dac_settings[i].set('Const')
-        elif reply[3] == DACTRI:
-          self.dac_settings[i].set('Tri')
+    #numberButtons = []
+  def initialize_buttons(self,objectList):
+    grid = []
+    for i in range(0, 4):
+      row = []
+      self.alarmColumns.append(tk.LabelFrame(self.alarm_frame, text=self.columnTitles[i], background=u.lightgrey_color))
+ #     self.columnButtons.append([])
+    #  numberButtons.append(0)
+      # This is a list of button functions to be added to buttons themselves
+      #self.select_buttons.append([])
+      #self.select_add_buttons.append(self.select_add_button(objectList,i,numberButtons[i]))
+      for j in range(0,len(objectList[i])):
+        # Loop over the list of objects, creating buttons
+        #self.select_buttons[i].append(self.select_button(objectList,i,j))
+        #self.columnButtons[i].append(tk.Button(self.alarmColumns[i], text=objectList[i][j].value, command = self.select_buttons[i][j], justify='center', background=objectList[i][j].color)) # loop over buttons
+        #self.columnButtons[i].append(tk.Button(self.alarmColumns[i], text=objectList[i][j].value, command = lambda: self.select_button(objectList,i,j), justify='center', background=objectList[i][j].color)) # loop over buttons
+        #self.columnButtons[i].append(tk.Button(self.alarmColumns[i], text=objectList[i][j].value, command = self.select_button(objectList), index_i = i, index_j = j, justify='center', background=objectList[i][j].color)) # loop over buttons
+        butt = tk.Button(self.alarmColumns[i], text=objectList[i][j].value, justify='center', background=objectList[i][j].color) # loop over buttons
+        butt.indices = (i,j)
+        butt.config(command = lambda but=butt: self.select_button(objectList,but))
+ #       self.columnButtons[i].append(butt) # loop over buttons
+        row.append(butt)
+        #self.columnButtons[i].append(tk.Button(self.alarmColumns[i], text=objectList[i][j].value, command = Callback(self.select_button, objectList[i][j]), justify='center', background=objectList[i][j].color)) # loop over buttons
+    #    numberButtons[i] += 1
+      # Finally add the "New Button" button
+ #     self.columnButtons[i].append(tk.Button(self.alarmColumns[i], text=self.newText[i], command = lambda: self.select_add_buttons(objectList,i,j), default='active', justify='center', background=u.lightgrey_color)) # loop over buttons
+ #     butt = tk.Button(self.alarmColumns[i], text=self.newText[i], command = lambda: self.select_add_buttons(objectList,i,j), default='active', justify='center', background=u.lightgrey_color)
+      butt = tk.Button(self.alarmColumns[i], text=self.newText[i], default='active', justify='center', background=u.lightgrey_color)
+      butt.indices = (i,len(row)-1)
+      butt.config(command = lambda but=butt: self.select_add_button(objectList,but))
+      row.append(butt)
+ #     row.append(tk.Button(self.alarmColumns[i], text=self.newText[i], command = lambda: self.select_add_buttons(objectList,i,j), default='active', justify='center', background=u.lightgrey_color)) # loop over buttons
+ #     for j in range(0,len(self.columnButtons[i])):
+      for j in range(0,len(row)):
+        if i==3:
+ #         self.columnButtons[i][j].grid(row=j,column=i,columnspan=2,padx=10,pady=10,sticky='W')
+          row[j].grid(row=j,column=i,columnspan=2,padx=10,pady=10,sticky='W')
         else:
-          self.dac_settings[i].set('Off')
+ #         self.columnButtons[i][j].grid(row=j,column=i,padx=10,pady=10,sticky='W')
+          row[j].grid(row=j,column=i,padx=10,pady=10,sticky='W')
+      self.alarmColumns[i].grid(row=0,column=i,pady=10,padx=10,sticky='N')
+      grid.append(row)
+    return grid
+    #  self.alarmColumns[i].pack(padx=20,pady=20,anchor='w')
 
-      else:
-        print("ERROR, Could not access socket.")
-        return -1
-      i += 1
-
-  def set_values(self):
-    fSample = []
-    fIntGain = []
-    fConvGain = []
-    fDAC = []
-    value = numBUTTON
-
-    i = 0
-    while i < value:
-      fIntGain.append(int(self.int_es[i].get()))
-
-      if fIntGain[i] < 0 or fIntGain[i] > 3:
-        print("ERROR: Int Value is out of range! Try (0-3)...")
-      else:
-        packet = [u.COMMAND_ALARM, ALARM_SET_INT, i, fIntGain[i], 0, "ALARM Set Int", "Y"]
-        err_flag, reply = u.send_command(u.Crate_CH, packet)
+#    i = 0
+#    while i < numBUTTON:
+#      self.button_ls.append(tk.Label(self.alarm_frame, text='BUTTON '+str(BUTTONlabels[i]), background=u.lightgrey_color))
+#      self.int_es.append(tk.Entry(self.alarm_frame, width=3))
+#      self.conv_es.append(tk.Entry(self.alarm_frame, width=3))
+#      self.dac_settings.append(tk.StringVar())
+#      self.sample_settings.append(tk.IntVar())
+#      i += 1
       
-        if err_flag == u.SOCK_OK:
-          pass
-        else:
-          print("ERROR, Could not access socket.")
-          return -1
+#    labels = ['Label', 'Int', 'Conv', '-----', 'DAC', 'Settings', '-----', 'Sample by:']
+#    for i, label in enumerate(labels):
+#      tk.Label(self.alarm_frame, text=label, background=u.lightgrey_color).grid(
+#          row=0, column=i, padx=8, pady=10, sticky='W')
+    
+#    self.create_table(numBUTTON)
+#    self.check_values()
 
-      fConvGain.append(int(self.conv_es[i].get()))
 
-      if fConvGain[i] < 0 or fConvGain[i] > 15:
-        print("ERROR: Conv Value is out of range! Try (0-15)...")
-      else:
-        packet = [u.COMMAND_ALARM, ALARM_SET_CONV, i, fConvGain[i], 0, "ALARM Set Conv", "Y"]
-        err_flag, reply = u.send_command(u.Crate_CH, packet)
-       
-        if err_flag == u.SOCK_OK:
-          pass
-        else:
-          print("ERROR, Could not access socket.")
-          return -1
-      
-      fDAC.append(self.dac_settings[i].get())
+  #def select_button(self,objectList,coli,rowi):
+  #  print(coli)
+  #  print(rowi)
+  #  objectList[coli][rowi].color=u.grey_color
+  #  self.background=u.grey_color
+  def select_button(self,objectList,but):
+    i,j = but.indices
+    print(i)
+    print(j)
+    objectList[i][j].color=u.grey_color
+    self.buttons[i][j].background=u.grey_color
+    #self.columnButtons[i][j].background=u.grey_color
+    #but.background=u.grey_color
+  
+  def select_add_button(self,objectList,but):
+    i,j = but.indices
+    print(i)
+    print(j)
+    butt = tk.Button(self.alarmColumns[i], text=objectList[i][j].identifier, justify='center', background=objectList[i][j].color)
+    j += 1
+    butt.indices = (i,j) #FIXME get the indices right and pass/edit locations of new buttons correctly
+    butt.config(command = lambda but=butt: self.select_button(objectList,but))
+    self.buttons[i].append(butt)
+#    self.buttons[coli].append(tk.Button(self.alarmColumns[coli], text=objectList[coli][rowi].identifier, command=lambda but=butt: self.select_button(objectList,but), justify='center', background=objectList[coli][rowi].color))
+    #self.columnButtons[coli].append(tk.Button(self.alarmColumns[coli], text=objectList[coli][rowi].identifier, command=lambda: self.select_button(objectList,i,j), justify='center', background=objectList[coli][rowi].color))
+    u.add_object(objectList,i)
 
-      if fDAC[i]=='Tri':
-        dacflag = DACTRI
-      elif fDAC[i]=='Saw':
-        dacflag = DACSAW
-      elif fDAC[i] == 'Const':
-        dacflag = DACCONST
-      else:
-        dacflag = DACOFF18
+  def add_to_columnButtons(self,columnIndex,lButton):
+    self.columnButtons[columnIndex].append(lButton)
 
-      packet = [u.COMMAND_ALARM, ALARM_SET_DAC, i, dacflag, 0, "ALARM Set DAC", "Y"]
-      err_flag, reply = u.send_command(u.Crate_CH, packet)
-       
-      if err_flag == u.SOCK_OK:
-        pass
-      else:
-        print("ERROR, Could not access socket.")
-        return -1
-
-      fSample.append(int(self.sample_settings[i].get()))
-
-      packet = [u.COMMAND_ALARM, ALARM_SET_SAMP, i, fSample[i], 0, "ALARM Set Sample", "Y"]
-      err_flag, reply = u.send_command(u.Crate_CH, packet)
-      
-      if err_flag == u.SOCK_OK:
-        pass
-      else:
-        print("ERROR, Could not access socket.")
-        return -1
-      i += 1
-
-    self.check_values()
