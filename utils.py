@@ -122,6 +122,9 @@ def append_object(OL,coli):
     newObject.parentIndices.append(OL.objectList[i_index][j_index].columnIndex)
   OL.objectList[coli].append(newObject)
 
+  if coli < len(OL.objectList)-1:
+    append_object(OL,coli+1)
+
 def add_object(OL,coli): 
   colLen = len(OL.objectList[coli])
   colIndexInsert = []

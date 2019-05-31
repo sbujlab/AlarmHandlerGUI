@@ -113,23 +113,51 @@ class ALARM_HANDLER(tk.Frame):
     #j = OL.selectedButtonColumnIndicesList[i] 
     #u.add_object(OL,i)
     u.append_object(OL,i)
-    self.append_button(OL,but)
+    indi = i
+    #self.insert_button(OL,but,indi)
+    self.append_button(OL,but,indi)
     #u.append_object(OL,i)
 
-  def append_button(self,OL,but):
+
+  def insert_button(self,OL,but,indi):
     i,j = but.indices
-    #j = OL.selectedButtonColumnIndicesList[i]
-    j = len(self.buttons[i]) #- 1 
+    j = OL.selectedButtonColumnIndicesList[i]
+    i = indi
+    j# = len(self.buttons[i]) #- 1 
     butt = tk.Button(self.alarmColumns[i], text=OL.objectList[i][j].value, justify='center', background=OL.objectList[i][j].color)
     butt.indices = (i,j) #FIXME get the indices right and pass/edit locations of new buttons correctly
     butt.config(command = lambda butte=butt: self.select_button(OL,butte))
-    self.buttons[i].append(butt)
+    self.buttons[i].insert(j,butt) # FIXME the OL.objectList.parentIndices and columnIndices must be updated now!!
+    self.select_button(OL,butt)
     if i==3:
       self.buttons[i][j].grid(row=j+1,column=i,columnspan=2,pady=10,padx=10,sticky='N')
     else:
       self.buttons[i][j].grid(row=j+1,column=i,pady=10,padx=10,sticky='N')
     self.alarmColumns[i].grid(row=0,column=i,pady=10,padx=10,sticky='N')
     self.alarmFrame.pack(padx=20,pady=20,anchor='w')
+    
+    if indi < len(self.buttons)-1:
+      self.insert_button(OL,but,indi+1)
+
+  def append_button(self,OL,but,indi):
+    i,j = but.indices
+    #j = OL.selectedButtonColumnIndicesList[i]
+    i = indi
+    j = len(self.buttons[i]) #- 1 
+    butt = tk.Button(self.alarmColumns[i], text=OL.objectList[i][j].value, justify='center', background=OL.objectList[i][j].color)
+    butt.indices = (i,j) #FIXME get the indices right and pass/edit locations of new buttons correctly
+    butt.config(command = lambda butte=butt: self.select_button(OL,butte))
+    self.buttons[i].append(butt)
+    self.select_button(OL,butt)
+    if i==3:
+      self.buttons[i][j].grid(row=j+1,column=i,columnspan=2,pady=10,padx=10,sticky='N')
+    else:
+      self.buttons[i][j].grid(row=j+1,column=i,pady=10,padx=10,sticky='N')
+    self.alarmColumns[i].grid(row=0,column=i,pady=10,padx=10,sticky='N')
+    self.alarmFrame.pack(padx=20,pady=20,anchor='w')
+    
+    if indi < len(self.buttons)-1:
+      self.append_button(OL,but,indi+1)
 
   def set_button_clicked(self,OL,i,j):
     for column in range(0,len(self.buttons)):
