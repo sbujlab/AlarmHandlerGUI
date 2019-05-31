@@ -14,9 +14,19 @@ import utils as u
 class OBJECT_LIST():
   def __init__(self,filearray):
     self.objectList = u.create_objects(filearray)
-    self.selectedButtonColumnIndices = []
+    self.selectedButtonColumnIndicesList = []
     for i in range(0,len(self.objectList)):
-      self.selectedButtonColumnIndices.append(0) # This looks stupid because I'm being safe
+      self.selectedButtonColumnIndicesList.append(0) # This looks stupid because I'm being safe
+      #self.selectedButtonColumnIndicesList.append(len(self.objectList[i])-1) # This looks stupid because I'm being safe
+
+  def set_clicked(self,i,j):
+    self.selectedButtonColumnIndicesList[i]=j
+    for column in range(0,len(self.objectList)):
+      for row in range(0,len(self.objectList[column])):
+        if row != self.selectedButtonColumnIndicesList[column]:
+          self.objectList[column][row].click(0)
+    self.objectList[i][j].click(1)
+
 
 
 class ALARM_OBJECT():
@@ -25,13 +35,23 @@ class ALARM_OBJECT():
     self.indexEnd = 0
     self.column = 0
     self.columnIndex = 0
-    self.parentIndex = 0
+    self.parentIndices = []
     self.identifier = "NULL"
     self.value = "NULL"
     self.parameterList = []
     self.parameterListHistory = []
     self.color = u.lightgrey_color
     self.alarm_status = 0
+    self.clicked = 0
+
+  def click(self,stat):
+    self.clicked = stat
+    if (stat == 0 and self.alarm_status == 0):
+      self.color = u.lightgrey_color
+    if (stat == 1):
+      self.color = u.grey_color
+    if (self.alarm_status == 1):
+      self.color = u.red_button_color
 
   def add_parameter(self,val1,val2):
     self.parameterList.append([val1,val2])

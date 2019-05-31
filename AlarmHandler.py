@@ -44,8 +44,12 @@ class AlarmHandler:
       #self.win.after(1000,print("waited 1 seconds"))
       self.win.after(10000,self.alarm_loop)
       print("waited 10 seconds")
-      print(self.OL.objectList[len(self.OL.objectList)-2][len(self.OL.objectList[len(self.OL.objectList)-2])-1].value)
-      print(self.OL.objectList[len(self.OL.objectList)-2][len(self.OL.objectList[len(self.OL.objectList)-2])-1].parentIndices)
+      for i in range(0,5):
+        print("new column")
+        for j in range(0,len(self.OL.objectList[i])):
+          print(self.OL.objectList[i][j].value)
+      #print(self.OL.objectList[len(self.OL.objectList)-2][len(self.OL.objectList[len(self.OL.objectList)-2])-1].value)
+      #print(self.OL.objectList[len(self.OL.objectList)-2][len(self.OL.objectList[len(self.OL.objectList)-2])-1].parentIndices)
       u.write_textfile(self.OL,self.filename,self.delim)
     # Loop over the global objectData and call data updating methods
 
