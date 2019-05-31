@@ -12,6 +12,6 @@ from tkinter import ttk
 import utils as u
 
 class ALARM_HISTORY(tk.Frame):
-  def __init__(self, tab, objectList):
+  def __init__(self, tab, OL, fileArray):
 
     i = 0

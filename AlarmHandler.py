@@ -30,9 +30,10 @@ class AlarmHandler:
     self.get_alarm_handler_style()
     self.filename = "/adaqfs/home/apar/bin/alarm.csv"
     self.delim = ','
-    self.filearray = u.parse_textfile(self.filename,self.delim)
-    self.OL = alarm_object.OBJECT_LIST(self.filearray)
-    #self.objectList = u.create_objects(self.filearray) 
+    self.fileArray = alarm_object.FILE_ARRAY(self.filename,self.delim)
+    # u.parse_textfile(self.filename,self.delim)
+    self.OL = alarm_object.OBJECT_LIST(self.fileArray)
+    #self.objectList = u.create_objects(self.fileArray) 
     #self.create_objects()
     self.fGlobalAlarmStatus = 0 # Start in non-alarmed state
     self.fGlobalLoopStatus = 1 # Start in looping state
@@ -50,7 +51,7 @@ class AlarmHandler:
       #    print(self.OL.objectList[i][j].value)
       #print(self.OL.objectList[len(self.OL.objectList)-2][len(self.OL.objectList[len(self.OL.objectList)-2])-1].value)
       #print(self.OL.objectList[len(self.OL.objectList)-2][len(self.OL.objectList[len(self.OL.objectList)-2])-1].parentIndices)
-      u.write_textfile(self.OL,self.filename,self.delim)
+      u.write_textfile(self.OL,self.fileArray)
     # Loop over the global objectData and call data updating methods
 
   def get_alarm_handler_style(self):
@@ -97,7 +98,7 @@ class AlarmHandler:
     for title, fn in tab_titles:
       tab = ttk.Frame(tab_control, width=800, height=600, style="My.TFrame")
       tab_control.add(tab, text=title)
-      fn(tab,self.OL)
+      fn(tab,self.OL,self.fileArray)
     tab_control.grid(row=0, column=0, columnspan=2)
     fenway = tk.PhotoImage(file='gm.ppm')
     fenway_pahk = tk.Label(self.win, image=fenway, cursor="hand2", bg=u.lightgrey_color)

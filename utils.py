@@ -18,19 +18,19 @@ red_button_color = '#9E1A1A'
 
 # Cameron Alarm Methods
 
-def parse_textfile(filename,delim):
-  filearray = []
-  with open(filename) as csv_file:
-    csv_reader = csv.reader(csv_file, delimiter=delim)
+def parse_textfile(fileArray):
+  fileArray.filearray = []
+  with open(fileArray.filename) as csv_file:
+    csv_reader = csv.reader(csv_file, delimiter=fileArray.delim)
     for row in csv_reader:
       rowList = []
       for col in row:
         rowList.append(col)
-      filearray.append(rowList)
-  return filearray
+      fileArray.filearray.append(rowList)
+  return fileArray.filearray
 
-def write_textfile(OL,filename,delim):
-  filearray = []
+def write_textfile(OL,fileArray):
+  fileArray.filearray = []
   # for each in OL.objectList
   #   define the start and stop indices
   #   find all child columns whose start and stop indices lie within
@@ -44,18 +44,50 @@ def write_textfile(OL,filename,delim):
       for k in range(0,len(parents)):
         entryarray.append(OL.objectList[k][parents[k]].value)
       entryarray.append(OL.objectList[i][j].value)
-      filearray.append(entryarray)
-  outFile = open(filename,'w+')
-  wr = csv.writer(outFile,delimiter=delim)
-  filearrayrows=zip(*filearray)
-  wr.writerows(filearray)
-  return filearray
+      fileArray.filearray.append(entryarray)
+  outFile = open(fileArray.filename,'w+')
+  wr = csv.writer(outFile,delimiter=fileArray.delim)
+  filearrayrows=zip(*fileArray.filearray)
+  wr.writerows(fileArray.filearray)
+  return fileArray.filearray
 
-def create_objects(filearray):
-  ncolumns = 5
-  #if len(filearray)>0: 
-  #  ncolumns = len(filearray[len(filearray)-1]) # FIXME should this just be hardcoded to 5 layers or should I keep it generic??
-  nlines = len(filearray)
+def add_to_filearray(OL,fileArray,but):
+  i,j = but.indices
+  print("Column:")
+  print(i)
+  j = OL.activeObjectColumnIndicesList[i]
+  print("Column index:")
+  print(j)
+  file_ind = OL.objectList[i][j].indexEnd+1
+  print("File index:")
+  print(file_ind)
+  addedLine = []
+  for parent in range(0,i):
+    addedLine.append(OL.objectList[parent][OL.activeObjectColumnIndicesList[parent]].value)
+  for child in range(i,len(OL.objectList)):
+    addedLine.append("NULL")
+  print("Added Line:")
+  print(addedLine)
+  fileArray.filearray.insert(file_ind,addedLine)
+  print("adding to file array")
+  for i in range(0,len(fileArray.filearray)):
+    print(fileArray.filearray[i])
+  return fileArray.filearray
+
+def write_filearray(fileArray):
+  outFile = open(fileArray.filename,'w+')
+  wr = csv.writer(outFile,delimiter=fileArray.delim)
+  filearrayrows=zip(*fileArray.filearray)
+  wr.writerows(fileArray.filearray)
+  print("writing file array")
+  for i in range(0,len(fileArray.filearray)):
+    print(fileArray.filearray[i])
+  return fileArray.filearray
+
+def create_objects(fileArray):
+  if len(fileArray.filearray)>0: 
+    ncolumns = len(fileArray.filearray[len(fileArray.filearray)-1]) # FIXME should this just be hardcoded to 5 layers or should I keep it generic??
+  nlines = len(fileArray.filearray)
   localObjectList = []
   colRow = []
   line_previous = []
@@ -64,7 +96,7 @@ def create_objects(filearray):
     colRow.append(0)
     line_previous.append("NULL")
   for lineN in range(0,nlines):
-    line = filearray[lineN]
+    line = fileArray.filearray[lineN]
     isnew = 0
     for column in range(0,ncolumns):
       if (isnew == 1 or (line[column] != line_previous[column]) or (line[column] == "NULL")): # This is a new value, so initialize it and store values
@@ -94,11 +126,13 @@ def create_objects(filearray):
           #localObjectList[2][colRow[2]-1].add_parameter(localObjectList[3][colRow[3]-1].value,localObjectList[4][colRow[4]-1].value)
         if (column==4 and isnew!=1):
           localObjectList[2][localObjectList[column][colRow[2]-1].parentIndices[2]].add_parameter_history(localObjectList[3][colRow[3]-1].value,localObjectList[4][colRow[4]-1].value)
-        #for colN in range(column+1,len(line)): # Tell the sub-types not to care if they are repeat values
-        #  line_previous[colN]="NULL"
       else:
         localObjectList[column][colRow[column]-1].indexEnd=lineN
       line_previous[column]=line[column]
+  print("generating object list")
+  for i in range(len(localObjectList)):
+    for j in range(len(localObjectList[i])):
+      print("Val: {}, startIndex: {}, endIndex: {}".format(localObjectList[i][j].value,localObjectList[i][j].indexStart,localObjectList[i][j].indexEnd))
   return localObjectList
   
 def append_object(OL,coli): 
@@ -125,104 +159,63 @@ def append_object(OL,coli):
   if coli < len(OL.objectList)-1:
     append_object(OL,coli+1)
 
-def add_object(OL,coli): 
+def insert_object(OL,coli): 
   colLen = len(OL.objectList[coli])
-  colIndexInsert = []
-  startIndexInsert = []
-  endIndexInsert = []
-  for i in range(0,len(OL.objectList)):
-    colIndexInsert.append(0)
-    #colIndexInsert.append(OL.selectedButtonColumnIndicesList[i])
-    startIndexInsert.append(0)
-    endIndexInsert.append(0)
-  clickedIndex = OL.selectedButtonColumnIndicesList[coli-1]
-  colIndexInsert[0]=clickedIndex # This is the index below which we start adding our new objects and pusing down
-  startIndexInsert[0]=OL.objectList[coli][len(OL.objectList[coli])-1].indexStart+1
-  endIndexInsert[0]=OL.objectList[coli][len(OL.objectList[coli])-1].indexEnd+1
-  if coli == 0:
-    colIndexInsert[coli] = colLen-1
-    startIndexInsert[coli] = OL.objectList[coli][colLen-1].indexStart
-    endIndexInsert[coli] = OL.objectList[coli][colLen-1].indexEnd
-    for i in range(1,len(OL.objectList)):
-      tmp = 0
-      tmp2 = 0
-      tmp3 = 0
-      for j in range(0,len(OL.objectList[i])):
-        if clickedIndex == OL.objectList[i][j].parentIndices[coli-1]:
-          tmp = OL.objectList[i][j].columnIndex
-          tmp2 = OL.objectList[i][j].indexStart
-          tmp3 = OL.objectList[i][j].indexEnd
-      colIndexInsert[i]=tmp #colIndex of one whose parent ID matches)
-      startIndexInsert[i]=tmp2
-      endIndexInsert[i]=tmp3
-  else:
-    for i in range(coli,len(OL.objectList)):
-      tmp = 0
-      tmp2 = 0
-      tmp3 = 0
-      for j in range(0,len(OL.objectList[i])):
-        if clickedIndex == OL.objectList[i][j].parentIndices[coli-1]:
-          tmp = OL.objectList[i][j].columnIndex
-          tmp2 = OL.objectList[i][j].indexStart
-          tmp3 = OL.objectList[i][j].indexEnd
-      colIndexInsert.append(tmp) #colIndex of one whose parent ID matches)
-      startIndexInsert.append(tmp2)
-      endIndexInsert.append(tmp3)
+  originalLengthColumn = OL.selectedColumnButtonLengthList[coli]
+  insertColumnsLocations = OL.activeObjectColumnIndicesList.copy() # These are the locations (++) we will be inserting new objects (and buttons)
 
-  # + increment the post guys, their column indices change
-  #for i in range(coli,len(OL.objectList)):
-  #  for j in range(1+colIndexInsert[i],len(OL.objectList[i])-1):
-# #     OL.objectList[i][j].columnIndex+=1
-  #    OL.objectList[i][j].indexStart+=1
-  #    OL.objectList[i][j].indexEnd+=1
+  #colIndexInsert = []
+  #startIndexInsert = []
+  #endIndexInsert = []
+  #for i in range(0,len(OL.objectList)):  # Fill from 0, but use from coli
+  #  colIndexInsert.append(insertColumnsLocations[i]+1)
+  #  startIndexInsert.append(OL.objectList[i][insertColumnsLocations[i]].indexEnd+1)
+  #  endIndexInsert.append(OL.objectList[i][insertColumnsLocations[i]].indexEnd+2)
+  # Go through the items whose children contain the affected (moved down) objects and update their start and endIndex+1, for row 3 (analyses) update parameter list with new NULL parameter in correct placement
+  # Go through the items which are moved down and move them down, also if their parent was moved down then update parentIndices+1
+  # Go through columns and insert new objects in the new colIndex position, give parentIndices appropriately for updated information
+  for j in range(insertColumnsLocations[coli]+1,len(OL.objectList[coli])): # Rows below first new button
+    OL.objectList[coli][j].columnIndex += 1
+    OL.objectList[coli][j].indexStart += 1
+    OL.objectList[coli][j].indexEnd += 1
+  for i in range(coli+1,len(OL.objectList)): # Rows to the right, below right buttons, update parent indices too
+    for j in range(insertColumnsLocations[i]+1,len(OL.objectList[i])):
+      OL.objectList[i][j].columnIndex += 1
+      OL.objectList[i][j].indexStart += 1
+      OL.objectList[i][j].indexEnd += 1
+      OL.objectList[i][j].parentIndices[i-1] += 1
+  for i in range(0,coli): # Rows to the left, left of and below selected location
+    OL.objectList[i][insertColumnsLocations[i]].indexEnd += 1
+    OL.objectList[i][insertColumnsLocations[i]].numberChildren += 1
+    for j in range(insertColumnsLocations[i]+1,len(OL.objectList[i])):
+      OL.objectList[i][j].indexEnd += 1
 
-  # + increment the pre guys, only their file indices change
-  #for i in range(0,coli):
-  #  for j in range(OL.selectedButtonColumnIndicesList[i]+1,len(OL.objectList[i])-1):
-  #    OL.objectList[i][j].indexStart+=1
-  #    OL.objectList[i][j].indexEnd+=1
+  newObjects = []
+  for i in range(coli,len(OL.objectList)):
+    newObjects.append(alarm_object.ALARM_OBJECT())
+    newObjects[i-coli].indexStart = OL.objectList[i][insertColumnsLocations[i]].indexEnd + 1
+    newObjects[i-coli].indexEnd = OL.objectList[i][insertColumnsLocations[i]].indexEnd + 2
+    newObjects[i-coli].column = i
+    newObjects[i-coli].columnIndex = insertColumnsLocations[i]+1 # Sketchy FIXME
+    if coli>0:
+      newObjects[i-coli].parentIndices = OL.objectList[i-1][insertColumnsLocations[i-1]].parentIndices.copy()
+      if i>coli:
+        newObjects[i-coli].parentIndices.append(OL.objectList[i-1][insertColumnsLocations[i-1]].columnIndex+1)
+      else:
+        newObjects[i-coli].parentIndices.append(OL.objectList[i-1][insertColumnsLocations[i-1]].columnIndex)
 
-  # + increment the post guys' parentIndices matrices, as now the coli row has had its post-clicked values ++ed 
-  for i in range(coli+1,len(OL.objectList)):
-    for j in range(1+colIndexInsert[i],len(OL.objectList[i])-1):
-      #if OL.objectList[i][j].parentIndices[coli]>colIndexInsert[i]:
-      if OL.objectList[i][j].parentIndices[coli]>=colIndexInsert[i]:
-        OL.objectList[i][j].parentIndices[coli] += 1
+  for i in range(coli,len(OL.objectList)):
+    OL.selectedButtonColumnIndicesList[i]+=1
+    OL.selectedColumnButtonLengthList[i]+=1
+    OL.activeObjectColumnIndicesList[i]+=1
+  for i in range(coli,len(OL.objectList)):
+    OL.objectList[i].insert(insertColumnsLocations[i]+1,newObjects[i-coli])
 
-
-
-  newObject = alarm_object.ALARM_OBJECT()
-  newObject.indexStart = startIndexInsert[coli]+1
-  newObject.indexEnd = startIndexInsert[coli]+2
-  newObject.column = coli
-  newObject.columnIndex = colIndexInsert[coli]+1
-
-  if coli != 0:
-    #if colLen != 0:
-    i_index = coli-1
-    j_index = OL.selectedButtonColumnIndicesList[i_index]
-    #j_index = len(OL.objectList[coli-1])-1
-    newObject.parentIndices = OL.objectList[i_index][j_index].parentIndices.copy()
-    newObject.parentIndices.append(OL.objectList[i_index][j_index].columnIndex)
-
-  #OL.objectList[coli].insert(colIndexInsert[coli],newObject)
-  OL.objectList[coli].insert(colIndexInsert[coli]+1,newObject)
-  print("Looping through")
+  print("Looping through column")
   print(coli)
-  #if coli<4:
-  #  add_object(OL,coli+1)
-
-  # FIXME FIXME When adding a new parameter or value be sure to add it to the analysis's parameterList and history
-
-  #FIXME : Add new objects into the middle of the array, at the end of the sub-array its parrent, don't append
-  # Also need to add objects to the right-> and treat parentIndices correctly
-
-  # Find the currently clicked button on the left
-  #   then grab it's list of children in the currently displayed column
-  #   then loop through that list of children to find the one that is at the end and obtain its columnIndex
-  #   grab all subsequent objects (and buttons to match) and update their column indices++
-  #     now, in object (and button) space move to the right, taking and loop through that list of children to find the one that is at the end (of list of children) and obtain its columnIndex
-  #     grab all subsequent objects (and buttons) and ++columnIndex (etc.)
-  #     
+  print("values of objectList: ")
+  for i in range (0,len(OL.objectList)):
+    for j in range (0,len(OL.objectList[i])):
+      print("Val: {}, columnIndex: {}, parentIndices: {}".format(OL.objectList[i][j].value,OL.objectList[i][j].columnIndex,OL.objectList[i][j].parentIndices))
 
 
