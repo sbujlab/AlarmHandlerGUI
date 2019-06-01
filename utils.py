@@ -108,9 +108,11 @@ def move_filearray_menu(OL,fileArray,butMenu):
   file_ind_start = OL.objectList[i][j].indexStart
   file_ind_stop = OL.objectList[i][j].indexEnd
   print("col {}, entry {}, move by {}, start file ind {}, end file ind {}, position to plant into {}".format(i,j,mvN,file_ind_start,file_ind_stop,OL.objectList[i][j+mvN].indexEnd))
+  print("col {}, entry {}, move by {}, start file ind {}, end file ind {}, position to plant into {}".format(i,j,mvN,file_ind_start,file_ind_stop,OL.objectList[i][j+mvN].indexStart))
   #inplace_shift(fileArray.filearray,file_ind_start,file_ind_stop-file_ind_start+1,file_ind_distance+file_ind_start)
   if mvN>0:
-    fileArray.filearray = subshift(fileArray.filearray,file_ind_start,file_ind_stop+1,OL.objectList[i][j+mvN].indexEnd)
+    #fileArray.filearray = subshift(fileArray.filearray,file_ind_start,file_ind_stop+1,OL.objectList[i][j+mvN].indexEnd)
+    fileArray.filearray = subshift(fileArray.filearray,file_ind_start,file_ind_stop+1,OL.objectList[i][j+mvN].indexEnd-(file_ind_stop-file_ind_start))
   if mvN<0:
     fileArray.filearray = subshift(fileArray.filearray,file_ind_start,file_ind_stop+1,OL.objectList[i][j+mvN].indexStart)
   return fileArray.filearray
@@ -129,6 +131,7 @@ def add_filearray_menu(OL,fileArray,butMenu):
   addedLine = []
   for parent in range(0,i):
     addedLine.append(OL.objectList[parent][OL.activeObjectColumnIndicesList[parent]].value)
+    #addedLine.append(OL.objectList[parent][OL.selectedButtonColumnIndicesList[parent]].value)
   for child in range(i,len(OL.objectList)):
     addedLine.append("NULL")
   fileArray.filearray.insert(file_ind,addedLine)

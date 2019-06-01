@@ -80,7 +80,7 @@ class ALARM_HANDLER(tk.Frame):
     grid = []
     for i in range(0, len(self.alarmColumns)):
       butCol = []
-      if len(OL.objectList)>(0):#i): #FIXME this ignores creating a button for the 5th entry, but we will want to make a label/edit box for it
+      if len(OL.objectList)>(0):
         for j in range(0,len(OL.objectList[i])):
           # Loop over the list of objects, creating buttons
           butt = tk.Button(self.alarmColumns[i], text=OL.objectList[i][j].value, justify='center', background=OL.objectList[i][j].color) # loop over buttons
@@ -92,9 +92,12 @@ class ALARM_HANDLER(tk.Frame):
 
   def initialize_menus(self,OL,fileArray):
     grid = []
+    print("Adding menus, len(self.alarmColumns) = {} times".format(len(self.alarmColumns)))
     for i in range(0, len(self.alarmColumns)):
+      print("Adding menus to {}, len(OL.objectList[{}]) = {} times".format(i,i,len(OL.objectList[i])))
       menuCol = []
-      if len(OL.objectList)>(0):#i): # See above FIXME
+      print("If len(OL.objectList) = {} > 0:".format(len(OL.objectList),0))
+      if len(OL.objectList)>(0):
         for j in range(0,len(OL.objectList[i])):
           buttMenu = tk.Menu(self.buttons[i][j], tearoff=0) # Is having the owner be button correct?
           buttMenu.indices = (i,j)
@@ -106,8 +109,8 @@ class ALARM_HANDLER(tk.Frame):
           buttMenu.add_command(label = 'Delete', command = lambda butMenu = buttMenu: self.button_delete_menu(OL,fileArray,butMenu))
           self.buttons[i][j].bind("<Button-3>",lambda event, butMenu = buttMenu: self.do_popup(event,butMenu))
           menuCol.append(buttMenu)
-        grid.append(menuCol)
-      return grid
+      grid.append(menuCol)
+    return grid
 
   def do_popup(self,event,butMenu):
     butMenu.tk_popup(event.x_root,event.y_root,0)
@@ -125,7 +128,7 @@ class ALARM_HANDLER(tk.Frame):
         self.buttons[i][j].grid_forget()
 
   def layout_grid_col(self,colID,OL,fileArray,newButts):
-    for i in range(colID,len(self.buttons)): # FIXME What should colID + 1 or + 0?
+    for i in range(colID,len(self.buttons)): 
       self.creatorButtons[i].grid_forget()
       for j in range(0,len(self.buttons[i])):
         self.buttons[i][j].grid_forget()
@@ -180,25 +183,39 @@ class ALARM_HANDLER(tk.Frame):
       self.select_button(OL,fileArray,self.buttons[coli][OL.selectedButtonColumnIndicesList[coli]])
 
   def button_edit_menu(self,OL,fileArray,butMenu):
-    butMenu.editValue = simpledialog.askstring("Input", "Enter replacement value:",parent = butMenu) #FIXME is this the right parent? should be whole tk.Tk()?
+    i,j = butMenu.indices
+    butMenu.editValue = simpledialog.askstring("Input", "Enter replacement value:",parent = butMenu) 
     if butMenu.editValue != None:
       fileArray.filearray = u.edit_filearray_menu(OL,fileArray,butMenu)
       self.update_GUI(OL,fileArray)
+      for coli in range(0,i):
+        self.select_button(OL,fileArray,self.buttons[coli][OL.selectedButtonColumnIndicesList[coli]])
 
   def button_move_menu(self,OL,fileArray,butMenu):
     i,j = butMenu.indices
-    butMenu.moveN = simpledialog.askinteger("Input", "Move amount (+ is down)",parent = butMenu, maxvalue=(len(self.buttons[i])-j-1), minvalue=-1*j) #FIXME is this the right parent? should be whole tk.Tk()?
+    #OL.selectedButtonColumnIndicesList[i]=j # FIXME - try to get menus to persist screen
+    butMenu.moveN = simpledialog.askinteger("Input", "Move amount (+ is down)",parent = butMenu, maxvalue=(len(self.buttons[i])-j-1), minvalue=-1*j) #FIXME - limits are for entire button array, not just currently shown one... 
     if butMenu.moveN != 0:
       fileArray.filearray = u.move_filearray_menu(OL,fileArray,butMenu)
       self.update_GUI(OL,fileArray)
+      for coli in range(0,i):
+        self.select_button(OL,fileArray,self.buttons[coli][OL.selectedButtonColumnIndicesList[coli]])
 
   def button_add_menu(self,OL,fileArray,butMenu):
+    i,j = butMenu.indices
     fileArray.filearray = u.add_filearray_menu(OL,fileArray,butMenu)
     self.update_GUI(OL,fileArray)
+    for coli in range(0,i):
+      self.select_button(OL,fileArray,self.buttons[coli][OL.selectedButtonColumnIndicesList[coli]])
 
   def button_delete_menu(self,OL,fileArray,butMenu):
+    i,j = butMenu.indices
     fileArray.filearray = u.delete_filearray_menu(OL,fileArray,butMenu)
     self.update_GUI(OL,fileArray)
+    for coli in range(i,len(OL.selectedButtonColumnIndicesList):
+        OL.selectedButtonColumnIndicesList[i] -= 1
+    for coli in range(0,i):
+      self.select_button(OL,fileArray,self.buttons[coli][OL.selectedButtonColumnIndicesList[coli]])
 
 # def insert_button(self,OL,but,indi):
 #   i,j = but.indices
@@ -241,16 +258,9 @@ class ALARM_HANDLER(tk.Frame):
   def set_button_clicked(self,OL,fileArray,i,j):
     for column in range(0,len(self.buttons)):
       for row in range(0,len(self.buttons[column])):
-        #if row != OL.selectedButtonColumnIndicesList[column]: # Not needed...
           self.buttons[column][row].config(background = OL.objectList[column][row].color) # Reset the other buttons that aren't currently the selected ones to their object's color
     self.buttons[i][j].config(background = OL.objectList[i][j].color) # And this one too
-    if i<3: #FIXME data buttons...3:
-      print("clicked, printing col {}".format(i))
+    if i<3: 
       self.layout_grid_col(i+1,OL,fileArray,self.creatorButtons)
-      #self.layout_grid_col(i,OL,fileArray,self.creatorButtons[i])
-    #if i==2:
-    #  self.layout_grid_col(i+2,OL,fileArray,self.creatorButtons[i+2])
     self.buttonMenus = self.initialize_menus(OL,fileArray)
 
-# If colID == 4 then creator button is just a "data" label
-# If colID == 4 then print all of the objects that correspond to the displayed colID 3 objects (i.e. is activeButton in colID==2 my parent, then display), but only display the 0th object for which that is true (has parent == immediately to the left of it)

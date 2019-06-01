@@ -52,6 +52,7 @@ class OBJECT_LIST():
     for ind in range(i,len(self.objectList)-1): # Look in the list of columns of objects, neglect final row
  #     print("Looking in column {}".format(ind))
       #for j in range(0,len(self.objectList[ind])): # For all entries in the column
+      #jNew = self.selectedButtonColumnIndices[ind] # Entry in the column
       jNew = self.activeObjectColumnIndicesList[ind] # Entry in the column
       for k in range(0,len(self.objectList[ind+1])): # For each entry in the column to the right
  #       print("Check if self.objectList[{}][{}].columnIndex = {} == {} = self.objectList[{}][{}].parentIndices[{}]".format(ind,jNew,self.objectList[ind][jNew].columnIndex,self.objectList[ind+1][k].parentIndices[ind],ind+1,k,ind))
