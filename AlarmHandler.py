@@ -98,7 +98,7 @@ class AlarmHandler:
     for title, fn in tab_titles:
       tab = ttk.Frame(tab_control, width=800, height=600, style="My.TFrame")
       tab_control.add(tab, text=title)
-      fn(tab,self.OL,self.fileArray)
+      fn(self.win,tab,self.OL,self.fileArray)
     tab_control.grid(row=0, column=0, columnspan=2)
     fenway = tk.PhotoImage(file='gm.ppm')
     fenway_pahk = tk.Label(self.win, image=fenway, cursor="hand2", bg=u.lightgrey_color)

@@ -53,38 +53,69 @@ def write_textfile(OL,fileArray):
 
 def add_to_filearray(OL,fileArray,but):
   i,j = but.indices
-  print("Column:")
-  print(i)
   j = OL.activeObjectColumnIndicesList[i]
-  print("Column index:")
-  print(j)
   file_ind = OL.objectList[i][j].indexEnd+1
-  print("File index:")
-  print(file_ind)
   addedLine = []
   for parent in range(0,i):
     addedLine.append(OL.objectList[parent][OL.activeObjectColumnIndicesList[parent]].value)
   for child in range(i,len(OL.objectList)):
     addedLine.append("NULL")
-  print("Added Line:")
-  print(addedLine)
   fileArray.filearray.insert(file_ind,addedLine)
-  print("adding to file array")
-  for i in range(0,len(fileArray.filearray)):
-    print(fileArray.filearray[i])
+  return fileArray.filearray
+
+def edit_filearray_menu(OL,fileArray,butMenu):
+  i,j = butMenu.indices
+  file_ind_start = OL.objectList[i][j].indexStart
+  file_ind_stop = OL.objectList[i][j].indexEnd
+  for k in range(file_ind_start,file_ind_stop+1): # +1 is so it will do the first one if both ==
+    fileArray.filearray[k][i] = butMenu.editValue # i is the column... where our data word exists
+  return fileArray.filearray
+
+def move_filearray_menu(OL,fileArray,butMenu):
+  i,j = butMenu.indices
+  mvN = butMenu.moveN
+  tmpFA = fileArray.filearray.copy()
+  # Shift fileArray down by moveN, make it == the values at tmpFA[moveNind][i]
+  # Shift fileArray[+moveNind] up by size of moved bit
+  file_ind_start = OL.objectList[i][j].indexStart
+  file_ind_stop = OL.objectList[i][j].indexEnd
+  file_ind_distance = OL.objectList[i][j+mvN].indexStart-file_ind_start
+  for k in range(file_ind_start,file_ind_stop+1): # +1 is so it will do the first one if both ==
+    fileArray.filearray[k][i] = tmpFA[file_ind_distance+k][i]
+  for k in range(OL.objectList[i][j+mvN].indexStart,file_ind_start):
+    fileArray.filearray[k][i] = tmpFA[k+file_ind_stop-file_ind_start][i]
+  return fileArray.filearray
+
+def delete_filearray_menu(OL,fileArray,butMenu):
+  i,j = butMenu.indices
+  file_ind_start = OL.objectList[i][j].indexStart
+  file_ind_stop = OL.objectList[i][j].indexEnd
+  for k in range(file_ind_start,file_ind_stop+1): # +1 is so it will do the first one if both ==
+    del fileArray.filearray[file_ind_start]
+  return fileArray.filearray
+
+def add_filearray_menu(OL,fileArray,butMenu):
+  i,j = butMenu.indices
+  file_ind = OL.objectList[i][j].indexEnd+1
+  addedLine = []
+  for parent in range(0,i):
+    addedLine.append(OL.objectList[parent][OL.activeObjectColumnIndicesList[parent]].value)
+  for child in range(i,len(OL.objectList)):
+    addedLine.append("NULL")
+  fileArray.filearray.insert(file_ind,addedLine)
   return fileArray.filearray
 
 def write_filearray(fileArray):
   outFile = open(fileArray.filename,'w+')
   wr = csv.writer(outFile,delimiter=fileArray.delim)
-  filearrayrows=zip(*fileArray.filearray)
-  wr.writerows(fileArray.filearray)
-  print("writing file array")
-  for i in range(0,len(fileArray.filearray)):
-    print(fileArray.filearray[i])
-  return fileArray.filearray
+  if len(fileArray.filearray)!=0:
+    filearrayrows=zip(*fileArray.filearray)
+    wr.writerows(fileArray.filearray)
+    print("writing file array")
+    return fileArray.filearray
 
 def create_objects(fileArray):
+  ncolumns = 0
   if len(fileArray.filearray)>0: 
     ncolumns = len(fileArray.filearray[len(fileArray.filearray)-1]) # FIXME should this just be hardcoded to 5 layers or should I keep it generic??
   nlines = len(fileArray.filearray)
@@ -129,10 +160,6 @@ def create_objects(fileArray):
       else:
         localObjectList[column][colRow[column]-1].indexEnd=lineN
       line_previous[column]=line[column]
-  print("generating object list")
-  for i in range(len(localObjectList)):
-    for j in range(len(localObjectList[i])):
-      print("Val: {}, startIndex: {}, endIndex: {}".format(localObjectList[i][j].value,localObjectList[i][j].indexStart,localObjectList[i][j].indexEnd))
   return localObjectList
   
 def append_object(OL,coli): 
@@ -151,7 +178,6 @@ def append_object(OL,coli):
     #if colLen != 0:
     i_index = coli-1
     j_index = OL.selectedButtonColumnIndicesList[i_index]
-    #j_index = len(OL.objectList[coli-1])-1
     newObject.parentIndices = OL.objectList[i_index][j_index].parentIndices.copy()
     newObject.parentIndices.append(OL.objectList[i_index][j_index].columnIndex)
   OL.objectList[coli].append(newObject)
@@ -210,12 +236,4 @@ def insert_object(OL,coli):
     OL.activeObjectColumnIndicesList[i]+=1
   for i in range(coli,len(OL.objectList)):
     OL.objectList[i].insert(insertColumnsLocations[i]+1,newObjects[i-coli])
-
-  print("Looping through column")
-  print(coli)
-  print("values of objectList: ")
-  for i in range (0,len(OL.objectList)):
-    for j in range (0,len(OL.objectList[i])):
-      print("Val: {}, columnIndex: {}, parentIndices: {}".format(OL.objectList[i][j].value,OL.objectList[i][j].columnIndex,OL.objectList[i][j].parentIndices))
-
 
