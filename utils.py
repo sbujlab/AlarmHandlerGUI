@@ -71,19 +71,48 @@ def edit_filearray_menu(OL,fileArray,butMenu):
     fileArray.filearray[k][i] = butMenu.editValue # i is the column... where our data word exists
   return fileArray.filearray
 
+def inplace_shift(L, start, length, pos):
+  a = 0
+  b = 0
+  c = 0
+  if pos > start + length:
+    (a, b, c) = (start, start + length, pos)
+  elif pos < start:
+    (a, b, c) = (pos, start, start + length)
+  #else:
+  #  raise ValueError("Cannot shift a subsequence to inside itself")
+  #if not (0 <= a < b < c <= len(L)):
+  #  msg = "Index check 0 <= {0} < {1} < {2} <= {3} failed."
+  #  raise ValueError(msg.format(a, b, c, len(L)))
+
+  span1, span2 = (b - a, c - b)
+  if span1 < span2:
+    tmp = L[a:b]
+    L[a:a + span2] = L[b:c]
+    L[c - span1:c] = tmp
+  else:
+    tmp = L[b:c]
+    L[a + span2:c] = L[a:b]
+    L[a:a + span2] = tmp
+
+def subshift(L, start, end, insert_at):
+  temp = L[start:end]
+  L = L[:start] + L[end:]
+  return L[:insert_at] + temp + L[insert_at:]
+
 def move_filearray_menu(OL,fileArray,butMenu):
   i,j = butMenu.indices
   mvN = butMenu.moveN
-  tmpFA = fileArray.filearray.copy()
   # Shift fileArray down by moveN, make it == the values at tmpFA[moveNind][i]
   # Shift fileArray[+moveNind] up by size of moved bit
   file_ind_start = OL.objectList[i][j].indexStart
   file_ind_stop = OL.objectList[i][j].indexEnd
-  file_ind_distance = OL.objectList[i][j+mvN].indexStart-file_ind_start
-  for k in range(file_ind_start,file_ind_stop+1): # +1 is so it will do the first one if both ==
-    fileArray.filearray[k][i] = tmpFA[file_ind_distance+k][i]
-  for k in range(OL.objectList[i][j+mvN].indexStart,file_ind_start):
-    fileArray.filearray[k][i] = tmpFA[k+file_ind_stop-file_ind_start][i]
+  print("col {}, entry {}, move by {}, start file ind {}, end file ind {}, position to plant into {}".format(i,j,mvN,file_ind_start,file_ind_stop,OL.objectList[i][j+mvN].indexEnd))
+  #inplace_shift(fileArray.filearray,file_ind_start,file_ind_stop-file_ind_start+1,file_ind_distance+file_ind_start)
+  if mvN>0:
+    fileArray.filearray = subshift(fileArray.filearray,file_ind_start,file_ind_stop+1,OL.objectList[i][j+mvN].indexEnd)
+  if mvN<0:
+    fileArray.filearray = subshift(fileArray.filearray,file_ind_start,file_ind_stop+1,OL.objectList[i][j+mvN].indexStart)
   return fileArray.filearray
 
 def delete_filearray_menu(OL,fileArray,butMenu):

@@ -27,9 +27,9 @@ class ALARM_HANDLER(tk.Frame):
     self.alarmHandlerWin = alarmHandlerWindow
     self.Tab = tab
     self.alarmFrame = tk.LabelFrame(tab, text='Alarm Handler', background=u.lightgrey_color)
-    self.columnTitles = ["Kinds","Channel","Type","Parameter"]
-    self.colsp = [1,1,1,2]
-    self.newText = ["New\nKind","New\nChannel","New\nType","New\nParameter"]
+    self.columnTitles = ["Kinds","Channel","Type","Parameter","Value"]
+    self.colsp = [1,1,1,1,1]
+    self.newText = ["New\nKind","New\nChannel","New\nType","New\nParameter","Alarm\nValues"]
 
     self.alarmColumns = []
     self.initialize_columns(OL)
@@ -60,13 +60,19 @@ class ALARM_HANDLER(tk.Frame):
       self.alarmColumns.append(tk.LabelFrame(self.alarmFrame, text=self.columnTitles[i], background=u.lightgrey_color))
       self.alarmColumns[i].grid(row=0,column=i,pady=10,padx=10,sticky='N')
 
+  def initialize_column(self,OL,colI):
+    self.alarmColumns[colI] = tk.LabelFrame(self.alarmFrame, text=self.columnTitles[colI], background=u.lightgrey_color)
+    self.alarmColumns[colI].grid(row=0,column=colI,pady=10,padx=10,sticky='N')
+    self.alarmFrame.pack(padx=20,pady=20,anchor='w')
+
   def initialize_creator_buttons(self,OL,fileArray):
     grid = []
     for i in range(0, len(self.alarmColumns)):
       # First add the "New Button" button
       newButt = tk.Button(self.alarmColumns[i], text=self.newText[i], default='active', justify='center', background=u.lightgrey_color)
       newButt.indices = (i,len(self.buttons[i]))
-      newButt.config(command = lambda newBut=newButt: self.select_add_button(OL,fileArray,newBut))
+      if i<4:
+        newButt.config(command = lambda newBut=newButt: self.select_add_button(OL,fileArray,newBut))
       grid.append(newButt)
     return grid
 
@@ -74,7 +80,7 @@ class ALARM_HANDLER(tk.Frame):
     grid = []
     for i in range(0, len(self.alarmColumns)):
       butCol = []
-      if len(OL.objectList)>(i): #FIXME this ignores creating a button for the 5th entry, but we will want to make a label/edit box for it
+      if len(OL.objectList)>(0):#i): #FIXME this ignores creating a button for the 5th entry, but we will want to make a label/edit box for it
         for j in range(0,len(OL.objectList[i])):
           # Loop over the list of objects, creating buttons
           butt = tk.Button(self.alarmColumns[i], text=OL.objectList[i][j].value, justify='center', background=OL.objectList[i][j].color) # loop over buttons
@@ -88,7 +94,7 @@ class ALARM_HANDLER(tk.Frame):
     grid = []
     for i in range(0, len(self.alarmColumns)):
       menuCol = []
-      if len(OL.objectList)>(i): # See above FIXME
+      if len(OL.objectList)>(0):#i): # See above FIXME
         for j in range(0,len(OL.objectList[i])):
           buttMenu = tk.Menu(self.buttons[i][j], tearoff=0) # Is having the owner be button correct?
           buttMenu.indices = (i,j)
@@ -118,18 +124,40 @@ class ALARM_HANDLER(tk.Frame):
       for j in range(0,len(self.buttons[i])):
         self.buttons[i][j].grid_forget()
 
-  def layout_grid_col(self,colID,OL,fileArray,newButt):
-    for i in range(colID,len(self.buttons)):
+  def layout_grid_col(self,colID,OL,fileArray,newButts):
+    for i in range(colID,len(self.buttons)): # FIXME What should colID + 1 or + 0?
       self.creatorButtons[i].grid_forget()
       for j in range(0,len(self.buttons[i])):
         self.buttons[i][j].grid_forget()
+    for i in range(colID,len(self.buttons)):#NEW
+      self.alarmColumns[i].grid_forget() #NEW
     # Want to ask OL which object is clicked
     # Then get the index range that its children live in
     # Then grid those children (and erase prior grid, preserving creatorButton[coldID])
-    newButt.grid(row=0,column=colID,columnspan=self.colsp[colID],padx=10,pady=10,sticky='N')
-    for j in range(0,len(OL.objectList[colID])):
-      if OL.objectList[colID][j].parentIndices[colID-1]==OL.selectedButtonColumnIndicesList[colID-1]: # If the item on the right has the parent index of the current column equal to the currently selected button's column index, thenactivate it
-        self.buttons[colID][j].grid(row=j+1,column=colID,columnspan=self.colsp[colID],padx=10,pady=10,sticky='N')
+    newButts[colID].grid(row=0,column=colID,columnspan=self.colsp[colID],padx=10,pady=10,sticky='N')
+    print("Adding column {}".format(colID))
+    self.alarmColumns[colID].grid(row=0,column=colID,pady=10,padx=10,sticky='N')#NEW
+    if colID == 3 and len(self.alarmColumns)>colID+1: #NEW
+      print("Adding column {}".format(colID+1))
+      newButts[colID+1].grid(row=0,column=colID+1,columnspan=self.colsp[colID+1],padx=10,pady=10,sticky='N')
+      self.alarmColumns[colID+1].grid(row=0,column=colID+1,pady=10,padx=10,sticky='N')#NEW
+    self.alarmFrame.pack(padx=20,pady=20,anchor='w') #NEW
+    if colID<4:
+      for j in range(0,len(OL.objectList[colID])):
+        if colID>0 and OL.objectList[colID][j].parentIndices[colID-1]==OL.selectedButtonColumnIndicesList[colID-1]: # If the item on the right has the parent index of the current column equal to the currently selected button's column index, thenactivate it
+          self.buttons[colID][j].grid(row=j+1,column=colID,columnspan=self.colsp[colID],padx=10,pady=10,sticky='N')
+        if colID == 0:
+          self.buttons[colID][j].grid(row=j+1,column=colID,columnspan=self.colsp[colID],padx=10,pady=10,sticky='N')
+    if colID==3:
+      colID=4
+      counter=[]
+      for j in range(0,len(OL.objectList[colID-1])):
+        counter.append(0)
+      for j in range(0,len(OL.objectList[colID])):
+        #if OL.objectList[colID][j].parentIndices[colID-1]==OL.selectedButtonColumnIndicesList[colID-1]: # If the item two on the right has the parent index of the current column equal to the currently selected button's column index, thenactivate it
+        counter[OL.objectList[colID][j].parentIndices[colID-1]] += 1 # Counts how many times a parent has seen any child
+        if OL.objectList[colID][j].parentIndices[colID-2]==OL.selectedButtonColumnIndicesList[colID-2] and counter[OL.objectList[colID][j].parentIndices[colID-1]]==1: # If the item two on the right is the first to have the one of the right's columnIndex as a parent then show it
+            self.buttons[colID][j].grid(row=j+1,column=colID,columnspan=self.colsp[colID],padx=10,pady=10,sticky='N')
     self.buttonMenus = self.initialize_menus(OL,fileArray)
 
   def select_button(self,OL,fileArray,but):
@@ -216,6 +244,13 @@ class ALARM_HANDLER(tk.Frame):
         #if row != OL.selectedButtonColumnIndicesList[column]: # Not needed...
           self.buttons[column][row].config(background = OL.objectList[column][row].color) # Reset the other buttons that aren't currently the selected ones to their object's color
     self.buttons[i][j].config(background = OL.objectList[i][j].color) # And this one too
-    if i<3:
-      self.layout_grid_col(i+1,OL,fileArray,self.creatorButtons[i+1])
+    if i<3: #FIXME data buttons...3:
+      print("clicked, printing col {}".format(i))
+      self.layout_grid_col(i+1,OL,fileArray,self.creatorButtons)
+      #self.layout_grid_col(i,OL,fileArray,self.creatorButtons[i])
+    #if i==2:
+    #  self.layout_grid_col(i+2,OL,fileArray,self.creatorButtons[i+2])
+    self.buttonMenus = self.initialize_menus(OL,fileArray)
 
+# If colID == 4 then creator button is just a "data" label
+# If colID == 4 then print all of the objects that correspond to the displayed colID 3 objects (i.e. is activeButton in colID==2 my parent, then display), but only display the 0th object for which that is true (has parent == immediately to the left of it)
