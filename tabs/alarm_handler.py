@@ -103,6 +103,7 @@ class ALARM_HANDLER(tk.Frame):
           buttMenu.indices = (i,j)
           buttMenu.moveN = 0
           buttMenu.editValue = None
+          buttMenu.add_command(label = 'Silence', command = lambda butMenu = buttMenu: self.button_silence_menu(OL,fileArray,butMenu))
           buttMenu.add_command(label = 'Edit', command = lambda butMenu = buttMenu: self.button_edit_menu(OL,fileArray,butMenu))
           buttMenu.add_command(label = 'Move', command = lambda butMenu = buttMenu: self.button_move_menu(OL,fileArray,butMenu))
           buttMenu.add_command(label = 'Add', command = lambda butMenu = buttMenu: self.button_add_menu(OL,fileArray,butMenu))
@@ -119,7 +120,7 @@ class ALARM_HANDLER(tk.Frame):
     newButt.grid(row=0,column=colID,columnspan=self.colsp[colID],padx=10,pady=10,sticky='N')
     for i in range(0,len(self.buttons[colID])):
       self.buttons[colID][i].grid(row=i+1,column=colID,columnspan=self.colsp[colID],padx=10,pady=10,sticky='N')
-    self.buttonMenus = self.initialize_menus(OL,fileArray)
+    #self.buttonMenus = self.initialize_menus(OL,fileArray)
 
   def erase_grid_col(self,colID,OL,fileArray,newButt):
     for i in range(colID,len(self.buttons)):
@@ -161,7 +162,7 @@ class ALARM_HANDLER(tk.Frame):
         counter[OL.objectList[colID][j].parentIndices[colID-1]] += 1 # Counts how many times a parent has seen any child
         if OL.objectList[colID][j].parentIndices[colID-2]==OL.selectedButtonColumnIndicesList[colID-2] and counter[OL.objectList[colID][j].parentIndices[colID-1]]==1: # If the item two on the right is the first to have the one of the right's columnIndex as a parent then show it
             self.buttons[colID][j].grid(row=j+1,column=colID,columnspan=self.colsp[colID],padx=10,pady=10,sticky='N')
-    self.buttonMenus = self.initialize_menus(OL,fileArray)
+    #self.buttonMenus = self.initialize_menus(OL,fileArray)
 
   def select_button(self,OL,fileArray,but):
     i,j = but.indices
@@ -178,6 +179,13 @@ class ALARM_HANDLER(tk.Frame):
   def select_add_button(self,OL,fileArray,but):
     i,j = but.indices
     fileArray.filearray = u.add_to_filearray(OL,fileArray,but)
+    self.update_GUI(OL,fileArray)
+    for coli in range(0,i):
+      self.select_button(OL,fileArray,self.buttons[coli][OL.selectedButtonColumnIndicesList[coli]])
+
+  def button_silence_menu(self,OL,fileArray,butMenu):
+    i,j = butMenu.indices
+    u.silence_filearray_menu(OL,fileArray,butMenu)
     self.update_GUI(OL,fileArray)
     for coli in range(0,i):
       self.select_button(OL,fileArray,self.buttons[coli][OL.selectedButtonColumnIndicesList[coli]])
@@ -212,7 +220,7 @@ class ALARM_HANDLER(tk.Frame):
     i,j = butMenu.indices
     fileArray.filearray = u.delete_filearray_menu(OL,fileArray,butMenu)
     self.update_GUI(OL,fileArray)
-    for coli in range(i,len(OL.selectedButtonColumnIndicesList):
+    for coli in range(i,len(OL.selectedButtonColumnIndicesList)):
         OL.selectedButtonColumnIndicesList[i] -= 1
     for coli in range(0,i):
       self.select_button(OL,fileArray,self.buttons[coli][OL.selectedButtonColumnIndicesList[coli]])

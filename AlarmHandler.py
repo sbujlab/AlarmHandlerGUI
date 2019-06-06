@@ -25,35 +25,18 @@ class AlarmHandler:
     self.win.title("Continuous Aggregate Monitor: Alarm Handler")
     self.win.configure(background=u.lightgrey_color)
     self.adc_options_vars = [tk.StringVar(), tk.StringVar(), tk.StringVar(), tk.StringVar()]
-    self.bm_test_setting = tk.StringVar()
-    self.clean_setting = tk.StringVar()
     self.get_alarm_handler_style()
     self.filename = "/adaqfs/home/apar/bin/alarm.csv"
     self.delim = ','
     self.fileArray = alarm_object.FILE_ARRAY(self.filename,self.delim)
     # u.parse_textfile(self.filename,self.delim)
     self.OL = alarm_object.OBJECT_LIST(self.fileArray)
+    self.alarmLoop = alarm_object.ALARM_LOOP(self)
     #self.objectList = u.create_objects(self.fileArray) 
     #self.create_objects()
-    self.fGlobalAlarmStatus = 0 # Start in non-alarmed state
-    self.fGlobalLoopStatus = 1 # Start in looping state
     self.create_widgets()
     #self.alarm_loop()
   
-  def alarm_loop(self):
-    if (self.fGlobalLoopStatus==1):
-      #self.win.after(1000,print("waited 1 seconds"))
-      self.win.after(10000,self.alarm_loop)
-      print("waited 10 seconds")
-      #for i in range(0,5):
-      #  print("new column")
-      #  for j in range(0,len(self.OL.objectList[i])):
-      #    print(self.OL.objectList[i][j].value)
-      #print(self.OL.objectList[len(self.OL.objectList)-2][len(self.OL.objectList[len(self.OL.objectList)-2])-1].value)
-      #print(self.OL.objectList[len(self.OL.objectList)-2][len(self.OL.objectList[len(self.OL.objectList)-2])-1].parentIndices)
-      u.write_textfile(self.OL,self.fileArray)
-    # Loop over the global objectData and call data updating methods
-
   def get_alarm_handler_style(self):
     style = ttk.Style()
     style.theme_create("alarm_handler", parent="alt", settings={
@@ -109,5 +92,5 @@ class AlarmHandler:
       row=1, column=1, padx=15, pady=5, sticky='SE')
 
 alarm_handler_GUI = AlarmHandler()
-alarm_handler_GUI.alarm_loop()
+alarm_handler_GUI.alarmLoop.alarm_loop()
 alarm_handler_GUI.win.mainloop()

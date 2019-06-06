@@ -15,6 +15,14 @@ green_color = '#3C8373'
 lightgrey_color = '#E0E0E0'
 grey_color = '#C0C0C0'
 red_button_color = '#9E1A1A'
+defaultKey = "NULL"
+
+camguinIDdict = {
+    ("mean","ana"),("integral","ana"),
+    ("burst","tree"),("mul","tree"),
+    ("asym","prefix"),("diff","prefix"),("yield","prefix")
+    }
+#void camguin(TString ana = "help", TString tree = "mul", TString branch = "asym_vqwk_04_0ch0", TString leaf = "hw_sum", TString cut = "defaultCuts", Int_t overWriteCut = 0, TString histMode = "defaultHist", Int_t stabilityRing = 0, Int_t runNumber = 0, Int_t splitNumber = -1, Int_t nRuns = -1){
 
 # Cameron Alarm Methods
 
@@ -38,7 +46,7 @@ def write_textfile(OL,fileArray):
 
   if len(OL.objectList)>1:
     i = len(OL.objectList)-1
-    for j in range(0,len(OL.objectList[i])): # Take the 5th column and make objects out of all of its parents, in sequence
+    for j in range(0,len(OL.objectList[i])): # Take the 5th column and make entries out of all of its parents values, in sequence
       entryarray = []
       parents = OL.objectList[i][j].parentIndices
       for k in range(0,len(parents)):
@@ -63,6 +71,21 @@ def add_to_filearray(OL,fileArray,but):
   fileArray.filearray.insert(file_ind,addedLine)
   return fileArray.filearray
 
+def silence_filearray_menu(OL,fileArray,butMenu):
+  i,j = butMenu.indices
+  j = OL.activeObjectColumnIndicesList[i]
+  # For it and its children set alarmStatus = 0
+  OL.objectList[i][j].alarmStatus = 0 
+  OL.objectList[i][j].color = lightgrey_color
+  for coli in range(i+1,len(OL.objectList)):
+    for k in range(0,len(OL.objectList[coli])):
+      if OL.objectList[coli][k].parentIndices[i] == OL.objectList[i][j].columnIndex:
+        OL.objectList[coli][k].alarmStatus = 0 
+        OL.objectList[coli][k].color = lightgrey_color
+
+  file_ind_start = OL.objectList[i][j].indexStart
+  file_ind_stop = OL.objectList[i][j].indexEnd
+
 def edit_filearray_menu(OL,fileArray,butMenu):
   i,j = butMenu.indices
   file_ind_start = OL.objectList[i][j].indexStart
@@ -70,30 +93,6 @@ def edit_filearray_menu(OL,fileArray,butMenu):
   for k in range(file_ind_start,file_ind_stop+1): # +1 is so it will do the first one if both ==
     fileArray.filearray[k][i] = butMenu.editValue # i is the column... where our data word exists
   return fileArray.filearray
-
-def inplace_shift(L, start, length, pos):
-  a = 0
-  b = 0
-  c = 0
-  if pos > start + length:
-    (a, b, c) = (start, start + length, pos)
-  elif pos < start:
-    (a, b, c) = (pos, start, start + length)
-  #else:
-  #  raise ValueError("Cannot shift a subsequence to inside itself")
-  #if not (0 <= a < b < c <= len(L)):
-  #  msg = "Index check 0 <= {0} < {1} < {2} <= {3} failed."
-  #  raise ValueError(msg.format(a, b, c, len(L)))
-
-  span1, span2 = (b - a, c - b)
-  if span1 < span2:
-    tmp = L[a:b]
-    L[a:a + span2] = L[b:c]
-    L[c - span1:c] = tmp
-  else:
-    tmp = L[b:c]
-    L[a + span2:c] = L[a:b]
-    L[a:a + span2] = tmp
 
 def subshift(L, start, end, insert_at):
   temp = L[start:end]
@@ -171,12 +170,15 @@ def create_objects(fileArray):
         newObject.parentIndices = []
         newObject.column = column
         newObject.columnIndex = colRow[column]-1
-        newObject.identifier = "Name"
+        if column == 0:
+          newObject.name = "New Alarm Type"
+        else:
+          newObject.name = line[column-1]
         newObject.value = line[column]
-        newObject.add_parameter(newObject.identifier,newObject.value)          # FIXME having its own name in its parameter list is probably not needed....
-        newObject.add_parameter_history(newObject.identifier,newObject.value)
+        newObject.add_parameter(newObject.name,newObject.value)          # FIXME having its own name in its parameter list is probably not needed....
+        newObject.add_parameter_history(newObject.value) # This assumes you are only recording value history
         newObject.color = lightgrey_color
-        newObject.alarm_status = 0
+        newObject.alarmStatus = 0
         localObjectList[column].append(newObject)
         if column != 0:
           for indices in range(0,column): # for parent objects grab their index (assuming my parent was the most recently added one to the object list)
@@ -185,13 +187,21 @@ def create_objects(fileArray):
         # FIXME try to find a way to catalogue the following children in a level 2 object
         if (column==4 and isnew==1):
           localObjectList[2][localObjectList[column][colRow[2]-1].parentIndices[2]].add_parameter(localObjectList[3][colRow[3]-1].value,localObjectList[4][colRow[4]-1].value)
-          localObjectList[2][localObjectList[column][colRow[2]-1].parentIndices[2]].add_parameter_history(localObjectList[3][colRow[3]-1].value,localObjectList[4][colRow[4]-1].value)
+          # This one records all parameters, (name,value) history
+          #localObjectList[2][localObjectList[column][colRow[2]-1].parentIndices[2]].add_parameter_history(localObjectList[3][colRow[3]-1].value,localObjectList[4][colRow[4]-1].value)
+          # This one records just the value/name parameter history
+          localObjectList[2][localObjectList[column][colRow[2]-1].parentIndices[2]].add_parameter_history(localObjectList[4][colRow[4]-1].value)
           #localObjectList[2][colRow[2]-1].add_parameter(localObjectList[3][colRow[3]-1].value,localObjectList[4][colRow[4]-1].value)
         if (column==4 and isnew!=1):
-          localObjectList[2][localObjectList[column][colRow[2]-1].parentIndices[2]].add_parameter_history(localObjectList[3][colRow[3]-1].value,localObjectList[4][colRow[4]-1].value)
+          # This one records all parameters, (name,value) history
+          #localObjectList[2][localObjectList[column][colRow[2]-1].parentIndices[2]].add_parameter_history(localObjectList[3][colRow[3]-1].value,localObjectList[4][colRow[4]-1].value)
+          # This one records just the value/name parameter history
+          localObjectList[2][localObjectList[column][colRow[2]-1].parentIndices[2]].add_parameter_history(localObjectList[4][colRow[4]-1].value)
       else:
         localObjectList[column][colRow[column]-1].indexEnd=lineN
       line_previous[column]=line[column]
+  for i in range(0,len(localObjectList[2])): # The 3rd column is the list of alarm objects
+    localObjectList[2][i].alarm = alarm_object.ALARM(localObjectList[2][i])
   return localObjectList
   
 def append_object(OL,coli): 
