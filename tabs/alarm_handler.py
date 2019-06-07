@@ -22,22 +22,57 @@ class Callback:
     self.func(*self.args,**self.kwargs)
 
 class ALARM_HANDLER(tk.Frame):
-  def __init__(self, alarmHandlerWindow, tab, OL, fileArray):
+  def __init__(self, alarmHandlerWindow, tab, OL, fileArray, alarmLoop):
 
     self.alarmHandlerWin = alarmHandlerWindow
-    self.Tab = tab
+    self.controlFrame = tk.LabelFrame(tab, text='Alarm Controls', background=u.grey_color)
     self.alarmFrame = tk.LabelFrame(tab, text='Alarm Handler', background=u.lightgrey_color)
     self.columnTitles = ["Kinds","Channel","Type","Parameter","Value"]
     self.colsp = [1,1,1,1,1]
     self.newText = ["New\nKind","New\nChannel","New\nType","New\nParameter","Alarm\nValues"]
+    self.controlButtonsText = ["Alarm Status","Toggle Loop","Silence All","Refresh GUI"]
 
     self.alarmColumns = []
     self.initialize_columns(OL)
     self.buttons = []
     self.buttonMenus = []
     self.creatorButtons = []
+    self.controlButtons = self.make_control_buttons(OL,fileArray, alarmLoop)
     self.make_screen(OL,fileArray)
 
+  def make_control_buttons(self,OL,fileArray,alarmLoop):
+    grid = []
+    for i in range(0, len(self.controlButtonsText)):
+      # First add the "New Button" button
+      newButt = tk.Button(self.controlFrame, text=self.controlButtonsText[i], default='active', justify='center', background=u.lightgrey_color)
+      newButt.indices = (i,0)
+      newButt.text = self.controlButtonsText[i]
+      newButt.config(command = lambda newBut=newButt: self.select_control_buttons(OL,fileArray,alarmLoop,newBut))
+      newButt.grid(row = 0, column = i,columnspan=self.colsp[i],padx=10,pady=10,sticky='N')
+      grid.append(newButt)
+    self.controlFrame.pack(padx=20,pady=5,anchor='n')
+    return grid
+
+  def select_control_buttons(self,OL,fileArray,alarmLoop,but):
+    i,j = but.indices
+    if but.text=="Toggle Loop" and alarmLoop.globalLoopStatus == True:
+      print("Turning off loop")
+      alarmLoop.globalLoopStatus = False
+    else:
+      if but.text=="Toggle Loop" and alarmLoop.globalLoopStatus == False:
+        print("Turning on loop")
+        alarmLoop.globalLoopStatus = True
+        alarmLoop.reset_alarmList(OL)
+    for k in range(0,len(self.controlButtons)):
+      self.controlButtons[k].grid_forget()
+    self.controlButtons = self.make_control_buttons(OL,fileArray,alarmLoop)
+    if but.text=="Alarm Status":
+      for k in range(0,len(u.recentAlarmButtons)):
+        OL.selectedButtonColumnIndicesList[k]=u.recentAlarmButtons[k] # Update the currently clicked button index to the alarming one
+      self.update_GUI(OL,fileArray)
+      for coli in range(0,5):
+        if OL.selectedButtonColumnIndicesList[coli] != -1:
+          self.refresh_button(OL,fileArray,self.buttons[coli][OL.selectedButtonColumnIndicesList[coli]])
 
   def make_screen(self,OL,fileArray):
     for i in range(0,len(self.alarmColumns)):
@@ -47,7 +82,7 @@ class ALARM_HANDLER(tk.Frame):
     self.buttons = self.initialize_buttons(OL,fileArray)
     self.creatorButtons = self.initialize_creator_buttons(OL,fileArray)
     self.buttonMenus = self.initialize_menus(OL,fileArray)
-    self.alarmFrame.pack(padx=20,pady=20,anchor='w')
+    self.alarmFrame.pack(padx=20,pady=10,anchor='nw')
     for i in range(0,len(self.buttons)):
       if i == 0: # Only default initialize all entries for column 0 (the Kind column)
         self.erase_grid_col(i,OL,fileArray,self.creatorButtons[i])
@@ -63,7 +98,7 @@ class ALARM_HANDLER(tk.Frame):
   def initialize_column(self,OL,colI):
     self.alarmColumns[colI] = tk.LabelFrame(self.alarmFrame, text=self.columnTitles[colI], background=u.lightgrey_color)
     self.alarmColumns[colI].grid(row=0,column=colI,pady=10,padx=10,sticky='N')
-    self.alarmFrame.pack(padx=20,pady=20,anchor='w')
+    self.alarmFrame.pack(padx=20,pady=10,anchor='nw')
 
   def initialize_creator_buttons(self,OL,fileArray):
     grid = []
@@ -145,7 +180,7 @@ class ALARM_HANDLER(tk.Frame):
       print("Adding column {}".format(colID+1))
       newButts[colID+1].grid(row=0,column=colID+1,columnspan=self.colsp[colID+1],padx=10,pady=10,sticky='N')
       self.alarmColumns[colID+1].grid(row=0,column=colID+1,pady=10,padx=10,sticky='N')#NEW
-    self.alarmFrame.pack(padx=20,pady=20,anchor='w') #NEW
+    self.alarmFrame.pack(padx=20,pady=10,anchor='nw') #NEW
     if colID<4:
       for j in range(0,len(OL.objectList[colID])):
         if colID>0 and OL.objectList[colID][j].parentIndices[colID-1]==OL.selectedButtonColumnIndicesList[colID-1]: # If the item on the right has the parent index of the current column equal to the currently selected button's column index, thenactivate it
@@ -242,44 +277,6 @@ class ALARM_HANDLER(tk.Frame):
       if OL.selectedButtonColumnIndicesList[coli] != -1:
         self.select_button(OL,fileArray,self.buttons[coli][OL.selectedButtonColumnIndicesList[coli]])
 
-# def insert_button(self,OL,but,indi):
-#   i,j = but.indices
-#   j = OL.selectedButtonColumnIndicesList[i]
-#   i = indi
-#   j# = len(self.buttons[i]) #- 1 
-#   butt = tk.Button(self.alarmColumns[i], text=OL.objectList[i][j].value, justify='center', background=OL.objectList[i][j].color)
-#   butt.indices = (i,j) 
-#   butt.config(command = lambda butte=butt: self.select_button(OL,butte))
-#   self.buttons[i].insert(j,butt) 
-#   self.select_button(OL,butt)
-#   if i==3:
-#     self.buttons[i][j].grid(row=j+1,column=i,columnspan=2,pady=10,padx=10,sticky='N')
-#   else:
-#     self.buttons[i][j].grid(row=j+1,column=i,pady=10,padx=10,sticky='N')
-#   self.alarmColumns[i].grid(row=0,column=i,pady=10,padx=10,sticky='N')
-#   self.alarmFrame.pack(padx=20,pady=20,anchor='w')
-#   #self.insert_button(OL,but,indi+1)
-#
-# def append_button(self,OL,but,indi):
-#   i,j = but.indices
-#   #j = OL.selectedButtonColumnIndicesList[i]
-#   i = indi
-#   j = len(self.buttons[i]) #- 1 
-#   butt = tk.Button(self.alarmColumns[i], text=OL.objectList[i][j].value, justify='center', background=OL.objectList[i][j].color)
-#   butt.indices = (i,j) 
-#   butt.config(command = lambda butte=butt: self.select_button(OL,butte))
-#   self.buttons[i].append(butt)
-#   self.select_button(OL,butt)
-#   if i==3:
-#     self.buttons[i][j].grid(row=j+1,column=i,columnspan=2,pady=10,padx=10,sticky='N')
-#   else:
-#     self.buttons[i][j].grid(row=j+1,column=i,pady=10,padx=10,sticky='N')
-#   self.alarmColumns[i].grid(row=0,column=i,pady=10,padx=10,sticky='N')
-#   self.alarmFrame.pack(padx=20,pady=20,anchor='w')
-#    
-#   if indi < len(self.buttons)-1:
-#     self.append_button(OL,but,indi+1)
-
   def set_button_clicked(self,OL,fileArray,i,j):
     for column in range(0,len(self.buttons)):
       for row in range(0,len(self.buttons[column])):
@@ -299,13 +296,10 @@ class ALARM_HANDLER(tk.Frame):
 #    self.buttonMenus = self.initialize_menus(OL,fileArray)
 
   def refresh_screen(self,OL,fileArray):
-    print("1 The selected buttons are indexed locally as {}".format(OL.selectedButtonColumnIndicesList))
     self.update_GUI(OL,fileArray)
-    print("2 The selected buttons are indexed locally as {}".format(OL.selectedButtonColumnIndicesList))
     for coli in range(0,len(OL.selectedButtonColumnIndicesList)):
       if OL.selectedButtonColumnIndicesList[coli] != -1:
         self.refresh_button(OL,fileArray,self.buttons[coli][OL.selectedButtonColumnIndicesList[coli]])
-    print("3 The selected buttons are indexed locally as {}".format(OL.selectedButtonColumnIndicesList))
 
       # FIXME this line is new every where:  if OL.selectedButtonColumnIndicesList[coli] != -1:
 

@@ -34,9 +34,8 @@ class AlarmHandler:
     self.OL = alarm_object.OBJECT_LIST(self.fileArray)
     #self.objectList = u.create_objects(self.fileArray) 
     #self.create_objects()
-    self.tabs = self.create_widgets()
     self.alarmLoop = alarm_object.ALARM_LOOP(self)
-    #self.alarmLoop.alarm_loop()
+    self.tabs = self.create_widgets()
   
   def get_alarm_handler_style(self):
     style = ttk.Style()
@@ -83,7 +82,7 @@ class AlarmHandler:
     for title, fn in tab_titles:
       tab = ttk.Frame(tab_control, width=800, height=600, style="My.TFrame")
       tab_control.add(tab, text=title)
-      tabs[title] = fn(self.win,tab,self.OL,self.fileArray)
+      tabs[title] = fn(self.win,tab,self.OL,self.fileArray,self.alarmLoop)
     tab_control.grid(row=0, column=0, columnspan=2)
     fenway = tk.PhotoImage(file='gm.ppm')
     fenway_pahk = tk.Label(self.win, image=fenway, cursor="hand2", bg=u.lightgrey_color)
@@ -95,6 +94,5 @@ class AlarmHandler:
     return tabs
 
 alarm_handler_GUI = AlarmHandler()
-print("made alarm handler")
 alarm_handler_GUI.alarmLoop.alarm_loop(alarm_handler_GUI)
 alarm_handler_GUI.win.mainloop()

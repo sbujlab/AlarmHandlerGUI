@@ -29,36 +29,28 @@ class ALARM_LOOP():
     self.globalAlarmStatus = "OK" # Start in non-alarmed state
     self.globalLoopStatus = True # Start in looping state
     self.globalUserAlarmSilence = False
-    #self.alarm_loop(alarmHandlerGUI)
-    #  self.win.after(10000,self.alarm_loop)
-    #  print("waited 10 seconds")
     
+  def reset_alarmList(self,OL):
+    self.alarmList = []
+    for i in range(0,len(OL.objectList[2])):
+      self.alarmList.append(OL.objectList[2][i].alarm)
+      print("Updated alarm lists == {}".format(self.alarmList[i].pList))
+
   def alarm_loop(self,alarmHandlerGUI):
     if (self.globalLoopStatus==True):
       print("waited 10 seconds, analyzing alarms")
       for i in range (0,len(self.alarmList)):
-        print("Loop, column index {} for i = {}".format(alarmHandlerGUI.OL.objectList[2][i].columnIndex,i)) # BREAKS HERE FIXME
         print("Before: pList value for \"Value\" updated to be {}".format(self.alarmList[i].pList))
-        print("Before: pList value for \"Value\" updated to be {}".format(self.alarmList[i].pList.get("Value",u.defaultKey)))
-        #alarmHandlerGUI.OL.objectList[2][i].alarm.alarm_analysis()
-        #alarmHandlerGUI.OL.objectList[2][i].alarm.alarm_evaluate()
         self.alarmList[i].alarm_analysis()
         self.alarmList[i].alarm_evaluate()
-        print("After: pList value for \"Value\" updated to be {}".format(self.alarmList[i].pList.get("Value",u.defaultKey)))
         print("After: Parameter list value for \"Value\" updated to be {}".format(self.alarmList[i].pList.get("Value",u.defaultKey)))
-        for k in range(0,len(alarmHandlerGUI.OL.objectList[4])):
-          print("Values of parameters in objects updated to be: {}".format(alarmHandlerGUI.OL.objectList[4][k].value)) 
-        #alarmHandlerGUI.OL.objectList[2][i].alarm.do_alarm_analysis(alarmHandlerGUI.OL.objectList[2][i])
-        #alarmHandlerGUI.OL.objectList[2][i].alarm.do_alarm_evaluate(alarmHandlerGUI.OL.objectList[2][i])
       u.update_objectList(alarmHandlerGUI.OL,alarmHandlerGUI.fileArray,self.alarmList)
       u.write_textfile(alarmHandlerGUI.OL,alarmHandlerGUI.fileArray) #FIXME Do this here?
       if alarmHandlerGUI.tabs.get("Alarm Handler",u.defaultKey) != u.defaultKey:
-        print("1 The selected buttons are indexed globally as {}".format(alarmHandlerGUI.OL.selectedButtonColumnIndicesList))
         alarmHandlerGUI.tabs["Alarm Handler"].refresh_screen(alarmHandlerGUI.OL,alarmHandlerGUI.fileArray)
-        print("2 The selected buttons are indexed globally as {}".format(alarmHandlerGUI.OL.selectedButtonColumnIndicesList))
       alarmHandlerGUI.win.after(10000,self.alarm_loop, alarmHandlerGUI) # Recursion loop here - splits off a new instance of this function and finishes the one currently running (be careful)
     if (self.globalLoopStatus==False):
-      alarmHandlerGUI.win.after(10000,self.alarm_loop, alarmHanderGUI) # Recursion loop here - splits off a new instance of this function and finishes the one currently running (be careful)
+      alarmHandlerGUI.win.after(10000,self.alarm_loop, alarmHandlerGUI) # Recursion loop here - splits off a new instance of this function and finishes the one currently running (be careful)
       print("waited 10 seconds to try again")
 
 class ALARM():
@@ -228,6 +220,10 @@ class ALARM():
           self.pList["Alarm Status"] = "Invalid"
     print("Updated: pList = {}".format(self.pList))
     if self.pList.get("Alarm Status",u.defaultKey) != "OK" and self.pList.get("Alarm Status",u.defaultKey) != "Invalid" and self.pList.get("Alarm Status",u.defaultKey) != "NULL": # Update global alarm status unless NULL or invalid
+      self.globalAlarmStatus = "Alarm"
+      for k in range(0,len(myAO.parentIndices)):
+        u.recentAlarmButtons[k] = myAO.parentIndices[k]
+      u.recentAlarmButtons[myAO.column] = myAO.columnIndex
       return "Not OK"
     else:
       return "OK"
