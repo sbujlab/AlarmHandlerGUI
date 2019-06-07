@@ -164,9 +164,19 @@ class ALARM_HANDLER(tk.Frame):
             self.buttons[colID][j].grid(row=j+1,column=colID,columnspan=self.colsp[colID],padx=10,pady=10,sticky='N')
     #self.buttonMenus = self.initialize_menus(OL,fileArray)
 
+  def refresh_button(self,OL,fileArray,but):
+    i,j = but.indices
+    OL.selectedButtonColumnIndicesList[i]=j # Update the currently clicked button index
+    OL.set_clicked(i,j) # Update that object's color to dark grey
+    self.set_button_clicked(OL,fileArray,i,j) # Re-organize the grid and change the non-clicked buttons back to regular light grey
+    self.buttons[i][j].config(background=OL.objectList[i][j].color) # Update that button to be the newly update object's new color (could just use but.config)
+
   def select_button(self,OL,fileArray,but):
     i,j = but.indices
     OL.selectedButtonColumnIndicesList[i]=j # Update the currently clicked button index
+    for k in range(i+1,len(OL.selectedButtonColumnIndicesList)): 
+      print("Erasing selectedButtonIncex at {}".format(k))
+      OL.selectedButtonColumnIndicesList[k] = -1
     OL.set_clicked(i,j) # Update that object's color to dark grey
     self.set_button_clicked(OL,fileArray,i,j) # Re-organize the grid and change the non-clicked buttons back to regular light grey
     self.buttons[i][j].config(background=OL.objectList[i][j].color) # Update that button to be the newly update object's new color (could just use but.config)
@@ -181,14 +191,16 @@ class ALARM_HANDLER(tk.Frame):
     fileArray.filearray = u.add_to_filearray(OL,fileArray,but)
     self.update_GUI(OL,fileArray)
     for coli in range(0,i):
-      self.select_button(OL,fileArray,self.buttons[coli][OL.selectedButtonColumnIndicesList[coli]])
+      if OL.selectedButtonColumnIndicesList[coli] != -1:
+        self.select_button(OL,fileArray,self.buttons[coli][OL.selectedButtonColumnIndicesList[coli]])
 
   def button_silence_menu(self,OL,fileArray,butMenu):
     i,j = butMenu.indices
     u.silence_filearray_menu(OL,fileArray,butMenu)
     self.update_GUI(OL,fileArray)
     for coli in range(0,i):
-      self.select_button(OL,fileArray,self.buttons[coli][OL.selectedButtonColumnIndicesList[coli]])
+      if OL.selectedButtonColumnIndicesList[coli] != -1:
+        self.refresh_button(OL,fileArray,self.buttons[coli][OL.selectedButtonColumnIndicesList[coli]])
 
   def button_edit_menu(self,OL,fileArray,butMenu):
     i,j = butMenu.indices
@@ -197,7 +209,8 @@ class ALARM_HANDLER(tk.Frame):
       fileArray.filearray = u.edit_filearray_menu(OL,fileArray,butMenu)
       self.update_GUI(OL,fileArray)
       for coli in range(0,i):
-        self.select_button(OL,fileArray,self.buttons[coli][OL.selectedButtonColumnIndicesList[coli]])
+        if OL.selectedButtonColumnIndicesList[coli] != -1:
+          self.refresh_button(OL,fileArray,self.buttons[coli][OL.selectedButtonColumnIndicesList[coli]])
 
   def button_move_menu(self,OL,fileArray,butMenu):
     i,j = butMenu.indices
@@ -207,23 +220,27 @@ class ALARM_HANDLER(tk.Frame):
       fileArray.filearray = u.move_filearray_menu(OL,fileArray,butMenu)
       self.update_GUI(OL,fileArray)
       for coli in range(0,i):
-        self.select_button(OL,fileArray,self.buttons[coli][OL.selectedButtonColumnIndicesList[coli]])
+        if OL.selectedButtonColumnIndicesList[coli] != -1:
+          self.select_button(OL,fileArray,self.buttons[coli][OL.selectedButtonColumnIndicesList[coli]])
 
   def button_add_menu(self,OL,fileArray,butMenu):
     i,j = butMenu.indices
     fileArray.filearray = u.add_filearray_menu(OL,fileArray,butMenu)
     self.update_GUI(OL,fileArray)
     for coli in range(0,i):
-      self.select_button(OL,fileArray,self.buttons[coli][OL.selectedButtonColumnIndicesList[coli]])
+      if OL.selectedButtonColumnIndicesList[coli] != -1:
+        self.select_button(OL,fileArray,self.buttons[coli][OL.selectedButtonColumnIndicesList[coli]])
 
   def button_delete_menu(self,OL,fileArray,butMenu):
     i,j = butMenu.indices
     fileArray.filearray = u.delete_filearray_menu(OL,fileArray,butMenu)
     self.update_GUI(OL,fileArray)
     for coli in range(i,len(OL.selectedButtonColumnIndicesList)):
+      if OL.selectedButtonColumnIndicesList[coli] != -1:
         OL.selectedButtonColumnIndicesList[i] -= 1
     for coli in range(0,i):
-      self.select_button(OL,fileArray,self.buttons[coli][OL.selectedButtonColumnIndicesList[coli]])
+      if OL.selectedButtonColumnIndicesList[coli] != -1:
+        self.select_button(OL,fileArray,self.buttons[coli][OL.selectedButtonColumnIndicesList[coli]])
 
 # def insert_button(self,OL,but,indi):
 #   i,j = but.indices
@@ -266,9 +283,29 @@ class ALARM_HANDLER(tk.Frame):
   def set_button_clicked(self,OL,fileArray,i,j):
     for column in range(0,len(self.buttons)):
       for row in range(0,len(self.buttons[column])):
-          self.buttons[column][row].config(background = OL.objectList[column][row].color) # Reset the other buttons that aren't currently the selected ones to their object's color
+        self.buttons[column][row].config(background = OL.objectList[column][row].color) # Reset the other buttons that aren't currently the selected ones to their object's color
     self.buttons[i][j].config(background = OL.objectList[i][j].color) # And this one too
     if i<3: 
       self.layout_grid_col(i+1,OL,fileArray,self.creatorButtons)
     self.buttonMenus = self.initialize_menus(OL,fileArray)
+
+#  def refresh_screen(self,OL,fileArray): # Update the screen when the loop comes back through
+#    for column in range(0,len(self.buttons)):
+#      for row in range(0,len(self.buttons[column])):
+#        self.buttons[column][row].config(background = OL.objectList[column][row].color) # Reset the other buttons that aren't currently the selected ones to their object's color
+#    #self.buttons[i][j].config(background = OL.objectList[i][j].color) # And this one too
+#    #if i<3: 
+#    #  self.layout_grid_col(i+1,OL,fileArray,self.creatorButtons)
+#    self.buttonMenus = self.initialize_menus(OL,fileArray)
+
+  def refresh_screen(self,OL,fileArray):
+    print("1 The selected buttons are indexed locally as {}".format(OL.selectedButtonColumnIndicesList))
+    self.update_GUI(OL,fileArray)
+    print("2 The selected buttons are indexed locally as {}".format(OL.selectedButtonColumnIndicesList))
+    for coli in range(0,len(OL.selectedButtonColumnIndicesList)):
+      if OL.selectedButtonColumnIndicesList[coli] != -1:
+        self.refresh_button(OL,fileArray,self.buttons[coli][OL.selectedButtonColumnIndicesList[coli]])
+    print("3 The selected buttons are indexed locally as {}".format(OL.selectedButtonColumnIndicesList))
+
+      # FIXME this line is new every where:  if OL.selectedButtonColumnIndicesList[coli] != -1:
 

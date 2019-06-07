@@ -17,6 +17,7 @@ import tabs.alarm_handler as alarm_handler
 import tabs.alarm_history as alarm_history
 import utils as u
 
+
 class AlarmHandler:
 
   def __init__(self):
@@ -31,11 +32,11 @@ class AlarmHandler:
     self.fileArray = alarm_object.FILE_ARRAY(self.filename,self.delim)
     # u.parse_textfile(self.filename,self.delim)
     self.OL = alarm_object.OBJECT_LIST(self.fileArray)
-    self.alarmLoop = alarm_object.ALARM_LOOP(self)
     #self.objectList = u.create_objects(self.fileArray) 
     #self.create_objects()
-    self.create_widgets()
-    #self.alarm_loop()
+    self.tabs = self.create_widgets()
+    self.alarmLoop = alarm_object.ALARM_LOOP(self)
+    #self.alarmLoop.alarm_loop()
   
   def get_alarm_handler_style(self):
     style = ttk.Style()
@@ -78,10 +79,11 @@ class AlarmHandler:
     tab_control = ttk.Notebook(self.win)
     #tab_titles = [('Alarm Handler', self.alarm_handler_tab),('Alarm History', self.alarm_history_tab)]
     tab_titles = [('Alarm Handler', alarm_handler.ALARM_HANDLER),('Alarm History', alarm_history.ALARM_HISTORY)]
+    tabs = {}
     for title, fn in tab_titles:
       tab = ttk.Frame(tab_control, width=800, height=600, style="My.TFrame")
       tab_control.add(tab, text=title)
-      fn(self.win,tab,self.OL,self.fileArray)
+      tabs[title] = fn(self.win,tab,self.OL,self.fileArray)
     tab_control.grid(row=0, column=0, columnspan=2)
     fenway = tk.PhotoImage(file='gm.ppm')
     fenway_pahk = tk.Label(self.win, image=fenway, cursor="hand2", bg=u.lightgrey_color)
@@ -90,7 +92,9 @@ class AlarmHandler:
     fenway_pahk.bind("<Button-1>", self.educate_yourself)
     tk.Button(self.win, text='QUIT', command=quit, background=u.lightgrey_color, width=15, height=3).grid(
       row=1, column=1, padx=15, pady=5, sticky='SE')
+    return tabs
 
 alarm_handler_GUI = AlarmHandler()
-alarm_handler_GUI.alarmLoop.alarm_loop()
+print("made alarm handler")
+alarm_handler_GUI.alarmLoop.alarm_loop(alarm_handler_GUI)
 alarm_handler_GUI.win.mainloop()

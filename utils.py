@@ -37,6 +37,30 @@ def parse_textfile(fileArray):
       fileArray.filearray.append(rowList)
   return fileArray.filearray
 
+def update_objectList(OL,fileArray,alarmList):
+  # Loop through column 3 (i = 2) and for each parameterList entry check if all column=4 entries have column3[i] as its parent
+  # if it does then update it's child [0].value to be == key result
+  # if parameterList key doesn't exist in list of col4 then make a new object and make it have name-value
+  found = 0
+  if len(OL.objectList)>=4: # Error out if there aren't 5 columns
+    for i in range(0,len(OL.objectList[2])):
+      for j in range(0,len(OL.objectList[3])):
+        found = 0
+        if OL.objectList[3][j].parentIndices[2]==OL.objectList[2][i].columnIndex: # Then the analysis is the parent of the current paramter
+          counter=[]
+          for k in range(0,len(OL.objectList[3])):
+            counter.append(0)
+          for k in range(0,len(OL.objectList[4])):
+            counter[OL.objectList[4][k].parentIndices[3]] += 1 # Count how many times we see our parent, and only edit the first time
+            if OL.objectList[4][k].parentIndices[3]==OL.objectList[3][j].columnIndex and counter[OL.objectList[4][k].parentIndices[3]]==1: # If our parent has our grandparent and If the item two on the right is the first to have the one on the right's columnIndex as a parent then show it - this allows us to append the prior value as a history if that is ever desired in the future FIXME FUTURE HISTORY IMPROVEMENT
+              found = 1
+              OL.objectList[4][k].value = alarmList[i].pList.get(OL.objectList[3][OL.objectList[4][k].parentIndices[3]].value,defaultKey) # Update the 5th column's key list
+              #print("Value =  {}".format(alarmList[i].pList.get(OL.objectList[3][OL.objectList[4][k].parentIndices[3]].value,defaultKey)))
+    if found==0:
+      print("Available parameters don't contain the desired value, please add it")
+  else:
+    print("Incorrect alarm.csv file type")
+
 def write_textfile(OL,fileArray):
   fileArray.filearray = []
   # for each in OL.objectList
@@ -45,7 +69,7 @@ def write_textfile(OL,fileArray):
   #   while that condition is true print from left to right
 
   if len(OL.objectList)>1:
-    i = len(OL.objectList)-1
+    i = len(OL.objectList)-1 # i = 5-1 = 4, last column
     for j in range(0,len(OL.objectList[i])): # Take the 5th column and make entries out of all of its parents values, in sequence
       entryarray = []
       parents = OL.objectList[i][j].parentIndices
@@ -154,7 +178,7 @@ def create_objects(fileArray):
   colRow = []
   line_previous = []
   for i in range(0,ncolumns):
-    localObjectList.append([]) # Check this
+    localObjectList.append([])
     colRow.append(0)
     line_previous.append("NULL")
   for lineN in range(0,nlines):
@@ -175,7 +199,66 @@ def create_objects(fileArray):
         else:
           newObject.name = line[column-1]
         newObject.value = line[column]
-        newObject.add_parameter(newObject.name,newObject.value)          # FIXME having its own name in its parameter list is probably not needed....
+###########        newObject.add_parameter(newObject.name,newObject.value)          # FIXME having its own name in its parameter list is probably not needed....
+###########        newObject.add_parameter(newObject,newObject)          # FIXME having its own name in its parameter list is probably not needed....
+#####FIXME        newObject.add_parameter_history(newObject.value) # This assumes you are only recording value history
+        newObject.color = lightgrey_color
+        newObject.alarmStatus = 0
+        localObjectList[column].append(newObject)
+        if column != 0:
+          for indices in range(0,column): # for parent objects grab their index (assuming my parent was the most recently added one to the object list)
+            localObjectList[column][colRow[column]-1].parentIndices.append(0)
+            localObjectList[column][colRow[column]-1].parentIndices[indices] = localObjectList[indices][len(localObjectList[indices])-1].columnIndex
+        # FIXME try to find a way to catalogue the following children in a level 2 object
+        if (column==4 and isnew==1):
+          localObjectList[2][localObjectList[column][colRow[3]-1].parentIndices[2]].add_parameter(localObjectList[3][colRow[3]-1],localObjectList[4][colRow[4]-1]) # Using colRow[4]-1 will always append the final entry of the values column [4] true for a parameter [3] to be the parameter list value.. consider first for history sake?
+          ### This one records just the value/name parameter history
+          localObjectList[2][localObjectList[column][colRow[3]-1].parentIndices[2]].add_parameter_history(localObjectList[4][colRow[4]-1].value)
+        if (column==4 and isnew!=1):
+          ### This one records just the value/name parameter history
+          localObjectList[2][localObjectList[column][colRow[3]-1].parentIndices[2]].add_parameter_history(localObjectList[4][colRow[4]-1].value)
+      else:
+        localObjectList[column][colRow[column]-1].indexEnd=lineN
+      line_previous[column]=line[column]
+  for i in range(0,len(localObjectList[2])): # The 3rd column is the list of alarm objects
+    localObjectList[2][i].alarm = alarm_object.ALARM(localObjectList[2][i]) # NEW ALARM defined here per new object in middle column
+    print("New object's parameterList = {}".format(localObjectList[2][i].parameterList))
+    print("Creating alarm for object {} {}, type = {}".format(localObjectList[2][i].column,localObjectList[2][i].columnIndex,localObjectList[2][i].parameterList.get("Alarm Type",defaultKey)))
+  return localObjectList
+  
+
+def create_objects_old(fileArray):
+  ncolumns = 0
+  if len(fileArray.filearray)>0: 
+    ncolumns = len(fileArray.filearray[len(fileArray.filearray)-1]) # FIXME should this just be hardcoded to 5 layers or should I keep it generic??
+  nlines = len(fileArray.filearray)
+  localObjectList = []
+  colRow = []
+  line_previous = []
+  for i in range(0,ncolumns):
+    localObjectList.append([])
+    colRow.append(0)
+    line_previous.append("NULL")
+  for lineN in range(0,nlines):
+    line = fileArray.filearray[lineN]
+    isnew = 0
+    for column in range(0,ncolumns):
+      if (isnew == 1 or (line[column] != line_previous[column]) or (line[column] == "NULL")): # This is a new value, so initialize it and store values
+        isnew = 1
+        colRow[column] += 1
+        newObject = alarm_object.ALARM_OBJECT() # call initializer
+        newObject.indexStart = lineN
+        newObject.indexEnd = lineN
+        newObject.parentIndices = []
+        newObject.column = column
+        newObject.columnIndex = colRow[column]-1
+        if column == 0:
+          newObject.name = "New Alarm Type"
+        else:
+          newObject.name = line[column-1]
+        newObject.value = line[column]
+###########        newObject.add_parameter(newObject.name,newObject.value)          # FIXME having its own name in its parameter list is probably not needed....
+        newObject.add_parameter(newObject,newObject)          # FIXME having its own name in its parameter list is probably not needed....
         newObject.add_parameter_history(newObject.value) # This assumes you are only recording value history
         newObject.color = lightgrey_color
         newObject.alarmStatus = 0
@@ -186,22 +269,28 @@ def create_objects(fileArray):
             localObjectList[column][colRow[column]-1].parentIndices[indices] = localObjectList[indices][len(localObjectList[indices])-1].columnIndex
         # FIXME try to find a way to catalogue the following children in a level 2 object
         if (column==4 and isnew==1):
-          localObjectList[2][localObjectList[column][colRow[2]-1].parentIndices[2]].add_parameter(localObjectList[3][colRow[3]-1].value,localObjectList[4][colRow[4]-1].value)
-          # This one records all parameters, (name,value) history
-          #localObjectList[2][localObjectList[column][colRow[2]-1].parentIndices[2]].add_parameter_history(localObjectList[3][colRow[3]-1].value,localObjectList[4][colRow[4]-1].value)
-          # This one records just the value/name parameter history
-          localObjectList[2][localObjectList[column][colRow[2]-1].parentIndices[2]].add_parameter_history(localObjectList[4][colRow[4]-1].value)
-          #localObjectList[2][colRow[2]-1].add_parameter(localObjectList[3][colRow[3]-1].value,localObjectList[4][colRow[4]-1].value)
+###########          localObjectList[2][localObjectList[column][colRow[3]-1].parentIndices[2]].add_parameter(localObjectList[3][colRow[3]-1].value,localObjectList[4][colRow[4]-1].value) # Using colRow[4]-1 will always append the final entry of the values column [4] true for a parameter [3] to be the parameter list value.. consider first for history sake?
+          localObjectList[2][localObjectList[column][colRow[3]-1].parentIndices[2]].add_parameter(localObjectList[3][colRow[3]-1],localObjectList[4][colRow[4]-1]) # Using colRow[4]-1 will always append the final entry of the values column [4] true for a parameter [3] to be the parameter list value.. consider first for history sake?
+          #localObjectList[2][localObjectList[column][colRow[2]-1].parentIndices[2]].add_parameter(localObjectList[3][colRow[3]-1].value,localObjectList[4][colRow[4]-1].value)
+          ### This one records all parameters, (name,value) history
+          ###localObjectList[2][localObjectList[column][colRow[2]-1].parentIndices[2]].add_parameter_history(localObjectList[3][colRow[3]-1].value,localObjectList[4][colRow[4]-1].value)
+          ### This one records just the value/name parameter history
+          localObjectList[2][localObjectList[column][colRow[3]-1].parentIndices[2]].add_parameter_history(localObjectList[4][colRow[4]-1].value)
+          #localObjectList[2][localObjectList[column][colRow[2]-1].parentIndices[2]].add_parameter_history(localObjectList[4][colRow[4]-1].value)
+          ###localObjectList[2][colRow[2]-1].add_parameter(localObjectList[3][colRow[3]-1].value,localObjectList[4][colRow[4]-1].value)
         if (column==4 and isnew!=1):
-          # This one records all parameters, (name,value) history
-          #localObjectList[2][localObjectList[column][colRow[2]-1].parentIndices[2]].add_parameter_history(localObjectList[3][colRow[3]-1].value,localObjectList[4][colRow[4]-1].value)
-          # This one records just the value/name parameter history
-          localObjectList[2][localObjectList[column][colRow[2]-1].parentIndices[2]].add_parameter_history(localObjectList[4][colRow[4]-1].value)
+          ### This one records all parameters, (name,value) history
+          ###localObjectList[2][localObjectList[column][colRow[2]-1].parentIndices[2]].add_parameter_history(localObjectList[3][colRow[3]-1].value,localObjectList[4][colRow[4]-1].value)
+          ### This one records just the value/name parameter history
+          localObjectList[2][localObjectList[column][colRow[3]-1].parentIndices[2]].add_parameter_history(localObjectList[4][colRow[4]-1].value)
+          #localObjectList[2][localObjectList[column][colRow[2]-1].parentIndices[2]].add_parameter_history(localObjectList[4][colRow[4]-1].value)
       else:
         localObjectList[column][colRow[column]-1].indexEnd=lineN
       line_previous[column]=line[column]
   for i in range(0,len(localObjectList[2])): # The 3rd column is the list of alarm objects
-    localObjectList[2][i].alarm = alarm_object.ALARM(localObjectList[2][i])
+    localObjectList[2][i].alarm = alarm_object.ALARM(localObjectList[2][i]) # NEW ALARM defined here per new object in middle column
+    print("New object's parameterList = {}".format(localObjectList[2][i].parameterList))
+    print("Creating alarm for object {} {}, type = {}".format(localObjectList[2][i].column,localObjectList[2][i].columnIndex,localObjectList[2][i].parameterList.get("Alarm Type",defaultKey)))
   return localObjectList
   
 def append_object(OL,coli): 
@@ -279,3 +368,9 @@ def insert_object(OL,coli):
   for i in range(coli,len(OL.objectList)):
     OL.objectList[i].insert(insertColumnsLocations[i]+1,newObjects[i-coli])
 
+def is_number(s):
+  try:
+    complex(s) # for int, long, float and complex
+  except ValueError:
+    return False
+  return True
