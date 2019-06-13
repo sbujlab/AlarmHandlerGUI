@@ -225,10 +225,30 @@ def create_objects(fileArray):
     print("Creating alarm for object {} {}, type = {}".format(localObjectList[2][i].column,localObjectList[2][i].columnIndex,localObjectList[2][i].parameterList.get("Alarm Type",defaultKey)))
   return localObjectList
   
+def update_extra_filearray(fileArray,extraFileArray):
+  # Update the extra file array with whatever contents it happens to have on disk at the moment
+  extraFileArray = alarm_object.FILE_ARRAY(extraFileArray.filename,extraFileArray.delim)
+
+  if extraFileArray != None: # Then we have the correct format
+    for i in range (0,len(extraFileArray.filearray)): # Check each line of extra array
+      filled = [0] * 4
+      # Check original file for contents matching comparison file, if first 4 columns can find a match then update, if not then append into the section with first 3/2/1 columns
+      for j in range (0,len(extraFileArray.filearray[i])-1):
+        for k in range (0,len(fileArray.filearray)): # Check each line of original array
+          if extraFileArray.filearray[i][j] == fileArray.filearray[k][j]: 
+            # Then this file has already been included in the main object list
+            filled[j] = k # if filled[0-3] == 1 then we are in a previously existing entry
+        if all(x != 0 for x in filled) and len(extraFileArray.filearray[i]) == 5:
+          # Then update the value in original file array with the updated one in extra file
+          fileArray.filearray[filled[3]][4] = extraFileArray.filearray[i][4]
+          # else continue
+        else:
+          # We need to add it ourselves, assume it wasn't here before at all, append
+          fileArray.filearray.append(extraFileArray.filearray[i])
+
 
   
 def append_object(OL,coli): 
-
   colLen = len(OL.objectList[coli])
   if colLen>0:
     lastIndexCol = OL.objectList[coli][colLen-1].indexEnd+1

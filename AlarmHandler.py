@@ -27,13 +27,15 @@ class AlarmHandler:
     self.win.configure(background=u.lightgrey_color)
     self.adc_options_vars = [tk.StringVar(), tk.StringVar(), tk.StringVar(), tk.StringVar()]
     self.get_alarm_handler_style()
-    self.filename = "/adaqfs/home/apar/bin/alarm.csv"
+    self.filename = "/adaqfs/home/apar/bin/alarm.csv" # FIXME this should eventually be pushed into the config file read by default main program at runtime
+    self.japanFilename = "/adaqfs/home/apar/bin/japanAlarms.csv"
     self.delim = ','
     self.fileArray = alarm_object.FILE_ARRAY(self.filename,self.delim)
-    # u.parse_textfile(self.filename,self.delim)
+    if os.path.exists(self.japanFilename): # Special case for running in a japan situation
+      self.japanFileArray = alarm_object.FILE_ARRAY(self.japanFilename,self.delim)
+    else:
+      self.japanFileArray = None
     self.OL = alarm_object.OBJECT_LIST(self.fileArray)
-    #self.objectList = u.create_objects(self.fileArray) 
-    #self.create_objects()
     self.alarmLoop = alarm_object.ALARM_LOOP(self)
     self.tabs = self.create_widgets()
   
