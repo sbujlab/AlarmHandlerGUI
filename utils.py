@@ -231,22 +231,20 @@ def update_extra_filearray(fileArray,extraFileArray):
 
   if extraFileArray != None: # Then we have the correct format
     for i in range (0,len(extraFileArray.filearray)): # Check each line of extra array
-      filled = [0] * 4
       # Check original file for contents matching comparison file, if first 4 columns can find a match then update, if not then append into the section with first 3/2/1 columns
       for j in range (0,len(extraFileArray.filearray[i])-1):
+        filled = [-1] * 4
         for k in range (0,len(fileArray.filearray)): # Check each line of original array
-          if extraFileArray.filearray[i][j] == fileArray.filearray[k][j]: 
+          if len(fileArray.filearray[k])>j and extraFileArray.filearray[i][j] == fileArray.filearray[k][j]: 
             # Then this file has already been included in the main object list
             filled[j] = k # if filled[0-3] == 1 then we are in a previously existing entry
-        if all(x != 0 for x in filled) and len(extraFileArray.filearray[i]) == 5:
+        if (filled[0]!=-1 or filled[1]!=-1 or filled[2]!=-1 or filled[3]!=-1) and len(extraFileArray.filearray[i]) == 5:
           # Then update the value in original file array with the updated one in extra file
           fileArray.filearray[filled[3]][4] = extraFileArray.filearray[i][4]
           # else continue
         else:
           # We need to add it ourselves, assume it wasn't here before at all, append
           fileArray.filearray.append(extraFileArray.filearray[i])
-
-
   
 def append_object(OL,coli): 
   colLen = len(OL.objectList[coli])

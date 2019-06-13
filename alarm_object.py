@@ -48,7 +48,7 @@ class ALARM_LOOP():
         print("After: Parameter list value for \"Value\" updated to be {}".format(self.alarmList[i].pList.get("Value",u.defaultKey)))
       u.update_objectList(alarmHandlerGUI.OL,alarmHandlerGUI.fileArray,self.alarmList)
       u.write_textfile(alarmHandlerGUI.OL,alarmHandlerGUI.fileArray) #FIXME Do this here?
-      if os.path.exists(alarmHandlerGUI.japanFilename) and self.checkJapanStatus == True and (time.time() - os.path.getmtime(alarmHandlerGUI.japanFilename)) < 300: # 5 minute wait time for japan to update
+      if os.path.exists(alarmHandlerGUI.japanFilename) and self.checkJapanStatus == True and (time.time() - os.path.getmtime(alarmHandlerGUI.japanFilename)) < 300000: # 5 minute wait time for japan to update
         print("Adding Japan alarms from {}".format(alarmHandlerGUI.japanFileArray.filename))
         u.update_extra_filearray(alarmHandlerGUI.fileArray,alarmHandlerGUI.japanFileArray)
       else:
