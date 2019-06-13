@@ -132,7 +132,6 @@ def move_filearray_menu(OL,fileArray,butMenu):
   file_ind_start = OL.objectList[i][j].indexStart
   file_ind_stop = OL.objectList[i][j].indexEnd
   print("col {}, entry {}, move by {}, start file ind {}, end file ind {}, position to plant into {}".format(i,j,mvN,file_ind_start,file_ind_stop,OL.objectList[i][j+mvN].indexEnd))
-  print("col {}, entry {}, move by {}, start file ind {}, end file ind {}, position to plant into {}".format(i,j,mvN,file_ind_start,file_ind_stop,OL.objectList[i][j+mvN].indexStart))
   #inplace_shift(fileArray.filearray,file_ind_start,file_ind_stop-file_ind_start+1,file_ind_distance+file_ind_start)
   if mvN>0:
     #fileArray.filearray = subshift(fileArray.filearray,file_ind_start,file_ind_stop+1,OL.objectList[i][j+mvN].indexEnd)
@@ -201,8 +200,8 @@ def create_objects(fileArray):
           newObject.name = line[column-1]
         newObject.value = line[column]
 #####FIXME        newObject.add_parameter_history(newObject.value) # This assumes you are only recording value history
+        newObject.alarmStatus = "OK"
         newObject.color = lightgrey_color
-        newObject.alarmStatus = 0
         localObjectList[column].append(newObject)
         if column != 0:
           for indices in range(0,column): # for parent objects grab their index (assuming my parent was the most recently added one to the object list)
@@ -211,6 +210,12 @@ def create_objects(fileArray):
         # FIXME try to find a way to catalogue the following children in a level 2 object
         if (column==4 and isnew==1):
           localObjectList[2][localObjectList[column][colRow[3]-1].parentIndices[2]].add_parameter(localObjectList[3][colRow[3]-1],localObjectList[4][colRow[4]-1]) # Using colRow[4]-1 will always append the final entry of the values column [4] true for a parameter [3] to be the parameter list value.. consider first for history sake?
+          if localObjectList[3][colRow[3]-1].name == "Alarm Status" and localObjectList[4][colRow[4]-1].value != "OK":
+            localObjectList[2][colRow[2]-1].alarmStatus = localObjectList[4][colRow[4]-1].value
+            localObjectList[2][colRow[2]-1].color = red_button_color
+          if localObjectList[3][colRow[3]-1].name == "Alarm Status" and localObjectList[4][colRow[4]-1].value == "OK":
+            localObjectList[2][colRow[2]-1].alarmStatus = localObjectList[4][colRow[4]-1].value
+            localObjectList[2][colRow[2]-1].color = lightgrey_color
           ### This one records just the value/name parameter history
           localObjectList[2][localObjectList[column][colRow[3]-1].parentIndices[2]].add_parameter_history(localObjectList[4][colRow[4]-1].value)
         if (column==4 and isnew!=1):
@@ -221,7 +226,7 @@ def create_objects(fileArray):
       line_previous[column]=line[column]
   for i in range(0,len(localObjectList[2])): # The 3rd column is the list of alarm objects
     localObjectList[2][i].alarm = alarm_object.ALARM(localObjectList[2][i]) # NEW ALARM defined here per new object in middle column
-    print("New object's parameterList = {}".format(localObjectList[2][i].parameterList))
+    #print("New object's parameterList = {}".format(localObjectList[2][i].parameterList))
     print("Creating alarm for object {} {}, type = {}".format(localObjectList[2][i].column,localObjectList[2][i].columnIndex,localObjectList[2][i].parameterList.get("Alarm Type",defaultKey)))
   return localObjectList
   
@@ -231,20 +236,29 @@ def update_extra_filearray(fileArray,extraFileArray):
 
   if extraFileArray != None: # Then we have the correct format
     for i in range (0,len(extraFileArray.filearray)): # Check each line of extra array
+      print("Reading extra fileArray {}, line {} = {}".format(extraFileArray.filename,i,extraFileArray.filearray[i]))
       # Check original file for contents matching comparison file, if first 4 columns can find a match then update, if not then append into the section with first 3/2/1 columns
+      edittedEntry = False
+      insertSpot = len(fileArray.filearray)
       for j in range (0,len(extraFileArray.filearray[i])-1):
         filled = [-1] * 4
         for k in range (0,len(fileArray.filearray)): # Check each line of original array
           if len(fileArray.filearray[k])>j and extraFileArray.filearray[i][j] == fileArray.filearray[k][j]: 
-            # Then this file has already been included in the main object list
-            filled[j] = k # if filled[0-3] == 1 then we are in a previously existing entry
-        if (filled[0]!=-1 or filled[1]!=-1 or filled[2]!=-1 or filled[3]!=-1) and len(extraFileArray.filearray[i]) == 5:
-          # Then update the value in original file array with the updated one in extra file
-          fileArray.filearray[filled[3]][4] = extraFileArray.filearray[i][4]
-          # else continue
-        else:
-          # We need to add it ourselves, assume it wasn't here before at all, append
-          fileArray.filearray.append(extraFileArray.filearray[i])
+            # Then this entry has already been included in the main object list
+            #print("Entry in extra fileArray {} being overwritten, line {} = {}".format(extraFileArray.filearray[i][j],i,extraFileArray.filearray[i]))
+            #print("fileArray.filearay[{}] contains {}".format(k,extraFileArray.filearray[i][j]))
+            if extraFileArray.filearray[i][0:4] == fileArray.filearray[k][0:4]: # only update for the case that I'm exactly replacing
+              fileArray.filearray[k][4] = extraFileArray.filearray[i][4] 
+              edittedEntry = True
+            if extraFileArray.filearray[i][0:3] == fileArray.filearray[k][0:3]:
+              insertSpot = k+1 # Update insertSpot for each entry with 3th level ana name matching
+        if edittedEntry == False:
+          if insertSpot == len(fileArray.filearray):
+            print("Appending {} below {}".format(extraFileArray.filearray[i],fileArray.filearray[len(fileArray.filearray)-1]))
+            fileArray.filearray.append(extraFileArray.filearray[i])
+          else:
+            fileArray.filearray.insert(insertSpot,extraFileArray.filearray[i])
+            print("Inserting {} below {}".format(extraFileArray.filearray[i],fileArray.filearray[indices[x]]))
   
 def append_object(OL,coli): 
   colLen = len(OL.objectList[coli])

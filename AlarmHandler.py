@@ -13,7 +13,7 @@ import webbrowser
 
 import csv
 import alarm_object
-import tabs.alarm_handler as alarm_handler
+import tabs.expert_alarm_handler as expert_alarm_handler
 import tabs.alarm_history as alarm_history
 import utils as u
 
@@ -28,13 +28,13 @@ class AlarmHandler:
     self.adc_options_vars = [tk.StringVar(), tk.StringVar(), tk.StringVar(), tk.StringVar()]
     self.get_alarm_handler_style()
     self.filename = "/adaqfs/home/apar/bin/alarm.csv" # FIXME this should eventually be pushed into the config file read by default main program at runtime
-    self.japanFilename = "/adaqfs/home/apar/bin/japanAlarms.csv"
+    self.externalFilename = "/adaqfs/home/apar/bin/japanAlarms.csv"
     self.delim = ','
     self.fileArray = alarm_object.FILE_ARRAY(self.filename,self.delim)
-    if os.path.exists(self.japanFilename): # Special case for running in a japan situation
-      self.japanFileArray = alarm_object.FILE_ARRAY(self.japanFilename,self.delim)
+    if os.path.exists(self.externalFilename): # Special case for running in an external situation like Japan or camguin analysis
+      self.externalFileArray = alarm_object.FILE_ARRAY(self.externalFilename,self.delim)
     else:
-      self.japanFileArray = None
+      self.externalFileArray = None
     self.OL = alarm_object.OBJECT_LIST(self.fileArray)
     self.alarmLoop = alarm_object.ALARM_LOOP(self)
     self.tabs = self.create_widgets()
@@ -56,7 +56,7 @@ class AlarmHandler:
 
 #    def alarm_handler_tab(self, expt_tab):
 #        tab_control = ttk.Notebook(expt_tab)
-#        tab_titles = [('Alarm Handler', alarm_handler.ALARM_HANDLER)]
+#        tab_titles = [('Expert Alarm Handler', expert_alarm_handler.EXPERT_ALARM_HANDLER)]
 #        for title, fn in tab_titles:
 #            sub_tab = ttk.Frame(tab_control, width=800, height=600, style="My.TFrame")
 #            tab_control.add(sub_tab, text=title)
@@ -78,8 +78,8 @@ class AlarmHandler:
     gui_style.configure('My.TFrame', background=u.lightgrey_color)
 
     tab_control = ttk.Notebook(self.win)
-    #tab_titles = [('Alarm Handler', self.alarm_handler_tab),('Alarm History', self.alarm_history_tab)]
-    tab_titles = [('Alarm Handler', alarm_handler.ALARM_HANDLER),('Alarm History', alarm_history.ALARM_HISTORY)]
+    #tab_titles = [('Expert Alarm Handler', self.expert_alarm_handler_tab),('Alarm History', self.alarm_history_tab)]
+    tab_titles = [('Expert Alarm Handler', expert_alarm_handler.EXPERT_ALARM_HANDLER),('Alarm History', alarm_history.ALARM_HISTORY)]
     tabs = {}
     for title, fn in tab_titles:
       tab = ttk.Frame(tab_control, width=800, height=600, style="My.TFrame")

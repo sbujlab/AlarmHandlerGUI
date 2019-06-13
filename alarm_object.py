@@ -28,7 +28,7 @@ class ALARM_LOOP():
       self.alarmList.append(alarmHandlerGUI.OL.objectList[2][i].alarm)
     print("Initializing, adding alarm list pList = {}".format(alarmHandlerGUI.OL.objectList[2][i].alarm.pList))
     self.globalAlarmStatus = "OK" # Start in non-alarmed state
-    self.checkJapanStatus = True # Check the japanAlarms.csv file
+    self.checkExternalStatus = True # Check the externalAlarms.csv file
     self.globalLoopStatus = True # Start in looping state
     self.globalUserAlarmSilence = False
     
@@ -36,42 +36,47 @@ class ALARM_LOOP():
     self.alarmList = []
     for i in range(0,len(OL.objectList[2])):
       self.alarmList.append(OL.objectList[2][i].alarm)
-      print("Updated alarm lists == {}".format(self.alarmList[i].pList))
+      #print("Updated alarm lists == {}".format(self.alarmList[i].pList))
 
   def alarm_loop(self,alarmHandlerGUI):
     if (self.globalLoopStatus==True):
       print("waited 10 seconds, analyzing alarms")
-      for i in range (0,len(self.alarmList)):
-        print("Before: pList value for \"Value\" updated to be {}".format(self.alarmList[i].pList))
-        self.alarmList[i].alarm_analysis()
-        self.alarmList[i].alarm_evaluate()
-        print("After: Parameter list value for \"Value\" updated to be {}".format(self.alarmList[i].pList.get("Value",u.defaultKey)))
-      u.update_objectList(alarmHandlerGUI.OL,alarmHandlerGUI.fileArray,self.alarmList)
-      u.write_textfile(alarmHandlerGUI.OL,alarmHandlerGUI.fileArray) #FIXME Do this here?
-      if os.path.exists(alarmHandlerGUI.japanFilename) and self.checkJapanStatus == True and (time.time() - os.path.getmtime(alarmHandlerGUI.japanFilename)) < 300000: # 5 minute wait time for japan to update
-        print("Adding Japan alarms from {}".format(alarmHandlerGUI.japanFileArray.filename))
-        u.update_extra_filearray(alarmHandlerGUI.fileArray,alarmHandlerGUI.japanFileArray)
+      if os.path.exists(alarmHandlerGUI.externalFilename) and self.checkExternalStatus == True and (time.time() - os.path.getmtime(alarmHandlerGUI.externalFilename)) < 300000: # 5 minute wait time for external to update
+        print("Adding External alarms from {}".format(alarmHandlerGUI.externalFileArray.filename))
+        u.update_extra_filearray(alarmHandlerGUI.fileArray,alarmHandlerGUI.externalFileArray)
+        alarmHandlerGUI.OL.objectList = u.create_objects(alarmHandlerGUI.fileArray)
+        self.reset_alarmList(alarmHandlerGUI.OL)
+        u.write_textfile(alarmHandlerGUI.OL,alarmHandlerGUI.fileArray) #FIXME Do this here?
       else:
         print("No extra alarm files found")
-      if alarmHandlerGUI.tabs.get("Alarm Handler",u.defaultKey) != u.defaultKey:
-        alarmHandlerGUI.tabs["Alarm Handler"].refresh_screen(alarmHandlerGUI.OL,alarmHandlerGUI.fileArray)
+      for i in range (0,len(self.alarmList)):
+        self.alarmList[i].alarm_analysis()
+        self.alarmList[i].alarm_evaluate()
+        if self.alarmList[i].alarmSelfStatus != "OK":
+          self.globalAlarmStatus = self.alarmList[i].alarmSelfStatus
+        #print("After: Parameter list value for \"Value\" updated to be {}".format(self.alarmList[i].pList.get("Value",u.defaultKey)))
+      u.update_objectList(alarmHandlerGUI.OL,alarmHandlerGUI.fileArray,self.alarmList)
+      u.write_textfile(alarmHandlerGUI.OL,alarmHandlerGUI.fileArray) #FIXME Do this here?
+      if alarmHandlerGUI.tabs.get("Expert Alarm Handler",u.defaultKey) != u.defaultKey:
+        alarmHandlerGUI.tabs["Expert Alarm Handler"].refresh_screen(alarmHandlerGUI.OL,alarmHandlerGUI.fileArray,alarmHandlerGUI.alarmLoop)
       alarmHandlerGUI.win.after(10000,self.alarm_loop, alarmHandlerGUI) # Recursion loop here - splits off a new instance of this function and finishes the one currently running (be careful)
     if (self.globalLoopStatus==False):
       alarmHandlerGUI.win.after(10000,self.alarm_loop, alarmHandlerGUI) # Recursion loop here - splits off a new instance of this function and finishes the one currently running (be careful)
-      print("waited 10 seconds to try again")
+      print("In sleep mode: waited 10 seconds to try to check alarm status again")
 
 class ALARM():
   def __init__(self,myAO):
     #self.alarmName = myAO.name
     #self.runNumber = os.getenv($RUNNUM)
     self.pList = myAO.parameterList # FIXME FIXME FIXME test and prove that this is true!!! This parameterList is built out of the object's parameter list which is built out of the values of all objects, so editing them here edits them everywhere - be careful!! FIXME - to edit all of objectLists' values it may be necessary to make the constituent local objects into arrays so the pointer logic works
-    print("Initializing: pList = {}".format(self.pList))
+    #print("Initializing: pList = {}".format(self.pList))
     self.alarmAnalysisReturn = None
     self.alarmErrorReturn = None
+    self.alarmSelfStatus = myAO.alarmStatus
     self.alarmType = self.pList.get("Alarm Type",u.defaultKey)
     self.alarmEvaluateType = "Exists" # Default alarm criteria is whether the value is not-null and otherwise is defined on context from given parameterList entries
     # Do I need to make a lambda initialized instance of the alarm action per event? I don't think this matters like it did for button context menu placements.... especially since these actions are being taken by the alarm handler in a loop over objectList
-    print("Initializing new alarm for object {} {}, name = {}".format(myAO.column,myAO.columnIndex,myAO.name+" "+myAO.value))
+    #print("Initializing new alarm for object {} {}, name = {}".format(myAO.column,myAO.columnIndex,myAO.name+" "+myAO.value))
     self.alarm_analysis = lambda myAOhere = myAO: self.do_alarm_analysis(myAOhere)
     self.alarm_evaluate = lambda myAOhere = myAO: self.do_alarm_evaluate(myAOhere) # Just keep this stub here in case
 
@@ -90,27 +95,26 @@ class ALARM():
         cmds = ['caget', '-t', self.pList["Variable Name"]]
         cond_out = "NULL"
         cond_out = subprocess.Popen(cmds, stdout=subprocess.PIPE).stdout.read().strip().decode('ascii') # Needs to be decoded... be careful #FIXME
-        print("EPICS: Doing alarm analysis for object {} {}, name = {}".format(myAO.column,myAO.columnIndex,myAO.name+" "+myAO.value))
+        #print("EPICS: Doing alarm analysis for object {} {}, name = {}".format(myAO.column,myAO.columnIndex,myAO.name+" "+myAO.value))
         print("The epics output for variable {} is {}".format(self.pList["Variable Name"],cond_out))
         if "Invalid" in str(cond_out): # Then the epics variable was invalid
           print("ERROR Invalid epics channel, check with caget again:\t {}".format(self.pList["Variable Name"]))
           cond_out = "NULL"
         self.pList["Value"] = cond_out
-        print("Parameter list value for \"Value\" updated to be {}".format(self.pList["Value"]))
       else: # User didn't have "Value" in their parameter list, add it and make it init to NULL
         self.pList["Variable Name"] = "NULL"
         self.pList["Value"] = "NULL"
-      print("Parameter list value for \"Value\" updated to be {}".format(self.pList["Value"]))
+      #print("Parameter list value for \"Value\" updated to be {}".format(self.pList["Value"]))
 
       #self.do_alarm_evaluate(myAO)
 
-    if "Japan" in self.alarmType: # Alarm Type is the parameter (level 4 object) which keeps track of what analysis to do
-      # Read the JAPAN output text file, parse each line, compare with current alarm object's dictionaries, update object's values, evaluate status, continue
+    if "External" in self.alarmType: # Alarm Type is the parameter (level 4 object) which keeps track of what analysis to do
+      # Read the external output text file, parse each line, compare with current alarm object's dictionaries, update object's values, evaluate status, continue
       pass
 
   def do_alarm_evaluate(self,myAO):
     # Consider making a candidate list of possible key words, but for now stick to hard-coded names... 
-    print("Updating: pList = {}".format(self.pList))
+    #print("Updating: pList = {}".format(self.pList))
     val = self.pList.get("Value",u.defaultKey)
     lowlow = self.pList.get("Low Low",u.defaultKey)
     low = self.pList.get("Low",u.defaultKey)
@@ -227,12 +231,16 @@ class ALARM():
           self.pList["Alarm Status"] = "Invalid"
     print("Updated: pList = {}".format(self.pList))
     if self.pList.get("Alarm Status",u.defaultKey) != "OK" and self.pList.get("Alarm Status",u.defaultKey) != "Invalid" and self.pList.get("Alarm Status",u.defaultKey) != "NULL": # Update global alarm status unless NULL or invalid
-      self.globalAlarmStatus = "Alarm"
+      self.alarmSelfStatus = self.pList.get("Alarm Status",u.defaultKey)
+      myAO.alarmStatus = self.pList.get("Alarm Status",u.defaultKey)
+      myAO.color = u.red_button_color
       for k in range(0,len(myAO.parentIndices)):
         u.recentAlarmButtons[k] = myAO.parentIndices[k]
       u.recentAlarmButtons[myAO.column] = myAO.columnIndex
       return "Not OK"
     else:
+      myAO.alarmStatus = "OK"
+      myAO.color = u.lightgrey_color
       return "OK"
 
 class FILE_ARRAY():
@@ -302,17 +310,18 @@ class ALARM_OBJECT():
     self.parameterList = {} # Using a dictionary makes life much easier
     self.parameterListHistory = [] # Every time we update parameterList pass its prior value to history ... let actually accumulating of values take place in alarmLoop if wanted...
     self.color = u.lightgrey_color
-    self.alarmStatus = 0
+    self.alarmStatus = "OK"
     self.alarm = lambda: ALARM(self);
     self.clicked = 0
 
   def click(self,clickStat):
     self.clicked = clickStat
-    if (clickStat == 0 and self.alarmStatus == 0):
+    if (clickStat == 0 and self.alarmStatus == "OK"):
       self.color = u.lightgrey_color
-    if (clickStat == 1):
+    if (clickStat == 1 and self.alarmStatus == "OK"):
       self.color = u.grey_color
-    if (clickStat == 0 and self.alarmStatus == 1):
+    #if (clickStat == 0 and self.alarmStatus == 1):
+    if self.alarmStatus != "OK":
       self.color = u.red_button_color
 
   def add_parameter(self,obj1,obj2): # Updates dictionary with new value, appends or edits appropriately, but names are the keys... so be careful

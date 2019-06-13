@@ -21,12 +21,12 @@ class Callback:
   def __call__(self):
     self.func(*self.args,**self.kwargs)
 
-class ALARM_HANDLER(tk.Frame):
+class EXPERT_ALARM_HANDLER(tk.Frame):
   def __init__(self, alarmHandlerWindow, tab, OL, fileArray, alarmLoop):
 
     self.alarmHandlerWin = alarmHandlerWindow
     self.controlFrame = tk.LabelFrame(tab, text='Alarm Controls', background=u.grey_color)
-    self.alarmFrame = tk.LabelFrame(tab, text='Alarm Handler', background=u.lightgrey_color)
+    self.alarmFrame = tk.LabelFrame(tab, text='Expert Alarm Handler', background=u.lightgrey_color)
     self.columnTitles = ["Kinds","Channel","Type","Parameter","Value"]
     self.colsp = [1,1,1,1,1]
     self.newText = ["New\nKind","New\nChannel","New\nType","New\nParameter","Alarm\nValues"]
@@ -45,6 +45,8 @@ class ALARM_HANDLER(tk.Frame):
     for i in range(0, len(self.controlButtonsText)):
       # First add the "New Button" button
       newButt = tk.Button(self.controlFrame, text=self.controlButtonsText[i], default='active', justify='center', background=u.lightgrey_color)
+      if self.controlButtonsText[i]=="Alarm Status" and alarmLoop.globalAlarmStatus != "OK":
+        newButt.config(background=u.red_button_color)
       newButt.indices = (i,0)
       newButt.text = self.controlButtonsText[i]
       newButt.config(command = lambda newBut=newButt: self.select_control_buttons(OL,fileArray,alarmLoop,newBut))
@@ -67,6 +69,10 @@ class ALARM_HANDLER(tk.Frame):
       self.controlButtons[k].grid_forget()
     self.controlButtons = self.make_control_buttons(OL,fileArray,alarmLoop)
     if but.text=="Alarm Status":
+      if alarmLoop.globalAlarmStatus != "OK":
+        but.config(background=u.red_button_color)
+      else:
+        but.config(background=u.lightgrey_color)
       for k in range(0,len(u.recentAlarmButtons)):
         OL.selectedButtonColumnIndicesList[k]=u.recentAlarmButtons[k] # Update the currently clicked button index to the alarming one
       self.update_GUI(OL,fileArray)
@@ -127,11 +133,11 @@ class ALARM_HANDLER(tk.Frame):
 
   def initialize_menus(self,OL,fileArray):
     grid = []
-    print("Adding menus, len(self.alarmColumns) = {} times".format(len(self.alarmColumns)))
+    #print("Adding menus, len(self.alarmColumns) = {} times".format(len(self.alarmColumns)))
     for i in range(0, len(self.alarmColumns)):
-      print("Adding menus to {}, len(OL.objectList[{}]) = {} times".format(i,i,len(OL.objectList[i])))
+      #print("Adding menus to {}, len(OL.objectList[{}]) = {} times".format(i,i,len(OL.objectList[i])))
       menuCol = []
-      print("If len(OL.objectList) = {} > 0:".format(len(OL.objectList),0))
+      #print("If len(OL.objectList) = {} > 0:".format(len(OL.objectList),0))
       if len(OL.objectList)>(0):
         for j in range(0,len(OL.objectList[i])):
           buttMenu = tk.Menu(self.buttons[i][j], tearoff=0) # Is having the owner be button correct?
@@ -174,10 +180,10 @@ class ALARM_HANDLER(tk.Frame):
     # Then get the index range that its children live in
     # Then grid those children (and erase prior grid, preserving creatorButton[coldID])
     newButts[colID].grid(row=0,column=colID,columnspan=self.colsp[colID],padx=10,pady=10,sticky='N')
-    print("Adding column {}".format(colID))
+    #print("Adding column {}".format(colID))
     self.alarmColumns[colID].grid(row=0,column=colID,pady=10,padx=10,sticky='N')#NEW
     if colID == 3 and len(self.alarmColumns)>colID+1: #NEW
-      print("Adding column {}".format(colID+1))
+      #print("Adding column {}".format(colID+1))
       newButts[colID+1].grid(row=0,column=colID+1,columnspan=self.colsp[colID+1],padx=10,pady=10,sticky='N')
       self.alarmColumns[colID+1].grid(row=0,column=colID+1,pady=10,padx=10,sticky='N')#NEW
     self.alarmFrame.pack(padx=20,pady=10,anchor='nw') #NEW
@@ -210,7 +216,7 @@ class ALARM_HANDLER(tk.Frame):
     i,j = but.indices
     OL.selectedButtonColumnIndicesList[i]=j # Update the currently clicked button index
     for k in range(i+1,len(OL.selectedButtonColumnIndicesList)): 
-      print("Erasing selectedButtonIncex at {}".format(k))
+      #print("Erasing selectedButtonIndex at {}".format(k))
       OL.selectedButtonColumnIndicesList[k] = -1
     OL.set_clicked(i,j) # Update that object's color to dark grey
     self.set_button_clicked(OL,fileArray,i,j) # Re-organize the grid and change the non-clicked buttons back to regular light grey
@@ -295,7 +301,8 @@ class ALARM_HANDLER(tk.Frame):
 #    #  self.layout_grid_col(i+1,OL,fileArray,self.creatorButtons)
 #    self.buttonMenus = self.initialize_menus(OL,fileArray)
 
-  def refresh_screen(self,OL,fileArray):
+  def refresh_screen(self,OL,fileArray,alarmLoop):
+    self.controlButtons = self.make_control_buttons(OL,fileArray, alarmLoop)
     self.update_GUI(OL,fileArray)
     for coli in range(0,len(OL.selectedButtonColumnIndicesList)):
       if OL.selectedButtonColumnIndicesList[coli] != -1:
