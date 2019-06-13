@@ -45,7 +45,10 @@ class EXPERT_ALARM_HANDLER(tk.Frame):
     for i in range(0, len(self.controlButtonsText)):
       # First add the "New Button" button
       newButt = tk.Button(self.controlFrame, text=self.controlButtonsText[i], default='active', justify='center', background=u.lightgrey_color)
-      if self.controlButtonsText[i]=="Alarm Status" and alarmLoop.globalAlarmStatus != "OK":
+      if self.controlButtonsText[i]=="Silence All" and alarmLoop.globalUserAlarmSilence != "Alert":
+        newButt.config(background=u.darkgrey_color)
+      if self.controlButtonsText[i]=="Alarm Status": # FIXME red here too always?
+        #and alarmLoop.globalAlarmStatus != "OK" and alarmLoop.globalUserAlarmSilence != "Silenced":
         newButt.config(background=u.red_button_color)
       newButt.indices = (i,0)
       newButt.text = self.controlButtonsText[i]
@@ -57,19 +60,26 @@ class EXPERT_ALARM_HANDLER(tk.Frame):
 
   def select_control_buttons(self,OL,fileArray,alarmLoop,but):
     i,j = but.indices
-    if but.text=="Toggle Loop" and alarmLoop.globalLoopStatus == True:
-      print("Turning off loop")
-      alarmLoop.globalLoopStatus = False
-    else:
-      if but.text=="Toggle Loop" and alarmLoop.globalLoopStatus == False:
-        print("Turning on loop")
-        alarmLoop.globalLoopStatus = True
-        alarmLoop.reset_alarmList(OL)
     for k in range(0,len(self.controlButtons)):
       self.controlButtons[k].grid_forget()
-    self.controlButtons = self.make_control_buttons(OL,fileArray,alarmLoop)
+    if but.text=="Silence All":
+      if alarmLoop.globalUserAlarmSilence == "Alert":
+        alarmLoop.globalUserAlarmSilence = "Silenced"
+        but.config(background=u.darkgrey_color)
+      elif alarmLoop.globalUserAlarmSilence == "Silenced":
+        alarmLoop.globalUserAlarmSilence = "Alert"
+        but.config(background=u.lightgrey_color)
+    if but.text=="Toggle Loop":
+      if alarmLoop.globalLoopStatus == "Looping":
+        print("Turning off loop")
+        alarmLoop.globalLoopStatus = "Paused"
+      elif alarmLoop.globalLoopStatus == "Paused":
+        print("Turning on loop")
+        alarmLoop.globalLoopStatus = "Looping"
+        alarmLoop.reset_alarmList(OL)
     if but.text=="Alarm Status":
-      if alarmLoop.globalAlarmStatus != "OK":
+      if alarmLoop.globalAlarmStatus != "OK": # FIXME red here too always?:
+        #and alarmLoop.globalUserAlarmSilence != "Silenced":
         but.config(background=u.red_button_color)
       else:
         but.config(background=u.lightgrey_color)
@@ -79,6 +89,7 @@ class EXPERT_ALARM_HANDLER(tk.Frame):
       for coli in range(0,5):
         if OL.selectedButtonColumnIndicesList[coli] != -1:
           self.refresh_button(OL,fileArray,self.buttons[coli][OL.selectedButtonColumnIndicesList[coli]])
+    self.controlButtons = self.make_control_buttons(OL,fileArray,alarmLoop)
 
   def make_screen(self,OL,fileArray):
     for i in range(0,len(self.alarmColumns)):

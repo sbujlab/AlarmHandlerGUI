@@ -29,8 +29,8 @@ class ALARM_LOOP():
     print("Initializing, adding alarm list pList = {}".format(alarmHandlerGUI.OL.objectList[2][i].alarm.pList))
     self.globalAlarmStatus = "OK" # Start in non-alarmed state
     self.checkExternalStatus = True # Check the externalAlarms.csv file
-    self.globalLoopStatus = True # Start in looping state
-    self.globalUserAlarmSilence = False
+    self.globalLoopStatus = "Looping" # Start in looping state
+    self.globalUserAlarmSilence = "Alert"
     
   def reset_alarmList(self,OL):
     self.alarmList = []
@@ -39,7 +39,7 @@ class ALARM_LOOP():
       #print("Updated alarm lists == {}".format(self.alarmList[i].pList))
 
   def alarm_loop(self,alarmHandlerGUI):
-    if (self.globalLoopStatus==True):
+    if (self.globalLoopStatus=="Looping"):
       print("waited 10 seconds, analyzing alarms")
       if os.path.exists(alarmHandlerGUI.externalFilename) and self.checkExternalStatus == True and (time.time() - os.path.getmtime(alarmHandlerGUI.externalFilename)) < 300000: # 5 minute wait time for external to update
         print("Adding External alarms from {}".format(alarmHandlerGUI.externalFileArray.filename))
@@ -60,7 +60,7 @@ class ALARM_LOOP():
       if alarmHandlerGUI.tabs.get("Expert Alarm Handler",u.defaultKey) != u.defaultKey:
         alarmHandlerGUI.tabs["Expert Alarm Handler"].refresh_screen(alarmHandlerGUI.OL,alarmHandlerGUI.fileArray,alarmHandlerGUI.alarmLoop)
       alarmHandlerGUI.win.after(10000,self.alarm_loop, alarmHandlerGUI) # Recursion loop here - splits off a new instance of this function and finishes the one currently running (be careful)
-    if (self.globalLoopStatus==False):
+    if (self.globalLoopStatus=="Paused"):
       alarmHandlerGUI.win.after(10000,self.alarm_loop, alarmHandlerGUI) # Recursion loop here - splits off a new instance of this function and finishes the one currently running (be careful)
       print("In sleep mode: waited 10 seconds to try to check alarm status again")
 
@@ -233,7 +233,10 @@ class ALARM():
     if self.pList.get("Alarm Status",u.defaultKey) != "OK" and self.pList.get("Alarm Status",u.defaultKey) != "Invalid" and self.pList.get("Alarm Status",u.defaultKey) != "NULL": # Update global alarm status unless NULL or invalid
       self.alarmSelfStatus = self.pList.get("Alarm Status",u.defaultKey)
       myAO.alarmStatus = self.pList.get("Alarm Status",u.defaultKey)
-      myAO.color = u.red_button_color
+      if myAO.userSilenceStatus != "Silenced":
+        myAO.color = u.red_button_color
+      elif myAO.userSilenceStatus == "Silenced":
+        myAO.color = u.darkgrey_color # Still indicate that it is off, but not red now
       for k in range(0,len(myAO.parentIndices)):
         u.recentAlarmButtons[k] = myAO.parentIndices[k]
       u.recentAlarmButtons[myAO.column] = myAO.columnIndex
@@ -311,6 +314,7 @@ class ALARM_OBJECT():
     self.parameterListHistory = [] # Every time we update parameterList pass its prior value to history ... let actually accumulating of values take place in alarmLoop if wanted...
     self.color = u.lightgrey_color
     self.alarmStatus = "OK"
+    self.userSilenceStatus = "Alert"
     self.alarm = lambda: ALARM(self);
     self.clicked = 0
 
@@ -321,8 +325,10 @@ class ALARM_OBJECT():
     if (clickStat == 1 and self.alarmStatus == "OK"):
       self.color = u.grey_color
     #if (clickStat == 0 and self.alarmStatus == 1):
-    if self.alarmStatus != "OK":
+    if self.alarmStatus != "OK" and self.userSilenceStatus != "Silenced":
       self.color = u.red_button_color
+    elif self.userSilenceStatus == "Silenced":
+      self.color = u.darkgrey_color
 
   def add_parameter(self,obj1,obj2): # Updates dictionary with new value, appends or edits appropriately, but names are the keys... so be careful
     self.parameterList[obj1.value]=obj2.value
