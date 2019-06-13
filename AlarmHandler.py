@@ -86,7 +86,7 @@ class AlarmHandler:
       tab_control.add(tab, text=title)
       tabs[title] = fn(self.win,tab,self.OL,self.fileArray,self.alarmLoop)
     tab_control.grid(row=0, column=0, columnspan=2)
-    fenway = tk.PhotoImage(file='gm.ppm')
+    fenway = tk.PhotoImage(file='alarm.ppm')
     fenway_pahk = tk.Label(self.win, image=fenway, cursor="hand2", bg=u.lightgrey_color)
     fenway_pahk.image = fenway
     fenway_pahk.grid(row=1, column=0, padx=5, pady=10, sticky='SW')
