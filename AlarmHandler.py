@@ -27,8 +27,8 @@ class AlarmHandler:
     self.win.configure(background=u.lightgrey_color)
     self.adc_options_vars = [tk.StringVar(), tk.StringVar(), tk.StringVar(), tk.StringVar()]
     self.get_alarm_handler_style()
-    self.filename = "/adaqfs/home/apar/bin/alarm.csv" # FIXME this should eventually be pushed into the config file read by default main program at runtime
-    self.externalFilename = "/adaqfs/home/apar/bin/japanAlarms.csv"
+    self.filename = "/adaqfs/home/apar/alarms/alarm.csv" # FIXME this should eventually be pushed into the config file read by default main program at runtime
+    self.externalFilename = "/adaqfs/home/apar/alarms/japanAlarms.csv"
     self.delim = ','
     self.fileArray = alarm_object.FILE_ARRAY(self.filename,self.delim)
     if os.path.exists(self.externalFilename): # Special case for running in an external situation like Japan or camguin analysis
