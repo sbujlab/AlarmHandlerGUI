@@ -1,0 +1,2 @@
+#!/bin/tcsh
+python3 AlarmHandler.py
