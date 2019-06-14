@@ -26,7 +26,7 @@ class ALARM_LOOP():
     self.alarmList = []
     for i in range(0,len(alarmHandlerGUI.OL.objectList[2])):
       self.alarmList.append(alarmHandlerGUI.OL.objectList[2][i].alarm)
-    print("Initializing, adding alarm list pList = {}".format(alarmHandlerGUI.OL.objectList[2][i].alarm.pList))
+    #print("Initializing, adding alarm list pList = {}".format(alarmHandlerGUI.OL.objectList[2][i].alarm.pList))
     self.globalAlarmStatus = "OK" # Start in non-alarmed state
     self.checkExternalStatus = True # Check the externalAlarms.csv file
     self.globalLoopStatus = "Looping" # Start in looping state
@@ -80,15 +80,10 @@ class ALARM():
     self.alarm_analysis = lambda myAOhere = myAO: self.do_alarm_analysis(myAOhere)
     self.alarm_evaluate = lambda myAOhere = myAO: self.do_alarm_evaluate(myAOhere) # Just keep this stub here in case
 
-    #subprocess.run(args, *, stdin=None, input=None, stdout=None, stderr=None, capture_output=False, shell=False, cwd=None, timeout=None, check=False, encoding=None, errors=None, text=None, env=None, universal_newlines=None)
   def do_alarm_analysis(self,myAO):
-    print("Trying alarm analysis for object {} {}, name = {}, = {}".format(myAO.column,myAO.columnIndex,myAO.name+" "+myAO.value,self.pList))
+    #print("Trying alarm analysis for object {} {}, name = {}, = {}".format(myAO.column,myAO.columnIndex,myAO.name+" "+myAO.value,self.pList))
     if "Camguin" in self.alarmType: # Alarm Type is the parameter (level 4 object) which keeps track of what analysis to do
-      #Standard form: ./camguin.C(string "type of analysis" (rms), string "tree" (mul), string "branch" (asym_vqwk_04_0ch0), string "leaf" (hw_sum), string "cuts" (defaultCuts), int overWriteCut (0, boolean to overwrite default cuts), string "histMode" (defaultHist, doesn't rebin), int runNumber ($RUNNUM), int nRuns ($NRUNS), double data (0.0))
       subprocess("root -L camguin_C.so({},{},{},{},{},{},{},{},{},{},{})".format(self.pList["Analysis"],self.pList["Tree"],self.pList["Branch"],self.pList["Leaf"],self.pList["Cuts"],int(self.pList["Ignore Event Cuts"]),self.pList["Hist Rebinning"],int(self.pList["Stability Ring Length"]),self.runNumber,1,0.0), stdout=self.alarmAnalysisReturn, stderr=self.alarmErrorReturn, timeout=30)
-      # Parse alarm return values into results and determine alarm status upadte
-      # Use dictionaries to map the return string names and values into the parameter list values
-      #self.do_alarm_valuate(self,myAO)
 
     if "EPICS" in self.alarmType:
       if self.pList.get("Variable Name"):
@@ -106,8 +101,6 @@ class ALARM():
         self.pList["Value"] = "NULL"
       #print("Parameter list value for \"Value\" updated to be {}".format(self.pList["Value"]))
 
-      #self.do_alarm_evaluate(myAO)
-
     if "External" in self.alarmType: # Alarm Type is the parameter (level 4 object) which keeps track of what analysis to do
       # Read the external output text file, parse each line, compare with current alarm object's dictionaries, update object's values, evaluate status, continue
       pass
@@ -120,6 +113,7 @@ class ALARM():
     low = self.pList.get("Low",u.defaultKey)
     high = self.pList.get("High",u.defaultKey)
     highhigh = self.pList.get("High High",u.defaultKey)
+    exactly = self.pList.get("Exactly",u.defaultKey)
     if not u.is_number(str(val)): # Then we are not dealing with a number alarm - for now just return false
       print("ERROR: Assume alarms values can only be numbers for now")
       return "Invalid"
@@ -229,10 +223,20 @@ class ALARM():
             self.pList["Alarm Status"] = "OK"
         else:
           self.pList["Alarm Status"] = "Invalid"
-    print("Updated: pList = {}".format(self.pList))
+      if exactly != "NULL":
+        self.alarmEvaluateType = "Exactly"
+        if val != "NULL":
+          if val != exactly:
+            self.pList["Alarm Status"] = "Not-Exactly"
+          else:
+            self.pList["Alarm Status"] = "OK"
+        else:
+          self.pList["Alarm Status"] = "Invalid"
+    #print("Updated: pList = {}".format(self.pList))
     if self.pList.get("Alarm Status",u.defaultKey) != "OK" and self.pList.get("Alarm Status",u.defaultKey) != "Invalid" and self.pList.get("Alarm Status",u.defaultKey) != "NULL": # Update global alarm status unless NULL or invalid
       self.alarmSelfStatus = self.pList.get("Alarm Status",u.defaultKey)
       myAO.alarmStatus = self.pList.get("Alarm Status",u.defaultKey)
+      myAO.userSilenceStatus = self.pList.get("User Silence Status",u.defaultKey)
       if myAO.userSilenceStatus != "Silenced":
         myAO.color = u.red_button_color
       elif myAO.userSilenceStatus == "Silenced":
@@ -327,7 +331,7 @@ class ALARM_OBJECT():
     #if (clickStat == 0 and self.alarmStatus == 1):
     if self.alarmStatus != "OK" and self.userSilenceStatus != "Silenced":
       self.color = u.red_button_color
-    elif self.userSilenceStatus == "Silenced":
+    if self.userSilenceStatus == "Silenced":
       self.color = u.darkgrey_color
 
   def add_parameter(self,obj1,obj2): # Updates dictionary with new value, appends or edits appropriately, but names are the keys... so be careful
