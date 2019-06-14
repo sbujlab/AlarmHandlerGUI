@@ -318,6 +318,7 @@ class ALARM_OBJECT():
     self.color = u.lightgrey_color
     self.alarmStatus = "OK"
     self.userSilenceStatus = "Alert"
+    self.parameterList["User Silence Status"] = self.userSilenceStatus
     self.alarm = lambda: ALARM(self);
     self.clicked = 0
 

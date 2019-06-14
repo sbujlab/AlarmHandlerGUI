@@ -1,16 +1,10 @@
-# PyGreenMonster
-Green Monster GUI created without ROOT
+# AlarmHandlerGUI
+Alarm Handler GUI in python for reading EPICS, ROOT, JAPAN, and anything you can think of
 
-To compile, run the following commands:
-gcc -c -fPIC -o cfSock/cfSockCli.o cfSock/cfSockCli.c
-gcc -shared -o cfSock/libcfSockCli.so cfSock/cfSockCli.o
-
-Main file is GreenMonster.py
+Main file is AlarmHandler.py
 
 Running:
-python3 GreenMonster.py
+`python3 AlarmHandler.py`
+or utilize a bash script called `AlarmHandler`
 
-It will require extensive use of python's cdll library.
 The GUI is constructed with python GUI module TKinter and its sister module ttk.
-
-2019-05-14: Only tab with correct functionality is gm_bmw.py.

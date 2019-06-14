@@ -203,6 +203,8 @@ def create_objects(fileArray):
         newObject.value = line[column]
 #####FIXME        newObject.add_parameter_history(newObject.value) # Commenting out then assumes you are only recording value history
         newObject.alarmStatus = "OK"
+        newObject.userSilenceStatus = "Alert"
+        newObject.parameterList["User Silence Status"] = newObject.userSilenceStatus
         newObject.color = lightgrey_color
         localObjectList[column].append(newObject)
         if column != 0:
@@ -213,19 +215,33 @@ def create_objects(fileArray):
         if (column==4 and isnew==1):
           localObjectList[2][localObjectList[column][colRow[3]-1].parentIndices[2]].add_parameter(localObjectList[3][colRow[3]-1],localObjectList[4][colRow[4]-1]) # FIXME Using colRow[4]-1 will always append the final entry of the values column [4] true for a parameter [3] to be the parameter list value.. consider first for history sake?
           if localObjectList[3][colRow[3]-1].value == "User Silence Status":
-            localObjectList[2][localObjectList[column][colRow[3]-1].parentIndices[2]].userSilenceStatus = localObjectList[4][colRow[4]-1].value # Check for user silenced status
-            print("user silence status: {}".format(localObjectList[2][localObjectList[column][colRow[3]-1].parentIndices[2]].userSilenceStatus))
+            localObjectList[2][localObjectList[column][colRow[3]-1].parentIndices[2]].userSilenceStatus = localObjectList[4][colRow[4]-1].value 
+            # Check for user silenced status
+            #print("user silence status: {}".format(localObjectList[2][localObjectList[column][colRow[3]-1].parentIndices[2]].userSilenceStatus))
             # Editing the parameterList entry..... instead of the object value itself...
             localObjectList[2][localObjectList[column][colRow[3]-1].parentIndices[2]].add_parameter(localObjectList[3][colRow[3]-1],localObjectList[4][colRow[4]-1])
+            # Also check each alarm status, in case the alarm status entry is earlier in fileArray than silence status
+            if localObjectList[2][localObjectList[column][colRow[3]-1].parentIndices[2]].alarmStatus != "OK" and localObjectList[2][localObjectList[column][colRow[3]-1].parentIndices[2]].userSilenceStatus == "Alert":
+              for q1 in range(0,column):
+                localObjectList[q1][localObjectList[column][colRow[3]-1].parentIndices[q1]].color = red_button_color
+            elif localObjectList[2][localObjectList[column][colRow[3]-1].parentIndices[2]].userSilenceStatus == "Silenced":
+              for q2 in range(0,column):
+                localObjectList[q2][localObjectList[column][colRow[3]-1].parentIndices[q2]].color = darkgrey_color
+            elif localObjectList[2][localObjectList[column][colRow[3]-1].parentIndices[2]].alarmStatus == "OK" and localObjectList[2][localObjectList[column][colRow[3]-1].parentIndices[2]].userSilenceStatus != "Silenced":
+              for q3 in range(0,column):
+                localObjectList[q3][localObjectList[column][colRow[3]-1].parentIndices[q3]].color = lightgrey_color
           #print("Checking {}?=Alarm Status and Checking {}!?=OK and Checking {}?=Alert".format(localObjectList[3][colRow[3]-1].value,localObjectList[4][colRow[4]-1].value,localObjectList[2][colRow[2]-1].userSilenceStatus))
           if localObjectList[3][colRow[3]-1].value == "Alarm Status" and localObjectList[4][colRow[4]-1].value != "OK" and localObjectList[2][localObjectList[column][colRow[3]-1].parentIndices[2]].userSilenceStatus == "Alert":
             for q in range(0,column):
-              print("Alert!!! Alarm not ok")
+              #print("Alert!!! Alarm not ok")
               localObjectList[q][localObjectList[column][colRow[3]-1].parentIndices[q]].alarmStatus = localObjectList[4][colRow[4]-1].value
               localObjectList[q][localObjectList[column][colRow[3]-1].parentIndices[q]].color = red_button_color
-          if localObjectList[3][colRow[3]-1].value == "Alarm Status" and localObjectList[4][colRow[4]-1].value != "OK" and localObjectList[2][localObjectList[column][colRow[3]-1].parentIndices[2]].userSilenceStatus == "Silenced":
+          # Only dark grey if alarmed and silenecd 
+          #if localObjectList[3][colRow[3]-1].value == "Alarm Status" and localObjectList[4][colRow[4]-1].value != "OK" and localObjectList[2][localObjectList[column][colRow[3]-1].parentIndices[2]].userSilenceStatus == "Silenced":
+          # Dark grey if silenced at all
+          if localObjectList[2][localObjectList[column][colRow[3]-1].parentIndices[2]].userSilenceStatus == "Silenced":
             for q in range(0,column):
-              print("Alert!!! Alarm silenced")
+              #print("Alert!!! Alarm silenced")
               localObjectList[q][localObjectList[column][colRow[3]-1].parentIndices[q]].alarmStatus = localObjectList[4][colRow[4]-1].value
               localObjectList[q][localObjectList[column][colRow[3]-1].parentIndices[q]].color = darkgrey_color
           #if localObjectList[3][colRow[3]-1].value == "Alarm Status" and localObjectList[4][colRow[4]-1].value == "OK":
