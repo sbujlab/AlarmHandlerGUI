@@ -24,7 +24,6 @@ class Callback:
 class EXPERT_ALARM_HANDLER(tk.Frame):
   def __init__(self, alarmHandlerWindow, tab, OL, fileArray, alarmLoop):
 
-    self.alarmHandlerWin = alarmHandlerWindow
     self.controlFrame = tk.LabelFrame(tab, text='Alarm Controls', background=u.grey_color)
     self.alarmFrame = tk.LabelFrame(tab, text='Expert Alarm Handler', background=u.lightgrey_color)
     self.columnTitles = ["Kinds","Channel","Type","Parameter","Value"]
@@ -310,21 +309,10 @@ class EXPERT_ALARM_HANDLER(tk.Frame):
       self.layout_grid_col(i+1,OL,fileArray,self.creatorButtons)
     self.buttonMenus = self.initialize_menus(OL,fileArray)
 
-#  def refresh_screen(self,OL,fileArray): # Update the screen when the loop comes back through
-#    for column in range(0,len(self.buttons)):
-#      for row in range(0,len(self.buttons[column])):
-#        self.buttons[column][row].config(background = OL.objectList[column][row].color) # Reset the other buttons that aren't currently the selected ones to their object's color
-#    #self.buttons[i][j].config(background = OL.objectList[i][j].color) # And this one too
-#    #if i<3: 
-#    #  self.layout_grid_col(i+1,OL,fileArray,self.creatorButtons)
-#    self.buttonMenus = self.initialize_menus(OL,fileArray)
-
   def refresh_screen(self,OL,fileArray,alarmLoop):
     self.controlButtons = self.make_control_buttons(OL,fileArray, alarmLoop)
     self.update_GUI(OL,fileArray)
     for coli in range(0,len(OL.selectedButtonColumnIndicesList)):
       if OL.selectedButtonColumnIndicesList[coli] != -1:
         self.refresh_button(OL,fileArray,self.buttons[coli][OL.selectedButtonColumnIndicesList[coli]])
-
-      # FIXME this line is new every where:  if OL.selectedButtonColumnIndicesList[coli] != -1:
 

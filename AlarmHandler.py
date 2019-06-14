@@ -36,6 +36,8 @@ class AlarmHandler:
     else:
       self.externalFileArray = None
     self.OL = alarm_object.OBJECT_LIST(self.fileArray)
+    self.masterAlarmImage = tk.PhotoImage(file='ok.ppm')
+    self.masterAlarmButton = tk.Label(self.win, image=self.masterAlarmImage, cursor="hand2", bg=u.lightgrey_color)
     self.alarmLoop = alarm_object.ALARM_LOOP(self)
     self.tabs = self.create_widgets()
   
@@ -51,8 +53,11 @@ class AlarmHandler:
     self.win.destroy()
     exit()
 
-  def educate_yourself(self, event):
-    webbrowser.open_new(r"https://en.wikipedia.org/wiki/Green_Monster")
+  def update_show_alarms(self, event):
+    for key in self.tabs:
+      if key != "Alarm History":
+        self.tabs[key].select_control_buttons(self.OL,self.fileArray,self.alarmLoop,self.tabs[key].controlButtons[0])
+      #webbrowser.open_new(r"https://en.wikipedia.org/wiki/Green_Monster")
 
 #    def alarm_handler_tab(self, expt_tab):
 #        tab_control = ttk.Notebook(expt_tab)
@@ -86,11 +91,10 @@ class AlarmHandler:
       tab_control.add(tab, text=title)
       tabs[title] = fn(self.win,tab,self.OL,self.fileArray,self.alarmLoop)
     tab_control.grid(row=0, column=0, columnspan=2)
-    fenway = tk.PhotoImage(file='alarm.ppm')
-    fenway_pahk = tk.Label(self.win, image=fenway, cursor="hand2", bg=u.lightgrey_color)
-    fenway_pahk.image = fenway
-    fenway_pahk.grid(row=1, column=0, padx=5, pady=10, sticky='SW')
-    fenway_pahk.bind("<Button-1>", self.educate_yourself)
+    #self.masterAlarmButton = tk.Label(self.win, image=self.masterAlarmImage, cursor="hand2", bg=u.lightgrey_color)
+    self.masterAlarmButton.image = self.masterAlarmImage
+    self.masterAlarmButton.grid(row=1, column=0, padx=5, pady=10, sticky='SW')
+    self.masterAlarmButton.bind("<Button-1>", self.update_show_alarms)
     tk.Button(self.win, text='QUIT', command=quit, background=u.lightgrey_color, width=15, height=3).grid(
       row=1, column=1, padx=15, pady=5, sticky='SE')
     return tabs

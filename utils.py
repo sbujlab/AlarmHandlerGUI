@@ -204,7 +204,7 @@ def create_objects(fileArray):
 #####FIXME        newObject.add_parameter_history(newObject.value) # Commenting out then assumes you are only recording value history
         newObject.alarmStatus = "OK"
         newObject.userSilenceStatus = "Alert"
-        newObject.parameterList["User Silence Status"] = newObject.userSilenceStatus
+        #newObject.parameterList["User Silence Status"] = newObject.userSilenceStatus
         newObject.color = lightgrey_color
         localObjectList[column].append(newObject)
         if column != 0:
@@ -235,6 +235,7 @@ def create_objects(fileArray):
             for q in range(0,column):
               #print("Alert!!! Alarm not ok")
               localObjectList[q][localObjectList[column][colRow[3]-1].parentIndices[q]].alarmStatus = localObjectList[4][colRow[4]-1].value
+              localObjectList[q][localObjectList[column][colRow[3]-1].parentIndices[q]].alarm.alarmSelfStatus = localObjectList[4][colRow[4]-1].value
               localObjectList[q][localObjectList[column][colRow[3]-1].parentIndices[q]].color = red_button_color
           # Only dark grey if alarmed and silenecd 
           #if localObjectList[3][colRow[3]-1].value == "Alarm Status" and localObjectList[4][colRow[4]-1].value != "OK" and localObjectList[2][localObjectList[column][colRow[3]-1].parentIndices[2]].userSilenceStatus == "Silenced":
@@ -243,10 +244,12 @@ def create_objects(fileArray):
             for q in range(0,column):
               #print("Alert!!! Alarm silenced")
               localObjectList[q][localObjectList[column][colRow[3]-1].parentIndices[q]].alarmStatus = localObjectList[4][colRow[4]-1].value
+              localObjectList[q][localObjectList[column][colRow[3]-1].parentIndices[q]].alarm.alarmSelfStatus = localObjectList[4][colRow[4]-1].value
               localObjectList[q][localObjectList[column][colRow[3]-1].parentIndices[q]].color = darkgrey_color
           #if localObjectList[3][colRow[3]-1].value == "Alarm Status" and localObjectList[4][colRow[4]-1].value == "OK":
           #  for q in range(0,column):
           #    localObjectList[q][localObjectList[column][colRow[3]-1].parentIndices[q]].alarmStatus = localObjectList[4][colRow[4]-1].value
+          #    localObjectList[q][localObjectList[column][colRow[3]-1].parentIndices[q]].alarm.alarmSelfStatus = localObjectList[4][colRow[4]-1].value
           #    localObjectList[q][localObjectList[column][colRow[3]-1].parentIndices[q]].color = lightgrey_color
           ### This one records just the value/name parameter history
           localObjectList[2][localObjectList[column][colRow[3]-1].parentIndices[2]].add_parameter_history(localObjectList[4][colRow[4]-1].value)

@@ -49,16 +49,32 @@ class ALARM_LOOP():
         u.write_textfile(alarmHandlerGUI.OL,alarmHandlerGUI.fileArray) #FIXME Do this here?
       else:
         print("No extra alarm files found")
+      localStat = "OK"
       for i in range (0,len(self.alarmList)):
         self.alarmList[i].alarm_analysis()
         self.alarmList[i].alarm_evaluate()
         if self.alarmList[i].alarmSelfStatus != "OK":
           self.globalAlarmStatus = self.alarmList[i].alarmSelfStatus
+          localStat = self.alarmList[i].alarmSelfStatus
+          print("alarm {} = {}".format(i,localStat))
+      if localStat == "OK":
+        self.globalAlarmStatus = "OK"
         #print("After: Parameter list value for \"Value\" updated to be {}".format(self.alarmList[i].pList.get("Value",u.defaultKey)))
       u.update_objectList(alarmHandlerGUI.OL,alarmHandlerGUI.fileArray,self.alarmList)
       u.write_textfile(alarmHandlerGUI.OL,alarmHandlerGUI.fileArray) #FIXME Do this here?
       if alarmHandlerGUI.tabs.get("Expert Alarm Handler",u.defaultKey) != u.defaultKey:
         alarmHandlerGUI.tabs["Expert Alarm Handler"].refresh_screen(alarmHandlerGUI.OL,alarmHandlerGUI.fileArray,alarmHandlerGUI.alarmLoop)
+      alarmHandlerGUI.masterAlarmButton.destroy()
+      if alarmHandlerGUI.alarmLoop.globalAlarmStatus == "OK":
+        alarmHandlerGUI.masterAlarmImage = tk.PhotoImage(file='ok.ppm')
+        alarmHandlerGUI.masterAlarmButton = tk.Label(alarmHandlerGUI.win, image=alarmHandlerGUI.masterAlarmImage, cursor="hand2", bg=u.lightgrey_color)
+        alarmHandlerGUI.masterAlarmButton.image = tk.PhotoImage(file='ok.ppm')
+      if alarmHandlerGUI.alarmLoop.globalAlarmStatus != "OK":
+        alarmHandlerGUI.masterAlarmImage = tk.PhotoImage(file='alarm.ppm')
+        alarmHandlerGUI.masterAlarmButton = tk.Label(alarmHandlerGUI.win, image=alarmHandlerGUI.masterAlarmImage, cursor="hand2", bg=u.lightgrey_color)
+        alarmHandlerGUI.masterAlarmButton.image = tk.PhotoImage(file='alarm.ppm')
+      alarmHandlerGUI.masterAlarmButton.grid(row=1, column=0, padx=5, pady=10, sticky='SW')
+      alarmHandlerGUI.masterAlarmButton.bind("<Button-1>", alarmHandlerGUI.update_show_alarms)
       alarmHandlerGUI.win.after(10000,self.alarm_loop, alarmHandlerGUI) # Recursion loop here - splits off a new instance of this function and finishes the one currently running (be careful)
     if (self.globalLoopStatus=="Paused"):
       alarmHandlerGUI.win.after(10000,self.alarm_loop, alarmHandlerGUI) # Recursion loop here - splits off a new instance of this function and finishes the one currently running (be careful)
@@ -246,6 +262,7 @@ class ALARM():
       u.recentAlarmButtons[myAO.column] = myAO.columnIndex
       return "Not OK"
     else:
+      self.alarmSelfStatus = self.pList.get("Alarm Status",u.defaultKey)
       myAO.alarmStatus = "OK"
       myAO.color = u.lightgrey_color
       return "OK"
@@ -318,7 +335,7 @@ class ALARM_OBJECT():
     self.color = u.lightgrey_color
     self.alarmStatus = "OK"
     self.userSilenceStatus = "Alert"
-    self.parameterList["User Silence Status"] = self.userSilenceStatus
+    #self.parameterList["User Silence Status"] = self.userSilenceStatus
     self.alarm = lambda: ALARM(self);
     self.clicked = 0
 
