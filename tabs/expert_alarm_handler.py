@@ -45,11 +45,16 @@ class EXPERT_ALARM_HANDLER(tk.Frame):
     for i in range(0, len(self.controlButtonsText)):
       # First add the "New Button" button
       newButt = tk.Button(self.controlFrame, text=self.controlButtonsText[i], default='active', justify='center', background=u.lightgrey_color)
-      if self.controlButtonsText[i]=="Silence All" and alarmLoop.globalUserAlarmSilence != "Alert":
+      if self.controlButtonsText[i]=="Silence All" and alarmLoop.globalUserAlarmSilence == "Silenced":
         newButt.config(background=u.darkgrey_color)
-      if self.controlButtonsText[i]=="Alarm Status": # FIXME red here too always?
-        #and alarmLoop.globalAlarmStatus != "OK" and alarmLoop.globalUserAlarmSilence != "Silenced":
-        newButt.config(background=u.red_button_color)
+      #if self.controlButtonsText[i]=="Alarm Status": # FIXME red here too always?
+      if self.controlButtonsText[i]=="Alarm Status":
+        if alarmLoop.globalAlarmStatus != "OK" and alarmLoop.globalUserAlarmSilence != "Silenced":
+          newButt.config(background=u.red_button_color)
+        elif alarmLoop.globalAlarmStatus == "OK" and alarmLoop.globalUserAlarmSilence != "Silenced":
+          newButt.config(background=u.lightgrey_color)
+        elif alarmLoop.globalUserAlarmSilence == "Silenced":
+          newButt.config(background=u.darkgrey_color)
       newButt.indices = (i,0)
       newButt.text = self.controlButtonsText[i]
       newButt.config(command = lambda newBut=newButt: self.select_control_buttons(OL,fileArray,alarmLoop,newBut))
@@ -93,7 +98,8 @@ class EXPERT_ALARM_HANDLER(tk.Frame):
 
   def make_screen(self,OL,fileArray):
     for i in range(0,len(self.alarmColumns)):
-      self.alarmColumns[i].grid_forget()
+      #self.alarmColumns[i].grid_forget()
+      self.alarmColumns[i].destroy()
     self.alarmColumns = []
     self.initialize_columns(OL)
     self.buttons = self.initialize_buttons(OL,fileArray)
@@ -155,7 +161,8 @@ class EXPERT_ALARM_HANDLER(tk.Frame):
           buttMenu.indices = (i,j)
           buttMenu.moveN = 0
           buttMenu.editValue = None
-          buttMenu.add_command(label = 'Silence', command = lambda butMenu = buttMenu: self.button_silence_menu(OL,fileArray,butMenu))
+          if i<=2:
+            buttMenu.add_command(label = 'Silence', command = lambda butMenu = buttMenu: self.button_silence_menu(OL,fileArray,butMenu))
           buttMenu.add_command(label = 'Edit', command = lambda butMenu = buttMenu: self.button_edit_menu(OL,fileArray,butMenu))
           buttMenu.add_command(label = 'Move', command = lambda butMenu = buttMenu: self.button_move_menu(OL,fileArray,butMenu))
           buttMenu.add_command(label = 'Add', command = lambda butMenu = buttMenu: self.button_add_menu(OL,fileArray,butMenu))

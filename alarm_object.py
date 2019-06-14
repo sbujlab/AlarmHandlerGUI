@@ -277,7 +277,6 @@ class OBJECT_LIST():
       self.selectedColumnButtonLengthList[i+1]=self.objectList[i][self.selectedButtonColumnIndicesList[i]].numberChildren
     self.selectedColumnButtonLengthList[0] = len(self.objectList[0]) # Initialize first column length to be just the number there
 
-
   def set_clicked(self,i,j):
     self.activeObjectColumnIndicesList[i]=j
     self.selectedButtonColumnIndicesList[i]=j
@@ -329,10 +328,12 @@ class ALARM_OBJECT():
     if (clickStat == 1 and self.alarmStatus == "OK"):
       self.color = u.grey_color
     #if (clickStat == 0 and self.alarmStatus == 1):
-    if self.alarmStatus != "OK" and self.userSilenceStatus != "Silenced":
-      self.color = u.red_button_color
-    if self.userSilenceStatus == "Silenced":
-      self.color = u.darkgrey_color
+    if self.alarmStatus != "OK":
+      self.color = self.color
+    #if self.alarmStatus != "OK" and self.userSilenceStatus == "Alert":
+    #  self.color = u.red_button_color
+    #if self.userSilenceStatus == "Silenced":
+    #  self.color = u.darkgrey_color
 
   def add_parameter(self,obj1,obj2): # Updates dictionary with new value, appends or edits appropriately, but names are the keys... so be careful
     self.parameterList[obj1.value]=obj2.value
