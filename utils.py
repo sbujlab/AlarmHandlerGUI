@@ -14,8 +14,12 @@ import alarm_object
 green_color = '#3C8373'
 lightgrey_color = '#E0E0E0'
 grey_color = '#C0C0C0'
-darkgrey_color = '#909090'
+darkgrey_color = '#909090' # Maybe swap this for yellow everywhere?
 red_button_color = '#9E1A1A'
+red_color = '#ff0000'
+yellow_color = '#ffff00'
+green_color = '#00ff00'
+black_color = '#000000'
 defaultKey = "NULL"
 
 recentAlarmButtons = [-1,-1,-1,-1,-1]
@@ -231,26 +235,28 @@ def create_objects(fileArray):
               for q3 in range(0,column):
                 localObjectList[q3][localObjectList[column][colRow[3]-1].parentIndices[q3]].color = lightgrey_color
           #print("Checking {}?=Alarm Status and Checking {}!?=OK and Checking {}?=Alert".format(localObjectList[3][colRow[3]-1].value,localObjectList[4][colRow[4]-1].value,localObjectList[2][colRow[2]-1].userSilenceStatus))
-          if localObjectList[3][colRow[3]-1].value == "Alarm Status" and localObjectList[4][colRow[4]-1].value != "OK" and localObjectList[2][localObjectList[column][colRow[3]-1].parentIndices[2]].userSilenceStatus == "Alert":
+          if localObjectList[3][colRow[3]-1].value == "Alarm Status":
+          #if localObjectList[3][colRow[3]-1].value == "Alarm Status" and localObjectList[4][colRow[4]-1].value != "OK" and localObjectList[2][localObjectList[column][colRow[3]-1].parentIndices[2]].userSilenceStatus == "Alert":
             for q in range(0,column):
               #print("Alert!!! Alarm not ok")
               localObjectList[q][localObjectList[column][colRow[3]-1].parentIndices[q]].alarmStatus = localObjectList[4][colRow[4]-1].value
               localObjectList[q][localObjectList[column][colRow[3]-1].parentIndices[q]].alarm.alarmSelfStatus = localObjectList[4][colRow[4]-1].value
-              localObjectList[q][localObjectList[column][colRow[3]-1].parentIndices[q]].color = red_button_color
+              if localObjectList[4][colRow[4]-1].value == "OK":
+                localObjectList[q][localObjectList[column][colRow[3]-1].parentIndices[q]].color = lightgrey_color
+              else:
+                localObjectList[q][localObjectList[column][colRow[3]-1].parentIndices[q]].color = red_button_color
+              if localObjectList[2][localObjectList[column][colRow[3]-1].parentIndices[2]].userSilenceStatus == "Silenced":
+                # If the silence status was read before then don't overwrite its color indication
+                localObjectList[q][localObjectList[column][colRow[3]-1].parentIndices[q]].color = darkgrey_color
           # Only dark grey if alarmed and silenecd 
           #if localObjectList[3][colRow[3]-1].value == "Alarm Status" and localObjectList[4][colRow[4]-1].value != "OK" and localObjectList[2][localObjectList[column][colRow[3]-1].parentIndices[2]].userSilenceStatus == "Silenced":
           # Dark grey if silenced at all
           if localObjectList[2][localObjectList[column][colRow[3]-1].parentIndices[2]].userSilenceStatus == "Silenced":
             for q in range(0,column):
               #print("Alert!!! Alarm silenced")
-              localObjectList[q][localObjectList[column][colRow[3]-1].parentIndices[q]].alarmStatus = localObjectList[4][colRow[4]-1].value
-              localObjectList[q][localObjectList[column][colRow[3]-1].parentIndices[q]].alarm.alarmSelfStatus = localObjectList[4][colRow[4]-1].value
+              #localObjectList[q][localObjectList[column][colRow[3]-1].parentIndices[q]].alarmStatus = localObjectList[4][colRow[4]-1].value
+              #localObjectList[q][localObjectList[column][colRow[3]-1].parentIndices[q]].alarm.alarmSelfStatus = localObjectList[4][colRow[4]-1].value
               localObjectList[q][localObjectList[column][colRow[3]-1].parentIndices[q]].color = darkgrey_color
-          #if localObjectList[3][colRow[3]-1].value == "Alarm Status" and localObjectList[4][colRow[4]-1].value == "OK":
-          #  for q in range(0,column):
-          #    localObjectList[q][localObjectList[column][colRow[3]-1].parentIndices[q]].alarmStatus = localObjectList[4][colRow[4]-1].value
-          #    localObjectList[q][localObjectList[column][colRow[3]-1].parentIndices[q]].alarm.alarmSelfStatus = localObjectList[4][colRow[4]-1].value
-          #    localObjectList[q][localObjectList[column][colRow[3]-1].parentIndices[q]].color = lightgrey_color
           ### This one records just the value/name parameter history
           localObjectList[2][localObjectList[column][colRow[3]-1].parentIndices[2]].add_parameter_history(localObjectList[4][colRow[4]-1].value)
         if (column==4 and isnew!=1):
