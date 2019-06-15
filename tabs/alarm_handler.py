@@ -26,8 +26,10 @@ class ALARM_HANDLER(tk.Frame):
 
     self.controlFrame = tk.LabelFrame(tab, text='Alarm Handler', background=u.grey_color)
     self.alarmFrame = tk.LabelFrame(tab, text='Alarm Handler Viewer', background=u.lightgrey_color)
+    self.pDataFrame = tk.LabelFrame(tab, text='Alarm Parameter Display', background=u.lightgrey_color)
     self.rowTitles = ["Alarms","ctd.","ctd.","ctd."]
     self.NperRow = 4
+    self.currentlySelectedButton = -1
     self.rowsp = [1,1,1,1,1,1,1,1,1]
     self.colsp = [1,1,1,1]
     self.controlButtonsText = ["Alarm Status","Toggle Loop","Silence All","Refresh GUI"]
@@ -82,11 +84,16 @@ class ALARM_HANDLER(tk.Frame):
         alarmLoop.globalLoopStatus = "Looping"
         alarmLoop.reset_alarmList(OL)
     if but.text=="Alarm Status":
+      #FIXME would be good to select the most recently activated red button and show its contents
       if alarmLoop.globalAlarmStatus != "OK": # FIXME red here too always?:
         #and alarmLoop.globalUserAlarmSilence != "Silenced":
         but.config(background=u.red_button_color)
       else:
         but.config(background=u.lightgrey_color)
+      self.update_GUI(OL,fileArray)
+    if but.text=="Refresh GUI":
+      self.currentlySelectedButton = -1
+      self.erase_pDataFrame()
       self.update_GUI(OL,fileArray)
     self.controlButtons = self.make_control_buttons(OL,fileArray,alarmLoop)
 
@@ -99,8 +106,12 @@ class ALARM_HANDLER(tk.Frame):
     self.displayFrames = self.initialize_displayFrames(OL,fileArray)
     self.buttonMenus = self.initialize_menus(OL,fileArray)
     self.alarmFrame.pack(padx=20,pady=10,anchor='nw')
-    self.erase_grid_all_row(OL,fileArray)
+    if self.currentlySelectedButton != -1:
+      self.pDataFrame.pack(padx=20,pady=10,anchor='nw')
+    self.erase_grid_all_row()
     self.layout_grid_all_row(OL,fileArray)
+    if self.currentlySelectedButton != -1:
+      self.select_button(OL,fileArray,self.displayFrames[self.currentlySelectedButton].butt)
 
   def initialize_rows(self,OL):
     for i in range(0, int(1.0*len(OL.objectList[2])/self.NperRow)+1):
@@ -112,7 +123,7 @@ class ALARM_HANDLER(tk.Frame):
     if len(OL.objectList)>(2) and len(OL.objectList[2])>0:
       for i in range(0,len(OL.objectList[2])):
         # Loop over the list of objects, creating displayFrames
-        disp = tk.LabelFrame(self.alarmRows[int(1.0*i/self.NperRow)], text=OL.objectList[2][i].value, background=OL.objectList[2][i].color) # FIXME want red alarm full label frame?
+        disp = tk.LabelFrame(self.alarmRows[int(1.0*i/self.NperRow)], text=OL.objectList[2][i].value, background=u.lightgrey_color) # FIXME want red alarm full label frame?
         disp.redStat = tk.IntVar()
         disp.yellowStat = tk.IntVar()
         disp.greenStat = tk.IntVar()
@@ -126,30 +137,30 @@ class ALARM_HANDLER(tk.Frame):
           disp.userSilenceStatus = 0 
         lgrid.append(disp)
 
-        butt = tk.Button(lgrid[i], text="Value = {}".format(OL.objectList[2][i].parameterList.get("Value",u.defaultKey)), justify='center', background=OL.objectList[2][i].color) # loop over displayFrames
-        butt.indices = (2,OL.objectList[2][i].columnIndex)
-        butt.config(command = lambda but=butt: self.select_button(OL,fileArray,but))
-        butt.grid(columnspan=3, row=0,column=0)
-        radioButRed = tk.Radiobutton(lgrid[i], text=OL.objectList[2][i].alarmStatus, indicatoron=False, justify='left', value=lgrid[i].alarmStatus, variable=lgrid[i].redStat, fg=u.black_color, bg=u.lightgrey_color,
-            activebackground=u.grey_color, activeforeground=u.black_color, selectcolor = u.red_color, highlightbackground=u.red_color, highlightcolor=u.red_color, highlightthickness=2)
-        radioButRed.indices = (2,i)
-        radioButRed.config(command = lambda radRed=radioButRed: self.select_red_button(OL,fileArray,radRed))
-        radioButRed.grid(row=1,column=0)
-        radioButYellow = tk.Radiobutton(lgrid[i], text=OL.objectList[2][i].userSilenceStatus, indicatoron=False, justify='center', value=lgrid[i].userSilenceStatus, variable=lgrid[i].yellowStat, fg=u.black_color, bg=u.lightgrey_color,
-            activebackground=u.grey_color, activeforeground=u.black_color, selectcolor = u.yellow_color, highlightbackground=u.yellow_color, highlightcolor=u.yellow_color, highlightthickness=2)
-        radioButYellow.indices = (2,i)
-        radioButYellow.config(command = lambda radYellow=radioButYellow: self.select_yellow_button(OL,fileArray,radYellow))
-        radioButYellow.grid(row=1,column=1)
-        radioButGreen = tk.Radiobutton(lgrid[i], indicatoron=False, justify='right', value=lgrid[i].greenAlarmStatus, variable=lgrid[i].greenStat, fg=u.black_color, bg=u.lightgrey_color,
-            activebackground=u.grey_color, activeforeground=u.black_color, selectcolor = u.green_color, highlightbackground=u.green_color, highlightcolor=u.green_color, highlightthickness=2)
-        radioButGreen.indices = (2,i)
+        disp.butt = tk.Button(lgrid[i], text="Value = {}".format(OL.objectList[2][i].parameterList.get("Value",u.defaultKey)), justify='center', background=OL.objectList[2][i].color) # loop over displayFrames
+        disp.butt.indices = (2,OL.objectList[2][i].columnIndex)
+        disp.butt.config(command = lambda but=disp.butt: self.select_button(OL,fileArray,but))
+        disp.butt.grid(columnspan=3, row=0,column=0)
+        disp.radioButRed = tk.Radiobutton(lgrid[i], text=OL.objectList[2][i].alarmStatus, indicatoron=False, justify='left', value=lgrid[i].alarmStatus, variable=lgrid[i].redStat, fg=u.black_color, bg=u.lightgrey_color,
+            activebackground=u.grey_color, activeforeground=u.black_color, selectcolor = u.red_color, highlightbackground=u.red_color, highlightcolor=u.red_color, highlightthickness=1)
+        disp.radioButRed.indices = (2,i)
+        disp.radioButRed.config(command = lambda radRed=disp.radioButRed: self.select_red_button(OL,fileArray,radRed))
+        disp.radioButRed.grid(row=1,column=0)
+        disp.radioButYellow = tk.Radiobutton(lgrid[i], text=OL.objectList[2][i].userSilenceStatus, indicatoron=False, justify='center', value=lgrid[i].userSilenceStatus, variable=lgrid[i].yellowStat, fg=u.black_color, bg=u.lightgrey_color,
+            activebackground=u.grey_color, activeforeground=u.black_color, selectcolor = u.yellow_color, highlightbackground=u.yellow_color, highlightcolor=u.yellow_color, highlightthickness=1)
+        disp.radioButYellow.indices = (2,i)
+        disp.radioButYellow.config(command = lambda radYellow=disp.radioButYellow: self.select_yellow_button(OL,fileArray,radYellow))
+        disp.radioButYellow.grid(row=1,column=1)
+        disp.radioButGreen = tk.Radiobutton(lgrid[i], indicatoron=False, justify='right', value=lgrid[i].greenAlarmStatus, variable=lgrid[i].greenStat, fg=u.black_color, bg=u.lightgrey_color,
+            activebackground=u.grey_color, activeforeground=u.black_color, selectcolor = u.green_color, highlightbackground=u.green_color, highlightcolor=u.green_color, highlightthickness=1)
+        disp.radioButGreen.indices = (2,i)
         print("OL 2,{} alarm status = {}".format(i,OL.objectList[2][i].alarmStatus))
         if OL.objectList[2][i].alarmStatus == "OK":
-          radioButGreen.config(text="OK")
+          disp.radioButGreen.config(text="OK")
         else:
-          radioButGreen.config(text="Alarm")
-        radioButGreen.config(command = lambda radGreen=radioButGreen: self.select_green_button(OL,fileArray,radGreen))
-        radioButGreen.grid(row=1,column=2)
+          disp.radioButGreen.config(text="Alarm")
+        disp.radioButGreen.config(command = lambda radGreen=disp.radioButGreen: self.select_green_button(OL,fileArray,radGreen))
+        disp.radioButGreen.grid(row=1,column=2)
     return lgrid
 
   def initialize_menus(self,OL,fileArray):
@@ -175,10 +186,13 @@ class ALARM_HANDLER(tk.Frame):
       self.displayFrames[i].grid(row=int(1.0*i/self.NperRow),column=i%self.NperRow,rowspan=self.rowsp[int(1.0*i/self.NperRow)],padx=10,pady=10,sticky='N')
     #self.buttonMenus = self.initialize_menus(OL,fileArray)
 
-  def erase_grid_all_row(self,OL,fileArray):
+  def erase_grid_all_row(self):
     # FIXME rowID is not being parsed correctly here !!
     for i in range(0,len(self.displayFrames)):
       self.displayFrames[i].grid_forget()
+
+  def erase_pDataFrame(self):
+    self.pDataFrame.grid_forget()
 
   def refresh_button(self,OL,fileArray,but):
     i,j = but.indices
@@ -188,8 +202,14 @@ class ALARM_HANDLER(tk.Frame):
   def select_button(self,OL,fileArray,but):
     # FIXME Put simple alarm handler behavior in here
     i,j = but.indices
+    self.currentlySelectedButton = j
     OL.set_clicked(i,j) # Update that object's color to dark grey
-    self.displayFrames[i].config(background=OL.objectList[i][j].color) # Update that button to be the newly update object's new color (could just use but.config)
+    for k in range(0,len(self.displayFrames)):
+      if k == j:
+        self.displayFrames[k].butt.config(background=u.darkgrey_color) # Update that button to be the newly update object's new color (could just use but.config)
+      else:
+        self.displayFrames[k].butt.config(background=u.lightgrey_color) # Update that button to be the newly update object's new color (could just use but.config)
+    #self.displayFrames[j].config(background=OL.objectList[i][j].color) # Update that button to be the newly update object's new color (could just use but.config)
 
   def select_red_button(self,OL,fileArray,but):
     i,j = but.indices
@@ -227,6 +247,23 @@ class ALARM_HANDLER(tk.Frame):
     fileArray.filearray = u.write_filearray(fileArray)
     OL.objectList = u.create_objects(fileArray)
     self.make_screen(OL,fileArray)
+
+  def display_parameter_list(self,OL,fileArray,i,j):
+    self.erase_pDataFrame()
+    localPlist = OL.objectList[i][j].parameterList.copy()
+    self.pDataFrame.pack(padx=20,pady=10,anchor='nw')
+    k = 0
+    for key,val in localPlist:
+      self.pDataFrame.disp = tk.Label(self.pDataFrame, text="{} = {}".format(key, val), background=u.lightgrey_color) # FIXME want red alarm full label frame?
+      self.pDataFrame.disp.grid(row=k,column=0,padx=10,pady=10,sticky='N')
+      k+=1
+
+
+  def button_information_menu(self,OL,fileArray,butMenu):
+    i,j = butMenu.indices
+    select_button(self,OL,fileArray,self.displayFrames[j].butt)
+    display_parameter_list(self,OL,fileArray,i,j)
+    self.update_GUI(OL,fileArray)
 
   def button_silence_menu(self,OL,fileArray,butMenu):
     i,j = butMenu.indices
