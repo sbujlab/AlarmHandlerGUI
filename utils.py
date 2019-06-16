@@ -20,6 +20,7 @@ red_color = '#ff0000'
 yellow_color = '#ffff00'
 green_color = '#00ff00'
 black_color = '#000000'
+white_color = '#ffffff'
 defaultKey = "NULL"
 
 recentAlarmButtons = [-1,-1,-1,-1,-1]
