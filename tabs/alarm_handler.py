@@ -24,9 +24,10 @@ class Callback:
 class ALARM_HANDLER(tk.Frame):
   def __init__(self, alarmHandlerWindow, tab, OL, fileArray, alarmLoop):
 
-    self.controlFrame = tk.LabelFrame(tab, text='Alarm Handler', background=u.grey_color)
+    self.controlFrame = tk.LabelFrame(tab, text='Alarm Controls', background=u.grey_color)
     self.alarmFrame = tk.LabelFrame(tab, text='Alarm Handler Viewer', background=u.lightgrey_color)
     self.pDataFrame = tk.LabelFrame(tab, text='Alarm Parameter Display', background=u.white_color)
+    self.pDataFrame.disp = []
     self.rowTitles = ["Alarms","ctd.","ctd.","ctd."]
     self.NperRow = 3
     self.currentlySelectedButton = -1
@@ -62,7 +63,7 @@ class ALARM_HANDLER(tk.Frame):
       newButt.grid(row = 0, column = i,columnspan=self.colsp[i],padx=10,pady=10,sticky='N')
       grid.append(newButt)
     self.controlFrame.grid(column=0, row=0, sticky='NW')
-    self.controlFrame.pack(padx=20,pady=5,anchor='n')
+    #self.controlFrame.pack(padx=20,pady=5,anchor='n')
     return grid
 
   def select_control_buttons(self,OL,fileArray,alarmLoop,but):
@@ -94,7 +95,6 @@ class ALARM_HANDLER(tk.Frame):
       self.update_GUI(OL,fileArray)
     if but.text=="Refresh GUI":
       self.currentlySelectedButton = -1
-      self.erase_pDataFrame()
       self.update_GUI(OL,fileArray)
     self.controlButtons = self.make_control_buttons(OL,fileArray,alarmLoop)
 
@@ -107,9 +107,13 @@ class ALARM_HANDLER(tk.Frame):
     self.displayFrames = self.initialize_displayFrames(OL,fileArray)
     self.buttonMenus = self.initialize_menus(OL,fileArray)
     self.alarmFrame.grid(column=0, row=1, sticky='NSW')
-    self.alarmFrame.pack(padx=20,pady=10,anchor='nw')
+    #self.alarmFrame.pack(padx=20,pady=10,anchor='nw')
+    print("currently selected button = {}".format(self.currentlySelectedButton))
+    self.erase_pDataFrame()
     if self.currentlySelectedButton != -1:
-      self.pDataFrame.pack(padx=20,pady=10,anchor='nw')
+      #self.pDataFrame.pack(padx=20,pady=10,anchor='nw')
+      self.display_parameter_list(OL,fileArray,2,self.currentlySelectedButton)
+      self.pDataFrame.grid(column=1,row=1, sticky='NE')
     self.erase_grid_all_row()
     self.layout_grid_all_row(OL,fileArray)
     if self.currentlySelectedButton != -1:
@@ -121,7 +125,7 @@ class ALARM_HANDLER(tk.Frame):
       self.alarmRows[i].grid(column=0,row=i,pady=10,padx=10,sticky='N')
 
   def initialize_displayFrames(self,OL,fileArray): # Needs a short row to contain [name = value, alarm status = type, alarm stat !OK, user silence stat, alarm stat OK], context menu displays full parameter list
-    self.pDataFrame.grid(column=1, row=1, sticky='NS')
+    #self.pDataFrame.grid(column=1, row=1, sticky='NS')
     lgrid = []
     if len(OL.objectList)>(2) and len(OL.objectList[2])>0:
       for i in range(0,len(OL.objectList[2])):
@@ -195,6 +199,8 @@ class ALARM_HANDLER(tk.Frame):
       self.displayFrames[i].grid_forget()
 
   def erase_pDataFrame(self):
+    for k in range(0,len(self.pDataFrame.disp)):
+      self.pDataFrame.disp[k].grid_forget()
     self.pDataFrame.grid_forget()
 
   def select_button(self,OL,fileArray,but):
@@ -248,12 +254,14 @@ class ALARM_HANDLER(tk.Frame):
 
   def display_parameter_list(self,OL,fileArray,i,j):
     self.erase_pDataFrame()
+    self.pDataFrame.disp = []
     localPlist = OL.objectList[i][j].parameterList.copy()
-    self.pDataFrame.pack(padx=20,pady=10,anchor='nw')
+    #self.pDataFrame.pack(padx=20,pady=10,anchor='nw')
+    self.pDataFrame.grid(column=1,row=1,sticky='NW')
     k = 0
     for key in localPlist:
-      self.pDataFrame.disp = tk.Label(self.pDataFrame, text="{} = {}".format(key, localPlist[key]), background=u.lightgrey_color) # FIXME want red alarm full label frame?
-      self.pDataFrame.disp.grid(row=k,column=0,padx=10,pady=10,sticky='W')
+      self.pDataFrame.disp.append(tk.Label(self.pDataFrame, text="{} = {}".format(key, localPlist[key]), background=u.lightgrey_color)) # FIXME want red alarm full label frame?
+      self.pDataFrame.disp[k].grid(row=k,column=0,padx=10,pady=10,sticky='W')
       k+=1
 
 

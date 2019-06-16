@@ -59,7 +59,8 @@ class EXPERT_ALARM_HANDLER(tk.Frame):
       newButt.config(command = lambda newBut=newButt: self.select_control_buttons(OL,fileArray,alarmLoop,newBut))
       newButt.grid(row = 0, column = i,columnspan=self.colsp[i],padx=10,pady=10,sticky='N')
       grid.append(newButt)
-    self.controlFrame.pack(padx=20,pady=5,anchor='n')
+    #self.controlFrame.pack(padx=20,pady=5,anchor='n')
+    self.controlFrame.grid(row=0,sticky='N')
     return grid
 
   def select_control_buttons(self,OL,fileArray,alarmLoop,but):
@@ -104,7 +105,8 @@ class EXPERT_ALARM_HANDLER(tk.Frame):
     self.buttons = self.initialize_buttons(OL,fileArray)
     self.creatorButtons = self.initialize_creator_buttons(OL,fileArray)
     self.buttonMenus = self.initialize_menus(OL,fileArray)
-    self.alarmFrame.pack(padx=20,pady=10,anchor='nw')
+    #self.alarmFrame.pack(padx=20,pady=10,anchor='nw')
+    self.alarmFrame.grid(row=1,sticky='NW')
     for i in range(0,len(self.buttons)):
       if i == 0: # Only default initialize all entries for column 0 (the Kind column)
         self.erase_grid_col(i,OL,fileArray,self.creatorButtons[i])
@@ -120,7 +122,8 @@ class EXPERT_ALARM_HANDLER(tk.Frame):
   def initialize_column(self,OL,colI):
     self.alarmColumns[colI] = tk.LabelFrame(self.alarmFrame, text=self.columnTitles[colI], background=u.lightgrey_color)
     self.alarmColumns[colI].grid(row=0,column=colI,pady=10,padx=10,sticky='N')
-    self.alarmFrame.pack(padx=20,pady=10,anchor='nw')
+    #self.alarmFrame.pack(padx=20,pady=10,anchor='nw')
+    self.alarmFrame.grid(row=0,sticky='NW')
 
   def initialize_creator_buttons(self,OL,fileArray):
     grid = []
@@ -203,7 +206,8 @@ class EXPERT_ALARM_HANDLER(tk.Frame):
       #print("Adding column {}".format(colID+1))
       newButts[colID+1].grid(row=0,column=colID+1,columnspan=self.colsp[colID+1],padx=10,pady=10,sticky='N')
       self.alarmColumns[colID+1].grid(row=0,column=colID+1,pady=10,padx=10,sticky='N')#NEW
-    self.alarmFrame.pack(padx=20,pady=10,anchor='nw') #NEW
+    #self.alarmFrame.pack(padx=20,pady=10,anchor='nw') #NEW
+    self.alarmFrame.grid(row=0,sticky='NW')
     if colID<4:
       for j in range(0,len(OL.objectList[colID])):
         if colID>0 and OL.objectList[colID][j].parentIndices[colID-1]==OL.selectedButtonColumnIndicesList[colID-1]: # If the item on the right has the parent index of the current column equal to the currently selected button's column index, thenactivate it
