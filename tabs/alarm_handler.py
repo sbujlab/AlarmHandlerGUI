@@ -130,7 +130,7 @@ class ALARM_HANDLER(tk.Frame):
     if len(OL.objectList)>(2) and len(OL.objectList[2])>0:
       for i in range(0,len(OL.objectList[2])):
         # Loop over the list of objects, creating displayFrames
-        disp = tk.LabelFrame(self.alarmRows[int(1.0*i/self.NperRow)], text=OL.objectList[2][i].value, background=u.lightgrey_color) # FIXME want red alarm full label frame?
+        disp = tk.LabelFrame(self.alarmRows[int(1.0*i/self.NperRow)], text="{}, {}\n{}".format(OL.objectList[0][OL.objectList[2][i].parentIndices[0]].value,OL.objectList[1][OL.objectList[2][i].parentIndices[1]].value,OL.objectList[2][i].value), background=u.lightgrey_color) # FIXME want red alarm full label frame?
         disp.redStat = tk.IntVar()
         disp.yellowStat = tk.IntVar()
         disp.greenStat = tk.IntVar()
@@ -144,7 +144,8 @@ class ALARM_HANDLER(tk.Frame):
           disp.userSilenceStatus = 0 
         lgrid.append(disp)
 
-        disp.butt = tk.Button(lgrid[i], text="Value = {}".format(OL.objectList[2][i].parameterList.get("Value",u.defaultKey)), justify='center', background=OL.objectList[2][i].color) # loop over displayFrames
+        disp.butt = tk.Button(lgrid[i], text="Value = {}".format(OL.objectList[2][i].parameterList.get("Value",u.defaultKey)), justify='center', background=u.lightgrey_color) # loop over displayFrames
+        #disp.butt = tk.Button(lgrid[i], text="Value = {}".format(OL.objectList[2][i].parameterList.get("Value",u.defaultKey)), justify='center', background=OL.objectList[2][i].color) # loop over displayFrames
         disp.butt.indices = (2,OL.objectList[2][i].columnIndex)
         disp.butt.config(command = lambda but=disp.butt: self.select_button(OL,fileArray,but))
         disp.butt.grid(columnspan=3, row=0,column=0)
