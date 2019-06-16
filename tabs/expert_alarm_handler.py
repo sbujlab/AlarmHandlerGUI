@@ -29,7 +29,7 @@ class EXPERT_ALARM_HANDLER(tk.Frame):
     self.columnTitles = ["Kinds","Channel","Type","Parameter","Value"]
     self.colsp = [1,1,1,1,1]
     self.newText = ["New\nKind","New\nChannel","New\nType","New\nParameter","Alarm\nValues"]
-    self.controlButtonsText = ["Alarm Status","Toggle Loop","Silence All","Refresh GUI"]
+    self.controlButtonsText = ["Alarm Status","Toggle Loop","Silence All","Reset GUI"]
 
     self.alarmColumns = []
     self.initialize_columns(OL)
@@ -60,7 +60,7 @@ class EXPERT_ALARM_HANDLER(tk.Frame):
       newButt.grid(row = 0, column = i,columnspan=self.colsp[i],padx=10,pady=10,sticky='N')
       grid.append(newButt)
     #self.controlFrame.pack(padx=20,pady=5,anchor='n')
-    self.controlFrame.grid(row=0,sticky='N')
+    self.controlFrame.grid(row=0,sticky='NW')
     return grid
 
   def select_control_buttons(self,OL,fileArray,alarmLoop,but):
@@ -94,6 +94,10 @@ class EXPERT_ALARM_HANDLER(tk.Frame):
       for coli in range(0,5):
         if OL.selectedButtonColumnIndicesList[coli] != -1:
           self.refresh_button(OL,fileArray,self.buttons[coli][OL.selectedButtonColumnIndicesList[coli]])
+    if but.text=="Reset GUI":
+      for k in range(0,len(OL.selectedButtonColumnIndicesList)):
+        OL.selectedButtonColumnIndicesList[k]=-1
+      self.update_GUI(OL,fileArray)
     self.controlButtons = self.make_control_buttons(OL,fileArray,alarmLoop)
 
   def make_screen(self,OL,fileArray):
@@ -106,6 +110,7 @@ class EXPERT_ALARM_HANDLER(tk.Frame):
     self.creatorButtons = self.initialize_creator_buttons(OL,fileArray)
     self.buttonMenus = self.initialize_menus(OL,fileArray)
     #self.alarmFrame.pack(padx=20,pady=10,anchor='nw')
+    self.controlFrame.grid(row=0,sticky='NW')
     self.alarmFrame.grid(row=1,sticky='NW')
     for i in range(0,len(self.buttons)):
       if i == 0: # Only default initialize all entries for column 0 (the Kind column)
@@ -117,13 +122,13 @@ class EXPERT_ALARM_HANDLER(tk.Frame):
   def initialize_columns(self,OL):
     for i in range(0, len(self.columnTitles)):
       self.alarmColumns.append(tk.LabelFrame(self.alarmFrame, text=self.columnTitles[i], background=u.lightgrey_color))
-      self.alarmColumns[i].grid(row=0,column=i,pady=10,padx=10,sticky='N')
+      self.alarmColumns[i].grid(row=1,column=i,pady=10,padx=10,sticky='N')
 
   def initialize_column(self,OL,colI):
     self.alarmColumns[colI] = tk.LabelFrame(self.alarmFrame, text=self.columnTitles[colI], background=u.lightgrey_color)
-    self.alarmColumns[colI].grid(row=0,column=colI,pady=10,padx=10,sticky='N')
+    self.alarmColumns[colI].grid(row=1,column=colI,pady=10,padx=10,sticky='N')
     #self.alarmFrame.pack(padx=20,pady=10,anchor='nw')
-    self.alarmFrame.grid(row=0,sticky='NW')
+    self.alarmFrame.grid(row=1,sticky='NW')
 
   def initialize_creator_buttons(self,OL,fileArray):
     grid = []
@@ -167,6 +172,7 @@ class EXPERT_ALARM_HANDLER(tk.Frame):
             buttMenu.add_command(label = 'Silence', command = lambda butMenu = buttMenu: self.button_silence_menu(OL,fileArray,butMenu))
           buttMenu.add_command(label = 'Edit', command = lambda butMenu = buttMenu: self.button_edit_menu(OL,fileArray,butMenu))
           buttMenu.add_command(label = 'Move', command = lambda butMenu = buttMenu: self.button_move_menu(OL,fileArray,butMenu))
+          buttMenu.add_command(label = 'Copy', command = lambda butMenu = buttMenu: self.button_copy_menu(OL,fileArray,butMenu))
           buttMenu.add_command(label = 'Add', command = lambda butMenu = buttMenu: self.button_add_menu(OL,fileArray,butMenu))
           buttMenu.add_command(label = 'Delete', command = lambda butMenu = buttMenu: self.button_delete_menu(OL,fileArray,butMenu))
           self.buttons[i][j].bind("<Button-3>",lambda event, butMenu = buttMenu: self.do_popup(event,butMenu))
@@ -201,13 +207,13 @@ class EXPERT_ALARM_HANDLER(tk.Frame):
     # Then grid those children (and erase prior grid, preserving creatorButton[coldID])
     newButts[colID].grid(row=0,column=colID,columnspan=self.colsp[colID],padx=10,pady=10,sticky='N')
     #print("Adding column {}".format(colID))
-    self.alarmColumns[colID].grid(row=0,column=colID,pady=10,padx=10,sticky='N')#NEW
+    self.alarmColumns[colID].grid(row=1,column=colID,pady=10,padx=10,sticky='N')#NEW
     if colID == 3 and len(self.alarmColumns)>colID+1: #NEW
       #print("Adding column {}".format(colID+1))
       newButts[colID+1].grid(row=0,column=colID+1,columnspan=self.colsp[colID+1],padx=10,pady=10,sticky='N')
-      self.alarmColumns[colID+1].grid(row=0,column=colID+1,pady=10,padx=10,sticky='N')#NEW
+      self.alarmColumns[colID+1].grid(row=1,column=colID+1,pady=10,padx=10,sticky='N')#NEW
     #self.alarmFrame.pack(padx=20,pady=10,anchor='nw') #NEW
-    self.alarmFrame.grid(row=0,sticky='NW')
+    self.alarmFrame.grid(row=1,sticky='NW')
     if colID<4:
       for j in range(0,len(OL.objectList[colID])):
         if colID>0 and OL.objectList[colID][j].parentIndices[colID-1]==OL.selectedButtonColumnIndicesList[colID-1]: # If the item on the right has the parent index of the current column equal to the currently selected button's column index, thenactivate it
@@ -280,6 +286,17 @@ class EXPERT_ALARM_HANDLER(tk.Frame):
     butMenu.moveN = simpledialog.askinteger("Input", "Move amount (+ is down)",parent = butMenu, maxvalue=(len(self.buttons[i])-j-1), minvalue=-1*j) #FIXME - limits are for entire button array, not just currently shown one... 
     if butMenu.moveN != 0:
       fileArray.filearray = u.move_filearray_menu(OL,fileArray,butMenu)
+      self.update_GUI(OL,fileArray)
+      for coli in range(0,i):
+        if OL.selectedButtonColumnIndicesList[coli] != -1:
+          self.select_button(OL,fileArray,self.buttons[coli][OL.selectedButtonColumnIndicesList[coli]])
+
+  def button_copy_menu(self,OL,fileArray,butMenu):
+    i,j = butMenu.indices
+    #OL.selectedButtonColumnIndicesList[i]=j # FIXME - try to get menus to persist screen
+    butMenu.copyName = simpledialog.askstring("Input", "New Entry Name",parent = butMenu) 
+    if butMenu.moveN != None:
+      fileArray.filearray = u.copy_filearray_menu(OL,fileArray,butMenu)
       self.update_GUI(OL,fileArray)
       for coli in range(0,i):
         if OL.selectedButtonColumnIndicesList[coli] != -1:

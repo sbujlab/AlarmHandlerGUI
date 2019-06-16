@@ -144,6 +144,22 @@ def move_filearray_menu(OL,fileArray,butMenu):
     fileArray.filearray = subshift(fileArray.filearray,file_ind_start,file_ind_stop+1,OL.objectList[i][j+mvN].indexStart)
   return fileArray.filearray
 
+def copy_filearray_menu(OL,fileArray,butMenu):
+  i,j = butMenu.indices
+  copyN = butMenu.copyName
+  copyFileArray = []
+  file_ind_start = OL.objectList[i][j].indexStart
+  file_ind_stop = OL.objectList[i][j].indexEnd
+  print("col {}, entry {}, copy newName = {}, start file ind {}, end file ind {}".format(i,j,copyN,file_ind_start,file_ind_stop))
+  if copyN != None:
+    for l in range(file_ind_start,file_ind_stop+1):
+      copyFileArray.append(fileArray.filearray[l].copy())
+    for h in range(0,len(copyFileArray)):
+      copyFileArray[h][i] = copyN
+  for k in reversed(range(0,len(copyFileArray))):
+    fileArray.filearray.insert(file_ind_stop+1,copyFileArray[k])
+  return fileArray.filearray
+
 def delete_filearray_menu(OL,fileArray,butMenu):
   i,j = butMenu.indices
   file_ind_start = OL.objectList[i][j].indexStart

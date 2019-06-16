@@ -31,9 +31,9 @@ class ALARM_HANDLER(tk.Frame):
     self.rowTitles = ["Alarms","ctd.","ctd.","ctd."]
     self.NperRow = 3
     self.currentlySelectedButton = -1
-    self.rowsp = [1,1,1,1,1,1,1,1,1]
+    self.rowsp = [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
     self.colsp = [1,1,1,1]
-    self.controlButtonsText = ["Alarm Status","Toggle Loop","Silence All","Refresh GUI"]
+    self.controlButtonsText = ["Alarm Status","Toggle Loop","Silence All","Reset GUI"]
 
     self.alarmRows = []
     self.initialize_rows(OL)
@@ -93,7 +93,7 @@ class ALARM_HANDLER(tk.Frame):
       else:
         but.config(background=u.lightgrey_color)
       self.update_GUI(OL,fileArray)
-    if but.text=="Refresh GUI":
+    if but.text=="Reset GUI":
       self.currentlySelectedButton = -1
       self.update_GUI(OL,fileArray)
     self.controlButtons = self.make_control_buttons(OL,fileArray,alarmLoop)
@@ -208,6 +208,8 @@ class ALARM_HANDLER(tk.Frame):
     i,j = but.indices
     self.currentlySelectedButton = j
     OL.set_clicked(i,j) # Update that object's color to dark grey
+    for l in range(0,len(OL.objectList[2][j].parentIndices)):
+      OL.set_clicked(l,OL.objectList[2][j].parentIndices[l])
     for k in range(0,len(self.displayFrames)):
       if k == j:
         self.displayFrames[k].butt.config(background=u.darkgrey_color) 
