@@ -110,7 +110,7 @@ def silence_filearray_menu(OL,fileArray,butMenu):
     OL.objectList[i][j].userSilenceStatus = "Alert" 
   elif OL.objectList[i][j].userSilenceStatus == "Alert":
     OL.objectList[i][j].userSilenceStatus = "Silenced" 
-    OL.objectList[i][j].color = darkgrey_color
+    OL.objectList[i][j].color = yellow_color
   for q in range(OL.objectList[i][j].indexStart,OL.objectList[i][j].indexEnd+1):
     if fileArray.filearray[q][3] == "User Silence Status": # Update the filearray too
       fileArray.filearray[q][4] = OL.objectList[i][j].userSilenceStatus
@@ -248,7 +248,7 @@ def create_objects(fileArray):
                   localObjectList[q1][localObjectList[column][p].parentIndices[q1]].color = red_button_color
               elif localObjectList[2][localObjectList[column][p].parentIndices[2]].userSilenceStatus == "Silenced":
                 for q2 in range(0,column):
-                  localObjectList[q2][localObjectList[column][p].parentIndices[q2]].color = darkgrey_color
+                  localObjectList[q2][localObjectList[column][p].parentIndices[q2]].color = yellow_color
               elif localObjectList[2][localObjectList[column][p].parentIndices[2]].alarmStatus == "OK" and localObjectList[2][localObjectList[column][p].parentIndices[2]].userSilenceStatus != "Silenced":
                 for q3 in range(0,column):
                   localObjectList[q3][localObjectList[column][p].parentIndices[q3]].color = lightgrey_color
@@ -268,7 +268,7 @@ def create_objects(fileArray):
               #  localObjectList[q][localObjectList[column][colRow[3]-1].parentIndices[q]].color = red_button_color
               if localObjectList[2][localObjectList[column][colRow[3]-1].parentIndices[2]].userSilenceStatus == "Silenced":
                 # If the silence status was read before then don't overwrite its color indication
-                localObjectList[q][localObjectList[column][colRow[3]-1].parentIndices[q]].color = darkgrey_color
+                localObjectList[q][localObjectList[column][colRow[3]-1].parentIndices[q]].color = yellow_color
           # Only dark grey if alarmed and silenecd 
           #if localObjectList[3][colRow[3]-1].value == "Alarm Status" and localObjectList[4][colRow[4]-1].value != "OK" and localObjectList[2][localObjectList[column][colRow[3]-1].parentIndices[2]].userSilenceStatus == "Silenced":
           # Dark grey if silenced at all
@@ -277,7 +277,7 @@ def create_objects(fileArray):
               #print("Alert!!! Alarm silenced")
               #localObjectList[q][localObjectList[column][colRow[3]-1].parentIndices[q]].alarmStatus = localObjectList[4][colRow[4]-1].value
               #localObjectList[q][localObjectList[column][colRow[3]-1].parentIndices[q]].alarm.alarmSelfStatus = localObjectList[4][colRow[4]-1].value
-              localObjectList[q][localObjectList[column][colRow[3]-1].parentIndices[q]].color = darkgrey_color
+              localObjectList[q][localObjectList[column][colRow[3]-1].parentIndices[q]].color = yellow_color
           ### This one records just the value/name parameter history
           localObjectList[2][localObjectList[column][colRow[3]-1].parentIndices[2]].add_parameter_history(localObjectList[4][colRow[4]-1].value)
         if (column==4 and isnew!=1):

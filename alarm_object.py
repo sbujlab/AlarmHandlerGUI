@@ -64,6 +64,8 @@ class ALARM_LOOP():
       u.write_textfile(alarmHandlerGUI.OL,alarmHandlerGUI.fileArray) #FIXME Do this here?
       if alarmHandlerGUI.tabs.get("Alarm Handler",u.defaultKey) != u.defaultKey:
         alarmHandlerGUI.tabs["Alarm Handler"].refresh_screen(alarmHandlerGUI.OL,alarmHandlerGUI.fileArray,alarmHandlerGUI.alarmLoop)
+      if alarmHandlerGUI.tabs.get("Grid Alarm Handler",u.defaultKey) != u.defaultKey:
+        alarmHandlerGUI.tabs["Grid Alarm Handler"].refresh_screen(alarmHandlerGUI.OL,alarmHandlerGUI.fileArray,alarmHandlerGUI.alarmLoop)
       if alarmHandlerGUI.tabs.get("Expert Alarm Handler",u.defaultKey) != u.defaultKey:
         alarmHandlerGUI.tabs["Expert Alarm Handler"].refresh_screen(alarmHandlerGUI.OL,alarmHandlerGUI.fileArray,alarmHandlerGUI.alarmLoop)
       alarmHandlerGUI.masterAlarmButton.destroy()

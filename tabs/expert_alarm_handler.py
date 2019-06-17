@@ -269,8 +269,9 @@ class EXPERT_ALARM_HANDLER(tk.Frame):
   def select_button(self,OL,fileArray,but):
     i,j = but.indices
     OL.selectedButtonColumnIndicesList[i]=j # Update the currently clicked button index
+    OL.selectedButtonColumnIndicesList[i] = j
     for k in range(0,i): 
-      OL.selectedButtonColumnIndicesList[k] = OL.objectList[i][OL.objectList[i][j].parentIndices[k]].columnIndex # FIXME this should fix the incorrect index updating on refresh
+      OL.selectedButtonColumnIndicesList[k] = OL.objectList[k][OL.objectList[i][j].parentIndices[k]].columnIndex # FIXME this should fix the incorrect index updating on refresh
     for k in range(i+1,len(OL.selectedButtonColumnIndicesList)): 
       #print("Erasing selectedButtonIndex at {}".format(k))
       OL.selectedButtonColumnIndicesList[k] = -1
