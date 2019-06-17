@@ -68,7 +68,7 @@ class ALARM_HANDLER(tk.Frame):
       newButt.config(command = lambda newBut=newButt: self.select_control_buttons(OL,fileArray,alarmLoop,newBut))
       newButt.grid(row = 0, column = i,columnspan=self.colsp,padx=10,pady=10,sticky='W')
       grid.append(newButt)
-    self.controlFrame.grid(column=0, row=0, sticky='NW')
+    self.controlFrame.grid(columnspan=2, column=0, row=0, sticky='NW')
     return grid
 
   def select_control_buttons(self,OL,fileArray,alarmLoop,but):
@@ -152,7 +152,10 @@ class ALARM_HANDLER(tk.Frame):
     if len(OL.objectList)>(2) and len(OL.objectList[2])>0:
       for i in range(0,len(OL.objectList[2])):
         # Loop over the list of objects, creating displayFrames
-        disp = tk.LabelFrame(self.alarmCols[int(1.0*i/self.NperCol)], text="{}, {}\n{}".format(OL.objectList[0][OL.objectList[2][i].parentIndices[0]].value,OL.objectList[1][OL.objectList[2][i].parentIndices[1]].value,OL.objectList[2][i].value), background=u.lightgrey_color) # FIXME want red alarm full label frame?
+        localStr = "{}, {}, {}".format(OL.objectList[0][OL.objectList[2][i].parentIndices[0]].value,OL.objectList[1][OL.objectList[2][i].parentIndices[1]].value[:25],OL.objectList[2][i].value[:25])
+        if len(localStr) > 30:
+          localStr = "{}, {}\n{}".format(OL.objectList[0][OL.objectList[2][i].parentIndices[0]].value,OL.objectList[1][OL.objectList[2][i].parentIndices[1]].value[:25],OL.objectList[2][i].value[:35])
+        disp = tk.LabelFrame(self.alarmCols[int(1.0*i/self.NperCol)], text=localStr, font=('Helvetica 8'), background=u.lightgrey_color) # FIXME want red alarm full label frame?
         disp.redStat = tk.IntVar()
         disp.yellowStat = tk.IntVar()
         disp.greenStat = tk.IntVar()
