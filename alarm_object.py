@@ -311,7 +311,9 @@ class OBJECT_LIST():
       jNew = self.activeObjectColumnIndicesList[ind] # Entry in the column
       for k in range(0,len(self.objectList[ind+1])): # For each entry in the column to the right
         if self.objectList[ind][jNew].columnIndex==self.objectList[ind+1][k].parentIndices[ind]:
-          self.activeObjectColumnIndicesList[ind+1]=self.objectList[ind+1][k].columnIndex  # loop until the end of children of this active click, then the inserting goes at the end of child lists
+          self.activeObjectColumnIndicesList[ind+1]=self.objectList[ind+1][k].columnIndex  
+          # loop until the end of children of this active click, then the inserting goes at the end of child lists
+          # FIXME is this why only last entry in a set of children will trigger parent's alarm status?
           break
     # If i+1 then take last parentIndex==columnIndex columnIndex as activeObjectIndicesList[i+1]
     if i < 4:
@@ -349,7 +351,7 @@ class ALARM_OBJECT():
       self.color = u.grey_color
     #if (clickStat == 0 and self.alarmStatus == 1):
     if self.alarmStatus != "OK":
-      self.color = self.color
+      self.color = self.color #FIXME col #3 still == red problem?
     #if self.alarmStatus != "OK" and self.userSilenceStatus == "Alert":
     #  self.color = u.red_button_color
     #if self.userSilenceStatus == "Silenced":

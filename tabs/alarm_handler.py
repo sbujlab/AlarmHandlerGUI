@@ -204,6 +204,13 @@ class ALARM_HANDLER(tk.Frame):
       self.pDataFrame.disp[k].grid_forget()
     self.pDataFrame.grid_forget()
 
+  def refresh_button(self,OL,fileArray,but):
+    i,j = but.indices
+    OL.selectedButtonColumnIndicesList[i]=j # Update the currently clicked button index
+    OL.set_clicked(i,j) # Update that object's color to dark grey
+    #self.set_button_clicked(OL,fileArray,i,j) # Re-organize the grid and change the non-clicked buttons back to regular light grey
+    #self.buttons[i][j].config(background=OL.objectList[i][j].color) # Update that button to be the newly update object's new color (could just use but.config)
+
   def select_button(self,OL,fileArray,but):
     # FIXME Put simple alarm handler behavior in here
     i,j = but.indices
@@ -282,3 +289,5 @@ class ALARM_HANDLER(tk.Frame):
   def refresh_screen(self,OL,fileArray,alarmLoop):
     self.controlButtons = self.make_control_buttons(OL,fileArray, alarmLoop)
     self.update_GUI(OL,fileArray)
+    if OL.selectedButtonColumnIndicesList[2] != -1:
+      self.refresh_button(OL,fileArray,self.buttons[2][OL.selectedButtonColumnIndicesList[2]])

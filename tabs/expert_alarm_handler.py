@@ -113,7 +113,9 @@ class EXPERT_ALARM_HANDLER(tk.Frame):
     self.controlFrame.grid(row=0,sticky='NW')
     self.alarmFrame.grid(row=1,sticky='NW')
     for i in range(0,len(self.buttons)):
-      if i == 0: # Only default initialize all entries for column 0 (the Kind column)
+      if i == 0: 
+        # Only default initialize all entries for column 0 (the Kind column)
+        # A refreshed screen should only show the left most column, other columns obtained through clicking or selectedButtonColumnIndicesList
         self.erase_grid_col(i,OL,fileArray,self.creatorButtons[i])
         self.layout_grid_all_col(i,OL,fileArray,self.creatorButtons[i])
       else:
@@ -242,12 +244,14 @@ class EXPERT_ALARM_HANDLER(tk.Frame):
   def select_button(self,OL,fileArray,but):
     i,j = but.indices
     OL.selectedButtonColumnIndicesList[i]=j # Update the currently clicked button index
+    for k in range(0,i): 
+      OL.selectedButtonColumnIndicesList[k] = OL.objectList[i][OL.objectList[i][j].parentIndices[k]].columnIndex # FIXME this should fix the incorrect index updating on refresh
     for k in range(i+1,len(OL.selectedButtonColumnIndicesList)): 
       #print("Erasing selectedButtonIndex at {}".format(k))
       OL.selectedButtonColumnIndicesList[k] = -1
     OL.set_clicked(i,j) # Update that object's color to dark grey
     self.set_button_clicked(OL,fileArray,i,j) # Re-organize the grid and change the non-clicked buttons back to regular light grey
-    self.buttons[i][j].config(background=OL.objectList[i][j].color) # Update that button to be the newly update object's new color (could just use but.config)
+    self.buttons[i][j].config(background=OL.objectList[i][j].color) # FIXME redundant? - Update that button to be the newly update object's new color (could just use but.config)
 
   def update_GUI(self,OL,fileArray):
     fileArray.filearray = u.write_filearray(fileArray)
@@ -304,6 +308,7 @@ class EXPERT_ALARM_HANDLER(tk.Frame):
 
   def button_add_menu(self,OL,fileArray,butMenu):
     i,j = butMenu.indices
+    #OL.selectedButtonColumnIndicesList[i]=j # FIXME - try to get menus to persist screen
     fileArray.filearray = u.add_filearray_menu(OL,fileArray,butMenu)
     self.update_GUI(OL,fileArray)
     for coli in range(0,i):
@@ -312,6 +317,7 @@ class EXPERT_ALARM_HANDLER(tk.Frame):
 
   def button_delete_menu(self,OL,fileArray,butMenu):
     i,j = butMenu.indices
+    #OL.selectedButtonColumnIndicesList[i]=j # FIXME - try to get menus to persist screen
     fileArray.filearray = u.delete_filearray_menu(OL,fileArray,butMenu)
     self.update_GUI(OL,fileArray)
     for coli in range(i,len(OL.selectedButtonColumnIndicesList)):
@@ -328,7 +334,7 @@ class EXPERT_ALARM_HANDLER(tk.Frame):
     self.buttons[i][j].config(background = OL.objectList[i][j].color) # And this one too
     if i<3: 
       self.layout_grid_col(i+1,OL,fileArray,self.creatorButtons)
-    self.buttonMenus = self.initialize_menus(OL,fileArray)
+    self.buttonMenus = self.initialize_menus(OL,fileArray) # FIXME Necessary?
 
   def refresh_screen(self,OL,fileArray,alarmLoop):
     self.controlButtons = self.make_control_buttons(OL,fileArray, alarmLoop)
