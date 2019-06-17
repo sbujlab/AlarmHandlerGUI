@@ -108,7 +108,6 @@ class ALARM_HANDLER(tk.Frame):
     self.buttonMenus = self.initialize_menus(OL,fileArray)
     self.alarmFrame.grid(column=0, row=1, sticky='NSW')
     #self.alarmFrame.pack(padx=20,pady=10,anchor='nw')
-    print("currently selected button = {}".format(self.currentlySelectedButton))
     self.erase_pDataFrame()
     if self.currentlySelectedButton != -1:
       #self.pDataFrame.pack(padx=20,pady=10,anchor='nw')
@@ -117,7 +116,9 @@ class ALARM_HANDLER(tk.Frame):
     self.erase_grid_all_row()
     self.layout_grid_all_row(OL,fileArray)
     if self.currentlySelectedButton != -1:
+      self.currentlySelectedButton = OL.selectedButtonColumnIndicesList[2] #Overwrite with expert list
       self.select_button(OL,fileArray,self.displayFrames[self.currentlySelectedButton].butt)
+    print("currently selected button = {}".format(self.currentlySelectedButton))
 
   def initialize_rows(self,OL):
     for i in range(0, int(1.0*len(OL.objectList[2])/self.NperRow)+1):
@@ -206,8 +207,10 @@ class ALARM_HANDLER(tk.Frame):
 
   def refresh_button(self,OL,fileArray,but):
     i,j = but.indices
-    OL.selectedButtonColumnIndicesList[i]=j # Update the currently clicked button index
+    #OL.selectedButtonColumnIndicesList[i] = j # Update the currently clicked button index
     OL.set_clicked(i,j) # Update that object's color to dark grey
+    if i==2:
+      self.currentlySelectedButton=OL.selectedButtonColumnIndicesList[2]
     #self.set_button_clicked(OL,fileArray,i,j) # Re-organize the grid and change the non-clicked buttons back to regular light grey
     #self.buttons[i][j].config(background=OL.objectList[i][j].color) # Update that button to be the newly update object's new color (could just use but.config)
 
@@ -290,4 +293,4 @@ class ALARM_HANDLER(tk.Frame):
     self.controlButtons = self.make_control_buttons(OL,fileArray, alarmLoop)
     self.update_GUI(OL,fileArray)
     if OL.selectedButtonColumnIndicesList[2] != -1:
-      self.refresh_button(OL,fileArray,self.buttons[2][OL.selectedButtonColumnIndicesList[2]])
+      self.refresh_button(OL,fileArray,self.displayFrames[OL.selectedButtonColumnIndicesList[2]].butt)
