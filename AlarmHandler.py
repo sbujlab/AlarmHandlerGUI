@@ -15,6 +15,7 @@ import csv
 import alarm_object
 import tabs.expert_alarm_handler as expert_alarm_handler
 import tabs.alarm_handler as alarm_handler
+import tabs.grid_alarm_handler as grid_alarm_handler
 import tabs.alarm_history as alarm_history
 import utils as u
 
@@ -85,7 +86,7 @@ class AlarmHandler:
 
     tab_control = ttk.Notebook(self.win)
     #tab_titles = [('Expert Alarm Handler', self.expert_alarm_handler_tab),('Alarm History', self.alarm_history_tab)]
-    tab_titles = [('Alarm Handler', alarm_handler.ALARM_HANDLER),('Expert Alarm Handler', expert_alarm_handler.EXPERT_ALARM_HANDLER),('Alarm History', alarm_history.ALARM_HISTORY)]
+    tab_titles = [('Grid Alarm Handler', grid_alarm_handler.GRID_ALARM_HANDLER),('Expert Alarm Handler', expert_alarm_handler.EXPERT_ALARM_HANDLER),('Alarm History', alarm_history.ALARM_HISTORY)]
     tabs = {}
     for title, fn in tab_titles:
       tab = ttk.Frame(tab_control, width=800, height=600, style="My.TFrame")

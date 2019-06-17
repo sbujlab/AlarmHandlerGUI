@@ -21,7 +21,7 @@ class Callback:
   def __call__(self):
     self.func(*self.args,**self.kwargs)
 
-class ALARM_HANDLER(tk.Frame):
+class GRID_ALARM_HANDLER(tk.Frame):
   def __init__(self, alarmHandlerWindow, tab, OL, fileArray, alarmLoop):
 
     self.controlFrame = tk.LabelFrame(tab, text='Alarm Controls', background=u.grey_color)
