@@ -258,7 +258,7 @@ class ALARM():
       myAO.alarmStatus = self.pList.get("Alarm Status",u.defaultKey)
       myAO.userSilenceStatus = self.pList.get("User Silence Status",u.defaultKey)
       if myAO.userSilenceStatus != "Silenced":
-        myAO.color = u.red_button_color
+        myAO.color = u.red_color
       elif myAO.userSilenceStatus == "Silenced":
         myAO.color = u.darkgrey_color # Still indicate that it is off, but not red now
       for k in range(0,len(myAO.parentIndices)):
@@ -357,7 +357,7 @@ class ALARM_OBJECT():
     if self.alarmStatus != "OK":
       self.color = self.color #FIXME col #3 still == red problem?
     #if self.alarmStatus != "OK" and self.userSilenceStatus == "Alert":
-    #  self.color = u.red_button_color
+    #  self.color = u.red_color
     #if self.userSilenceStatus == "Silenced":
     #  self.color = u.darkgrey_color
 

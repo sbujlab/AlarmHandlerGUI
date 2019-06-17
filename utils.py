@@ -104,7 +104,7 @@ def add_to_filearray(OL,fileArray,but):
 
 def silence_filearray_menu(OL,fileArray,butMenu):
   i,j = butMenu.indices
-  j = OL.activeObjectColumnIndicesList[i] # FIXME is this supposed to be here?
+  #j = OL.activeObjectColumnIndicesList[i] # FIXME is this supposed to be here?
   # For it and its children set alarmStatus = "OK"
   if OL.objectList[i][j].userSilenceStatus == "Silenced":
     OL.objectList[i][j].userSilenceStatus = "Alert" 
@@ -242,10 +242,11 @@ def create_objects(fileArray):
             # Editing the parameterList entry..... instead of the object value itself...
             localObjectList[2][localObjectList[column][colRow[3]-1].parentIndices[2]].add_parameter(localObjectList[3][colRow[3]-1],localObjectList[4][colRow[4]-1])
             # Also check each alarm status, in case the alarm status entry is earlier in fileArray than silence status
+            # FIXME FIXME FIXME This will loop through column3 and overwrite its prior entries for parent coloration.... this is bad.
             for p in range(0,colRow[3]): # FIXME replace colRow[3]-1 with p to loop over priors too ... a bit redundant, but should work
               if localObjectList[2][localObjectList[column][p].parentIndices[2]].alarmStatus != "OK" and localObjectList[2][localObjectList[column][p].parentIndices[2]].userSilenceStatus == "Alert":
                 for q1 in range(0,column):
-                  localObjectList[q1][localObjectList[column][p].parentIndices[q1]].color = red_button_color
+                  localObjectList[q1][localObjectList[column][p].parentIndices[q1]].color = red_color
               elif localObjectList[2][localObjectList[column][p].parentIndices[2]].userSilenceStatus == "Silenced":
                 for q2 in range(0,column):
                   localObjectList[q2][localObjectList[column][p].parentIndices[q2]].color = yellow_color
@@ -261,11 +262,11 @@ def create_objects(fileArray):
               localObjectList[q][localObjectList[column][colRow[3]-1].parentIndices[q]].alarm.alarmSelfStatus = localObjectList[4][colRow[4]-1].value
               for o in range(0,colRow[4]):
                 if localObjectList[4][o].value != "OK":
-                  localObjectList[q][localObjectList[column][colRow[3]-1].parentIndices[q]].color = red_button_color
+                  localObjectList[q][localObjectList[column][colRow[3]-1].parentIndices[q]].color = red_color
               #if localObjectList[4][colRow[4]-1].value == "OK":
               #  localObjectList[q][localObjectList[column][colRow[3]-1].parentIndices[q]].color = lightgrey_color # FIXME the colRow[3]-1 etc. business only selects parents to be red if last member of children is red
               #else:
-              #  localObjectList[q][localObjectList[column][colRow[3]-1].parentIndices[q]].color = red_button_color
+              #  localObjectList[q][localObjectList[column][colRow[3]-1].parentIndices[q]].color = red_color
               if localObjectList[2][localObjectList[column][colRow[3]-1].parentIndices[2]].userSilenceStatus == "Silenced":
                 # If the silence status was read before then don't overwrite its color indication
                 localObjectList[q][localObjectList[column][colRow[3]-1].parentIndices[q]].color = yellow_color

@@ -28,11 +28,11 @@ class GRID_ALARM_HANDLER(tk.Frame):
     self.alarmFrame = tk.LabelFrame(tab, text='Alarm Handler Viewer', background=u.lightgrey_color)
     self.pDataFrame = tk.LabelFrame(tab, text='Alarm Parameter Display', background=u.white_color)
     self.pDataFrame.disp = []
-    self.rowTitles = ["Alarms","ctd.","ctd.","ctd.","ctd.","ctd.","ctd.","ctd.","ctd.","ctd."]
+    self.rowTitles = {0:"Alarms"}
     self.NperRow = 3
     OL.currentlySelectedButton = -1
     OL.displayPList = 0
-    self.rowsp = [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+    self.rowsp = 1
     self.colsp = [1,1,1,1]
     self.controlButtonsText = ["Alarm Status","Alarm Checker","Silencer","Reset GUI"]
     self.CBTextSuffix1 = ["\nFind Alarm","\nTurn Off" ,"\nTurn On",""]
@@ -48,7 +48,7 @@ class GRID_ALARM_HANDLER(tk.Frame):
   def make_control_buttons(self,OL,fileArray,alarmLoop):
     grid = []
     for i in range(0, len(self.controlButtonsText)):
-      newButt = tk.Button(self.controlFrame, text="{}{}".format(self.controlButtonsText[i],self.CBTextSuffix1[i]), default='active', justify='center', background=u.lightgrey_color)
+      newButt = tk.Button(self.controlFrame, text="{}{}".format(self.controlButtonsText[i],self.CBTextSuffix1[i]), default='active', justify='center', font = ('Helvetica 14 bold'),background=u.lightgrey_color)
       if self.controlButtonsText[i]=="Alarm Checker" and alarmLoop.globalLoopStatus != "Looping":
         newButt.config(background=u.yellow_color)
         newButt.config(text="{}{}".format(self.controlButtonsText[i],self.CBTextSuffix2[i]))
@@ -57,7 +57,8 @@ class GRID_ALARM_HANDLER(tk.Frame):
         newButt.config(text="{}{}".format(self.controlButtonsText[i],self.CBTextSuffix2[i]))
       if self.controlButtonsText[i]=="Alarm Status":
         if alarmLoop.globalAlarmStatus != "OK" and alarmLoop.globalUserAlarmSilence != "Silenced":
-          newButt.config(background=u.red_button_color)
+          newButt.config(background=u.red_color)
+          newButt.config(fg=u.white_color)
         elif alarmLoop.globalAlarmStatus == "OK" and alarmLoop.globalUserAlarmSilence != "Silenced":
           newButt.config(background=u.lightgrey_color)
         elif alarmLoop.globalUserAlarmSilence == "Silenced":
@@ -66,7 +67,7 @@ class GRID_ALARM_HANDLER(tk.Frame):
           newButt.config(background=u.yellow_color)
       newButt.indices = (i,0)
       newButt.config(command = lambda newBut=newButt: self.select_control_buttons(OL,fileArray,alarmLoop,newBut))
-      newButt.grid(row = 0, column = i,columnspan=self.colsp[i],padx=10,pady=10,sticky='N')
+      newButt.grid(row = 0, column = i,columnspan=self.colsp[i],padx=10,pady=10,sticky='W')
       grid.append(newButt)
     self.controlFrame.grid(column=0, row=0, sticky='NW')
     return grid
@@ -86,7 +87,7 @@ class GRID_ALARM_HANDLER(tk.Frame):
       but.config(background=u.lightgrey_color)
       but.config(text="{}{}".format(self.controlButtonsText[2],self.CBTextSuffix1[2]))
       if alarmLoop.globalAlarmStatus != "OK":
-        self.controlButtons[0].config(background=u.red_button_color)
+        self.controlButtons[0].config(background=u.red_color)
       else:
         self.controlButtons[0].config(background=u.lightgrey_color)
     if but.cget('text')==self.controlButtonsText[1]+self.CBTextSuffix1[1] and alarmLoop.globalLoopStatus == "Looping": 
@@ -105,7 +106,7 @@ class GRID_ALARM_HANDLER(tk.Frame):
       # Alarm Go To
       #FIXME would be good to select the most recently activated red button and show its contents
       if alarmLoop.globalAlarmStatus != "OK" and alarmLoop.globalUserAlarmSilence != "Silenced":
-        but.config(background=u.red_button_color)
+        but.config(background=u.red_color)
       elif alarmLoop.globalAlarmStatus != "OK" and alarmLoop.globalUserAlarmSilence == "Silenced":
         but.config(background=u.yellow_color)
       elif alarmLoop.globalAlarmStatus == "OK":
@@ -147,7 +148,7 @@ class GRID_ALARM_HANDLER(tk.Frame):
 
   def initialize_rows(self,OL):
     for i in range(0, int(1.0*len(OL.objectList[2])/self.NperRow)+1):
-      self.alarmRows.append(tk.LabelFrame(self.alarmFrame, text=self.rowTitles[i], background=u.lightgrey_color))
+      self.alarmRows.append(tk.LabelFrame(self.alarmFrame, text=self.rowTitles.get(i,"ctd."), background=u.lightgrey_color))
       self.alarmRows[i].grid(column=0,row=i,pady=10,padx=10,sticky='N')
 
   def initialize_displayFrames(self,OL,fileArray): # Needs a short row to contain [name = value, alarm status = type, alarm stat !OK, user silence stat, alarm stat OK], context menu displays full parameter list
@@ -217,7 +218,7 @@ class GRID_ALARM_HANDLER(tk.Frame):
 
   def layout_grid_all_row(self,OL,fileArray):
     for i in range(0,len(self.displayFrames)):
-      self.displayFrames[i].grid(row=int(1.0*i/self.NperRow),column=i%self.NperRow,rowspan=self.rowsp[int(1.0*i/self.NperRow)],padx=10,pady=10,sticky='N')
+      self.displayFrames[i].grid(row=int(1.0*i/self.NperRow),column=i%self.NperRow,rowspan=self.rowsp,padx=10,pady=10,sticky='N')
     #self.buttonMenus = self.initialize_menus(OL,fileArray)
 
   def erase_grid_all_row(self):
@@ -313,6 +314,7 @@ class GRID_ALARM_HANDLER(tk.Frame):
 
   def button_silence_menu(self,OL,fileArray,butMenu):
     i,j = butMenu.indices
+    self.select_button(OL,fileArray,but)
     u.silence_filearray_menu(OL,fileArray,butMenu)
     self.update_GUI(OL,fileArray)
 
