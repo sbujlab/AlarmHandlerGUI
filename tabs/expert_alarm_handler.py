@@ -29,7 +29,9 @@ class EXPERT_ALARM_HANDLER(tk.Frame):
     self.columnTitles = ["Kinds","Channel","Type","Parameter","Value"]
     self.colsp = [1,1,1,1,1]
     self.newText = ["New\nKind","New\nChannel","New\nType","New\nParameter","Alarm\nValues"]
-    self.controlButtonsText = ["Alarm Status","Toggle Loop","Silence All","Reset GUI"]
+    self.controlButtonsText = ["Alarm Status","Alarm Checker","Silencer","Reset GUI"]
+    self.CBTextSuffix1 = ["\nFind Alarm","\nTurn Off" ,"\nTurn On",""]
+    self.CBTextSuffix2 = ["\nFind Alarm","\nTurn On","\nTurn Off" ,""]
 
     self.alarmColumns = []
     self.initialize_columns(OL)
@@ -43,50 +45,67 @@ class EXPERT_ALARM_HANDLER(tk.Frame):
     grid = []
     for i in range(0, len(self.controlButtonsText)):
       # First add the "New Button" button
-      newButt = tk.Button(self.controlFrame, text=self.controlButtonsText[i], default='active', justify='center', background=u.lightgrey_color)
-      if self.controlButtonsText[i]=="Silence All" and alarmLoop.globalUserAlarmSilence == "Silenced":
-        newButt.config(background=u.darkgrey_color)
-      #if self.controlButtonsText[i]=="Alarm Status": # FIXME red here too always?
+      newButt = tk.Button(self.controlFrame, text="{}{}".format(self.controlButtonsText[i],self.CBTextSuffix1[i]), default='active', justify='center', background=u.lightgrey_color)
+      if self.controlButtonsText[i]=="Alarm Checker" and alarmLoop.globalLoopStatus != "Looping":
+        newButt.config(background=u.yellow_color)
+        newButt.config(text="{}{}".format(self.controlButtonsText[i],self.CBTextSuffix2[i]))
+      if self.controlButtonsText[i]=="Silencer" and alarmLoop.globalUserAlarmSilence == "Silenced":
+        newButt.config(background=u.yellow_color)
+        newButt.config(text="{}{}".format(self.controlButtonsText[i],self.CBTextSuffix2[i]))
       if self.controlButtonsText[i]=="Alarm Status":
         if alarmLoop.globalAlarmStatus != "OK" and alarmLoop.globalUserAlarmSilence != "Silenced":
           newButt.config(background=u.red_button_color)
         elif alarmLoop.globalAlarmStatus == "OK" and alarmLoop.globalUserAlarmSilence != "Silenced":
           newButt.config(background=u.lightgrey_color)
         elif alarmLoop.globalUserAlarmSilence == "Silenced":
-          newButt.config(background=u.darkgrey_color)
+          newButt.config(background=u.yellow_color)
+        if alarmLoop.globalLoopStatus != "Looping":
+          newButt.config(background=u.yellow_color)
       newButt.indices = (i,0)
-      newButt.text = self.controlButtonsText[i]
       newButt.config(command = lambda newBut=newButt: self.select_control_buttons(OL,fileArray,alarmLoop,newBut))
       newButt.grid(row = 0, column = i,columnspan=self.colsp[i],padx=10,pady=10,sticky='N')
       grid.append(newButt)
-    #self.controlFrame.pack(padx=20,pady=5,anchor='n')
-    self.controlFrame.grid(row=0,sticky='NW')
+    self.controlFrame.grid(column=0, row=0, sticky='NW')
     return grid
 
   def select_control_buttons(self,OL,fileArray,alarmLoop,but):
     i,j = but.indices
     for k in range(0,len(self.controlButtons)):
       self.controlButtons[k].grid_forget()
-    if but.text=="Silence All":
-      if alarmLoop.globalUserAlarmSilence == "Alert":
-        alarmLoop.globalUserAlarmSilence = "Silenced"
-        but.config(background=u.darkgrey_color)
-      elif alarmLoop.globalUserAlarmSilence == "Silenced":
-        alarmLoop.globalUserAlarmSilence = "Alert"
-        but.config(background=u.lightgrey_color)
-    if but.text=="Toggle Loop":
-      if alarmLoop.globalLoopStatus == "Looping":
-        print("Turning off loop")
-        alarmLoop.globalLoopStatus = "Paused"
-      elif alarmLoop.globalLoopStatus == "Paused":
-        print("Turning on loop")
-        alarmLoop.globalLoopStatus = "Looping"
-        alarmLoop.reset_alarmList(OL)
-    if but.text=="Alarm Status":
-      if alarmLoop.globalAlarmStatus != "OK": # FIXME red here too always?:
-        #and alarmLoop.globalUserAlarmSilence != "Silenced":
-        but.config(background=u.red_button_color)
+    if but.cget('text')=="{}{}".format(self.controlButtonsText[2],self.CBTextSuffix1[2]) and alarmLoop.globalUserAlarmSilence == "Alert": 
+      # Silenced All
+      alarmLoop.globalUserAlarmSilence = "Silenced"
+      but.config(background=u.yellow_color)
+      but.config(text="{}{}".format(self.controlButtonsText[2],self.CBTextSuffix2[2]))
+      self.controlButtons[0].config(background=u.yellow_color)
+    elif but.cget('text')=="{}{}".format(self.controlButtonsText[2],self.CBTextSuffix2[2]) and alarmLoop.globalUserAlarmSilence == "Silenced":
+      alarmLoop.globalUserAlarmSilence = "Alert"
+      but.config(background=u.lightgrey_color)
+      but.config(text="{}{}".format(self.controlButtonsText[2],self.CBTextSuffix1[2]))
+      if alarmLoop.globalAlarmStatus != "OK":
+        self.controlButtons[0].config(background=u.red_button_color)
       else:
+        self.controlButtons[0].config(background=u.lightgrey_color)
+    if but.cget('text')==self.controlButtonsText[1]+self.CBTextSuffix1[1] and alarmLoop.globalLoopStatus == "Looping": 
+      # Paused Loop
+      print("Turning off loop")
+      alarmLoop.globalLoopStatus = "Paused"
+      but.config(background=u.yellow_color)
+      but.config(text="{}{}".format(self.controlButtonsText[1],self.CBTextSuffix2[1]))
+    elif but.cget('text')=="{}{}".format(self.controlButtonsText[1],self.CBTextSuffix2[1]) and alarmLoop.globalLoopStatus == "Paused":
+      print("Turning on loop")
+      alarmLoop.globalLoopStatus = "Looping"
+      alarmLoop.reset_alarmList(OL)
+      but.config(background=u.lightgrey_color)
+      but.config(text="{}{}".format(self.controlButtonsText[1],self.CBTextSuffix1[1]))
+    if but.cget('text')=="{}{}".format(self.controlButtonsText[0],self.CBTextSuffix1[0]): 
+      # Alarm Go To
+      #FIXME would be good to select the most recently activated red button and show its contents
+      if alarmLoop.globalAlarmStatus != "OK" and alarmLoop.globalUserAlarmSilence != "Silenced":
+        but.config(background=u.red_button_color)
+      elif alarmLoop.globalAlarmStatus != "OK" and alarmLoop.globalUserAlarmSilence == "Silenced":
+        but.config(background=u.yellow_color)
+      elif alarmLoop.globalAlarmStatus == "OK":
         but.config(background=u.lightgrey_color)
       for k in range(0,len(u.recentAlarmButtons)):
         OL.selectedButtonColumnIndicesList[k]=u.recentAlarmButtons[k] # Update the currently clicked button index to the alarming one
@@ -95,7 +114,8 @@ class EXPERT_ALARM_HANDLER(tk.Frame):
       for coli in range(0,5):
         if OL.selectedButtonColumnIndicesList[coli] != -1:
           self.refresh_button(OL,fileArray,self.buttons[coli][OL.selectedButtonColumnIndicesList[coli]])
-    if but.text=="Reset GUI":
+    if but.cget('text')=="{}{}".format(self.controlButtonsText[3],self.CBTextSuffix1[3]): 
+      # Reset GUI
       OL.currentlySelectedButton = -1
       OL.displayPList = 0
       for k in range(0,len(OL.selectedButtonColumnIndicesList)):

@@ -240,7 +240,6 @@ class ALARM_HANDLER(tk.Frame):
     #self.buttons[i][j].config(background=OL.objectList[i][j].color) # Update that button to be the newly update object's new color (could just use but.config)
 
   def select_button(self,OL,fileArray,but):
-    # FIXME Put simple alarm handler behavior in here
     i,j = but.indices
     OL.currentlySelectedButton = j
     OL.set_clicked(i,j) # Update that object's color to dark grey
