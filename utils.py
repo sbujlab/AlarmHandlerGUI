@@ -242,15 +242,16 @@ def create_objects(fileArray):
             # Editing the parameterList entry..... instead of the object value itself...
             localObjectList[2][localObjectList[column][colRow[3]-1].parentIndices[2]].add_parameter(localObjectList[3][colRow[3]-1],localObjectList[4][colRow[4]-1])
             # Also check each alarm status, in case the alarm status entry is earlier in fileArray than silence status
-            if localObjectList[2][localObjectList[column][colRow[3]-1].parentIndices[2]].alarmStatus != "OK" and localObjectList[2][localObjectList[column][colRow[3]-1].parentIndices[2]].userSilenceStatus == "Alert":
-              for q1 in range(0,column):
-                localObjectList[q1][localObjectList[column][colRow[3]-1].parentIndices[q1]].color = red_button_color
-            elif localObjectList[2][localObjectList[column][colRow[3]-1].parentIndices[2]].userSilenceStatus == "Silenced":
-              for q2 in range(0,column):
-                localObjectList[q2][localObjectList[column][colRow[3]-1].parentIndices[q2]].color = darkgrey_color
-            elif localObjectList[2][localObjectList[column][colRow[3]-1].parentIndices[2]].alarmStatus == "OK" and localObjectList[2][localObjectList[column][colRow[3]-1].parentIndices[2]].userSilenceStatus != "Silenced":
-              for q3 in range(0,column):
-                localObjectList[q3][localObjectList[column][colRow[3]-1].parentIndices[q3]].color = lightgrey_color
+            for p in range(0,colRow[3]): # FIXME replace colRow[3]-1 with p to loop over priors too ... a bit redundant, but should work
+              if localObjectList[2][localObjectList[column][p].parentIndices[2]].alarmStatus != "OK" and localObjectList[2][localObjectList[column][p].parentIndices[2]].userSilenceStatus == "Alert":
+                for q1 in range(0,column):
+                  localObjectList[q1][localObjectList[column][p].parentIndices[q1]].color = red_button_color
+              elif localObjectList[2][localObjectList[column][p].parentIndices[2]].userSilenceStatus == "Silenced":
+                for q2 in range(0,column):
+                  localObjectList[q2][localObjectList[column][p].parentIndices[q2]].color = darkgrey_color
+              elif localObjectList[2][localObjectList[column][p].parentIndices[2]].alarmStatus == "OK" and localObjectList[2][localObjectList[column][p].parentIndices[2]].userSilenceStatus != "Silenced":
+                for q3 in range(0,column):
+                  localObjectList[q3][localObjectList[column][p].parentIndices[q3]].color = lightgrey_color
           #print("Checking {}?=Alarm Status and Checking {}!?=OK and Checking {}?=Alert".format(localObjectList[3][colRow[3]-1].value,localObjectList[4][colRow[4]-1].value,localObjectList[2][colRow[2]-1].userSilenceStatus))
           if localObjectList[3][colRow[3]-1].value == "Alarm Status":
           #if localObjectList[3][colRow[3]-1].value == "Alarm Status" and localObjectList[4][colRow[4]-1].value != "OK" and localObjectList[2][localObjectList[column][colRow[3]-1].parentIndices[2]].userSilenceStatus == "Alert":
@@ -258,10 +259,13 @@ def create_objects(fileArray):
               #print("Alert!!! Alarm not ok")
               localObjectList[q][localObjectList[column][colRow[3]-1].parentIndices[q]].alarmStatus = localObjectList[4][colRow[4]-1].value
               localObjectList[q][localObjectList[column][colRow[3]-1].parentIndices[q]].alarm.alarmSelfStatus = localObjectList[4][colRow[4]-1].value
-              if localObjectList[4][colRow[4]-1].value == "OK":
-                localObjectList[q][localObjectList[column][colRow[3]-1].parentIndices[q]].color = lightgrey_color
-              else:
-                localObjectList[q][localObjectList[column][colRow[3]-1].parentIndices[q]].color = red_button_color
+              for o in range(0,colRow[4]):
+                if localObjectList[4][o].value != "OK":
+                  localObjectList[q][localObjectList[column][colRow[3]-1].parentIndices[q]].color = red_button_color
+              #if localObjectList[4][colRow[4]-1].value == "OK":
+              #  localObjectList[q][localObjectList[column][colRow[3]-1].parentIndices[q]].color = lightgrey_color # FIXME the colRow[3]-1 etc. business only selects parents to be red if last member of children is red
+              #else:
+              #  localObjectList[q][localObjectList[column][colRow[3]-1].parentIndices[q]].color = red_button_color
               if localObjectList[2][localObjectList[column][colRow[3]-1].parentIndices[2]].userSilenceStatus == "Silenced":
                 # If the silence status was read before then don't overwrite its color indication
                 localObjectList[q][localObjectList[column][colRow[3]-1].parentIndices[q]].color = darkgrey_color

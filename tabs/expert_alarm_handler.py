@@ -90,11 +90,14 @@ class EXPERT_ALARM_HANDLER(tk.Frame):
         but.config(background=u.lightgrey_color)
       for k in range(0,len(u.recentAlarmButtons)):
         OL.selectedButtonColumnIndicesList[k]=u.recentAlarmButtons[k] # Update the currently clicked button index to the alarming one
+      OL.currentlySelectedButton = OL.selectedButtonColumnIndicesList[2]
       self.update_GUI(OL,fileArray)
       for coli in range(0,5):
         if OL.selectedButtonColumnIndicesList[coli] != -1:
           self.refresh_button(OL,fileArray,self.buttons[coli][OL.selectedButtonColumnIndicesList[coli]])
     if but.text=="Reset GUI":
+      OL.currentlySelectedButton = -1
+      OL.displayPList = 0
       for k in range(0,len(OL.selectedButtonColumnIndicesList)):
         OL.selectedButtonColumnIndicesList[k]=-1
       self.update_GUI(OL,fileArray)
@@ -238,6 +241,8 @@ class EXPERT_ALARM_HANDLER(tk.Frame):
     i,j = but.indices
     OL.selectedButtonColumnIndicesList[i]=j # Update the currently clicked button index
     OL.set_clicked(i,j) # Update that object's color to dark grey
+    if i == 2:
+      OL.currentlySelectedButton=OL.selectedButtonColumnIndicesList[2]
     self.set_button_clicked(OL,fileArray,i,j) # Re-organize the grid and change the non-clicked buttons back to regular light grey
     self.buttons[i][j].config(background=OL.objectList[i][j].color) # Update that button to be the newly update object's new color (could just use but.config)
 

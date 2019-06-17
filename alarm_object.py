@@ -278,6 +278,8 @@ class FILE_ARRAY():
 class OBJECT_LIST():
   def __init__(self,fileArray):
     self.objectList = u.create_objects(fileArray)
+    self.currentlySelectedButton = -1
+    self.displayPList = 0
     self.selectedButtonColumnIndicesList = []
     self.activeObjectColumnIndicesList = [] # This stores the location where insertion will take place
     self.selectedColumnButtonLengthList = [] # This is the thing to store the number of buttons that should be displayed -> == the number of children of the parent clicked button

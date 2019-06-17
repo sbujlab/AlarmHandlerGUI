@@ -30,7 +30,8 @@ class ALARM_HANDLER(tk.Frame):
     self.pDataFrame.disp = []
     self.rowTitles = ["Alarms","ctd.","ctd.","ctd."]
     self.NperRow = 3
-    self.currentlySelectedButton = -1
+    OL.currentlySelectedButton = -1
+    OL.displayPList = 0
     self.rowsp = [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
     self.colsp = [1,1,1,1]
     self.controlButtonsText = ["Alarm Status","Toggle Loop","Silence All","Reset GUI"]
@@ -92,9 +93,15 @@ class ALARM_HANDLER(tk.Frame):
         but.config(background=u.red_button_color)
       else:
         but.config(background=u.lightgrey_color)
+      for k in range(0,len(u.recentAlarmButtons)):
+        OL.selectedButtonColumnIndicesList[k]=u.recentAlarmButtons[k] # Update the currently clicked button index to the alarming one
+      OL.currentlySelectedButton = OL.selectedButtonColumnIndicesList[2]
       self.update_GUI(OL,fileArray)
     if but.text=="Reset GUI":
-      self.currentlySelectedButton = -1
+      OL.currentlySelectedButton = -1
+      OL.displayPList = 0
+      for k in range(0,len(OL.selectedButtonColumnIndicesList)):
+        OL.selectedButtonColumnIndicesList[k]=-1
       self.update_GUI(OL,fileArray)
     self.controlButtons = self.make_control_buttons(OL,fileArray,alarmLoop)
 
@@ -109,16 +116,16 @@ class ALARM_HANDLER(tk.Frame):
     self.alarmFrame.grid(column=0, row=1, sticky='NSW')
     #self.alarmFrame.pack(padx=20,pady=10,anchor='nw')
     self.erase_pDataFrame()
-    if self.currentlySelectedButton != -1:
+    if OL.currentlySelectedButton != -1 and OL.displayPList == 1:
       #self.pDataFrame.pack(padx=20,pady=10,anchor='nw')
-      self.display_parameter_list(OL,fileArray,2,self.currentlySelectedButton)
+      self.display_parameter_list(OL,fileArray,2,OL.currentlySelectedButton)
       self.pDataFrame.grid(column=1,row=1, sticky='NE')
     self.erase_grid_all_row()
     self.layout_grid_all_row(OL,fileArray)
-    if self.currentlySelectedButton != -1:
-      self.currentlySelectedButton = OL.selectedButtonColumnIndicesList[2] #Overwrite with expert list
-      self.select_button(OL,fileArray,self.displayFrames[self.currentlySelectedButton].butt)
-    print("currently selected button = {}".format(self.currentlySelectedButton))
+    if OL.currentlySelectedButton != -1:
+      OL.currentlySelectedButton = OL.selectedButtonColumnIndicesList[2] #Overwrite with expert list
+      self.select_button(OL,fileArray,self.displayFrames[OL.currentlySelectedButton].butt)
+    print("currently selected button = {}".format(OL.currentlySelectedButton))
 
   def initialize_rows(self,OL):
     for i in range(0, int(1.0*len(OL.objectList[2])/self.NperRow)+1):
@@ -210,14 +217,14 @@ class ALARM_HANDLER(tk.Frame):
     #OL.selectedButtonColumnIndicesList[i] = j # Update the currently clicked button index
     OL.set_clicked(i,j) # Update that object's color to dark grey
     if i==2:
-      self.currentlySelectedButton=OL.selectedButtonColumnIndicesList[2]
+      OL.currentlySelectedButton=OL.selectedButtonColumnIndicesList[2]
     #self.set_button_clicked(OL,fileArray,i,j) # Re-organize the grid and change the non-clicked buttons back to regular light grey
     #self.buttons[i][j].config(background=OL.objectList[i][j].color) # Update that button to be the newly update object's new color (could just use but.config)
 
   def select_button(self,OL,fileArray,but):
     # FIXME Put simple alarm handler behavior in here
     i,j = but.indices
-    self.currentlySelectedButton = j
+    OL.currentlySelectedButton = j
     OL.set_clicked(i,j) # Update that object's color to dark grey
     for l in range(0,len(OL.objectList[2][j].parentIndices)):
       OL.set_clicked(l,OL.objectList[2][j].parentIndices[l])
@@ -268,6 +275,7 @@ class ALARM_HANDLER(tk.Frame):
   def display_parameter_list(self,OL,fileArray,i,j):
     self.erase_pDataFrame()
     self.pDataFrame.disp = []
+    OL.displayPList = 1
     localPlist = OL.objectList[i][j].parameterList.copy()
     #self.pDataFrame.pack(padx=20,pady=10,anchor='nw')
     self.pDataFrame.grid(column=1,row=1,sticky='NW')
@@ -294,3 +302,4 @@ class ALARM_HANDLER(tk.Frame):
     self.update_GUI(OL,fileArray)
     if OL.selectedButtonColumnIndicesList[2] != -1:
       self.refresh_button(OL,fileArray,self.displayFrames[OL.selectedButtonColumnIndicesList[2]].butt)
+
