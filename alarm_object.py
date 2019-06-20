@@ -32,6 +32,8 @@ class ALARM_LOOP():
     self.checkExternalStatus = True # Check the externalAlarms.csv file
     self.globalLoopStatus = "Looping" # Start in looping state
     self.globalUserAlarmSilence = "Alert"
+    self.userNotifyLoop = USER_NOTIFY()
+    self.userNotifyLoop.user_notify_loop(alarmHandlerGUI.OL)
     
   def reset_alarmList(self,OL):
     self.alarmList = []
@@ -75,7 +77,8 @@ class ALARM_LOOP():
         alarmHandlerGUI.masterAlarmButton = tk.Label(alarmHandlerGUI.win, image=alarmHandlerGUI.masterAlarmImage, cursor="hand2", bg=u.lightgrey_color)
         alarmHandlerGUI.masterAlarmButton.image = tk.PhotoImage(file='ok.ppm')
       if alarmHandlerGUI.alarmLoop.globalAlarmStatus != "OK":
-        alarmHandlerGUI.alarmClient.sendPacket("2")
+        #alarmHandlerGUI.alarmClient.sendPacket("2")
+        #self.userNotifyLoop.update_user_notify_status(alarmHandlerGUI.OL)
         alarmHandlerGUI.masterAlarmImage = tk.PhotoImage(file='alarm.ppm')
         alarmHandlerGUI.masterAlarmButton = tk.Label(alarmHandlerGUI.win, image=alarmHandlerGUI.masterAlarmImage, cursor="hand2", bg=u.lightgrey_color)
         alarmHandlerGUI.masterAlarmButton.image = tk.PhotoImage(file='alarm.ppm')
@@ -85,6 +88,27 @@ class ALARM_LOOP():
     if (self.globalLoopStatus=="Paused"):
       alarmHandlerGUI.win.after(10000,self.alarm_loop, alarmHandlerGUI) # Recursion loop here - splits off a new instance of this function and finishes the one currently running (be careful)
       print("In sleep mode: waited 10 seconds to try to check alarm status again")
+
+class USER_NOTIFY():
+  def __init__(self):
+    self.userNotifyStatus = alarmLoop.globalAlarmStatus
+    self.refreshRate = 1.9 # Set this in file
+
+  def user_notify_loop(self,OL):
+    if (self.globalLoopStatus=="Looping"):
+      self.update_user_notify_status(OL) # Assumes OK, checks each OL.objectList[2] entry for its notify status, continues
+      if self.userNotifyStatus != "OK":
+        alarmHandlerGUI.alarmClient.sendPacket("2") # Have a case series here for passing different packets based on different alarm stati
+      alarmHandlerGUI.win.after(1000*self.refreshRate,self.user_notify_loop(), alarmHandlerGUI) # Recursion loop here - splits off a new instance of this function and finishes the one currently running (be careful)
+    else:
+      alarmHandlerGUI.win.after(1000*10*self.refreshRate,self.user_notify_loop(), alarmHandlerGUI) # Recursion loop here - splits off a new instance of this function and finishes the one currently running (be careful) - Wait longer if paused, no need to overkill # FIXME Probably use the global refresh wait time for this
+
+  def update_user_notify_status(self,OL):
+    self.userNotifyStatus = "OK"
+    for each in range(0,len(OL.objectList[2])):
+      if OL.objectList.userNotifyStatus != "OK":
+        self.userNotifyStatus = OL.objectList.userNotifyStatus
+      
 
 class ALARM():
   def __init__(self,myAO):
