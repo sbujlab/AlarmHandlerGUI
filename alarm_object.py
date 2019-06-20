@@ -10,6 +10,7 @@ Cameron Clarke 2019-05-28
 import tkinter as tk
 from tkinter import ttk
 import utils as u
+import bclient as bclient
 import os
 import time
 from decimal import Decimal
@@ -74,6 +75,7 @@ class ALARM_LOOP():
         alarmHandlerGUI.masterAlarmButton = tk.Label(alarmHandlerGUI.win, image=alarmHandlerGUI.masterAlarmImage, cursor="hand2", bg=u.lightgrey_color)
         alarmHandlerGUI.masterAlarmButton.image = tk.PhotoImage(file='ok.ppm')
       if alarmHandlerGUI.alarmLoop.globalAlarmStatus != "OK":
+        alarmHandlerGUI.alarmClient.sendPacket("2")
         alarmHandlerGUI.masterAlarmImage = tk.PhotoImage(file='alarm.ppm')
         alarmHandlerGUI.masterAlarmButton = tk.Label(alarmHandlerGUI.win, image=alarmHandlerGUI.masterAlarmImage, cursor="hand2", bg=u.lightgrey_color)
         alarmHandlerGUI.masterAlarmButton.image = tk.PhotoImage(file='alarm.ppm')
