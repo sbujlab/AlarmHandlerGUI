@@ -18,6 +18,7 @@ darkgrey_color = '#909090' # Maybe swap this for yellow everywhere?
 red_button_color = '#9E1A1A'
 red_color = '#ff0000'
 yellow_color = '#ffff00'
+orange_color = '#ff8800'
 green_color = '#00ff00'
 black_color = '#000000'
 white_color = '#ffffff'
@@ -104,7 +105,6 @@ def add_to_filearray(OL,fileArray,but):
 
 def silence_filearray_menu(OL,fileArray,butMenu):
   i,j = butMenu.indices
-  #j = OL.activeObjectColumnIndicesList[i] # FIXME is this supposed to be here?
   # For it and its children set alarmStatus = "OK"
   if OL.objectList[i][j].userSilenceStatus == "Silenced":
     OL.objectList[i][j].userSilenceStatus = "Alert" 
@@ -114,6 +114,19 @@ def silence_filearray_menu(OL,fileArray,butMenu):
   for q in range(OL.objectList[i][j].indexStart,OL.objectList[i][j].indexEnd+1):
     if fileArray.filearray[q][3] == "User Silence Status": # Update the filearray too
       fileArray.filearray[q][4] = OL.objectList[i][j].userSilenceStatus
+
+def notify_acknowledge_filearray_menu(OL,fileArray,butMenu):
+  i,j = butMenu.indices
+  tmpStat = OL.objectList[i][j].userNotifyStatus.split(' ')
+  if tmpStat[0] == "Cooldown":
+    OL.objectList[i][j].userNotifyStatus = "OK" # The user is manually OKing this alarm... maybe this is not safe FIXME
+  else:
+    # The user is just now acknowledging, therefore start the cooldown
+    OL.objectList[i][j].userNotifyStatus = "Cooldown {}".format(int(OL.cooldownLength))
+    #OL.objectList[i][j].color = yellow_color
+  for q in range(OL.objectList[i][j].indexStart,OL.objectList[i][j].indexEnd+1):
+    if fileArray.filearray[q][3] == "User Notify Status": # Update the filearray too
+      fileArray.filearray[q][4] = OL.objectList[i][j].userNotifyStatus
 
 def edit_filearray_menu(OL,fileArray,butMenu):
   i,j = butMenu.indices
@@ -225,6 +238,7 @@ def create_objects(fileArray):
 #####FIXME        newObject.add_parameter_history(newObject.value) # Commenting out then assumes you are only recording value history
         newObject.alarmStatus = "OK"
         newObject.userSilenceStatus = "Alert"
+        newObject.userNotifyStatus = "OK"
         #newObject.parameterList["User Silence Status"] = newObject.userSilenceStatus
         newObject.color = lightgrey_color
         localObjectList[column].append(newObject)
@@ -235,6 +249,13 @@ def create_objects(fileArray):
         # FIXME try to find a way to catalogue the following children in a level 2 object
         if (column==4 and isnew==1):
           localObjectList[2][localObjectList[column][colRow[3]-1].parentIndices[2]].add_parameter(localObjectList[3][colRow[3]-1],localObjectList[4][colRow[4]-1]) # FIXME Using colRow[4]-1 will always append the final entry of the values column [4] true for a parameter [3] to be the parameter list value.. consider first for history sake?
+
+
+
+##### Silence Read
+
+
+
           if localObjectList[3][colRow[3]-1].value == "User Silence Status":
             localObjectList[2][localObjectList[column][colRow[3]-1].parentIndices[2]].userSilenceStatus = localObjectList[4][colRow[4]-1].value 
             # Check for user silenced status
@@ -254,8 +275,16 @@ def create_objects(fileArray):
                 for q3 in range(0,column):
                   localObjectList[q3][localObjectList[column][p].parentIndices[q3]].color = lightgrey_color
           #print("Checking {}?=Alarm Status and Checking {}!?=OK and Checking {}?=Alert".format(localObjectList[3][colRow[3]-1].value,localObjectList[4][colRow[4]-1].value,localObjectList[2][colRow[2]-1].userSilenceStatus))
+
+
+
+
+##### Alarm status read 
+
+
+
+
           if localObjectList[3][colRow[3]-1].value == "Alarm Status":
-          #if localObjectList[3][colRow[3]-1].value == "Alarm Status" and localObjectList[4][colRow[4]-1].value != "OK" and localObjectList[2][localObjectList[column][colRow[3]-1].parentIndices[2]].userSilenceStatus == "Alert":
             for q in range(0,column):
               #print("Alert!!! Alarm not ok")
               localObjectList[q][localObjectList[column][colRow[3]-1].parentIndices[q]].alarmStatus = localObjectList[4][colRow[4]-1].value
@@ -263,14 +292,17 @@ def create_objects(fileArray):
               for o in range(0,colRow[4]):
                 if localObjectList[4][o].value != "OK":
                   localObjectList[q][localObjectList[column][colRow[3]-1].parentIndices[q]].color = red_color
-              #if localObjectList[4][colRow[4]-1].value == "OK":
-              #  localObjectList[q][localObjectList[column][colRow[3]-1].parentIndices[q]].color = lightgrey_color # FIXME the colRow[3]-1 etc. business only selects parents to be red if last member of children is red
-              #else:
-              #  localObjectList[q][localObjectList[column][colRow[3]-1].parentIndices[q]].color = red_color
               if localObjectList[2][localObjectList[column][colRow[3]-1].parentIndices[2]].userSilenceStatus == "Silenced":
                 # If the silence status was read before then don't overwrite its color indication
                 localObjectList[q][localObjectList[column][colRow[3]-1].parentIndices[q]].color = yellow_color
-          # Only dark grey if alarmed and silenecd 
+
+
+
+#### Post all check again about alarm status in case order reversed
+
+
+
+          # Only dark grey if alarmed and silenced 
           #if localObjectList[3][colRow[3]-1].value == "Alarm Status" and localObjectList[4][colRow[4]-1].value != "OK" and localObjectList[2][localObjectList[column][colRow[3]-1].parentIndices[2]].userSilenceStatus == "Silenced":
           # Dark grey if silenced at all
           if localObjectList[2][localObjectList[column][colRow[3]-1].parentIndices[2]].userSilenceStatus == "Silenced":
@@ -281,6 +313,39 @@ def create_objects(fileArray):
               localObjectList[q][localObjectList[column][colRow[3]-1].parentIndices[q]].color = yellow_color
           ### This one records just the value/name parameter history
           localObjectList[2][localObjectList[column][colRow[3]-1].parentIndices[2]].add_parameter_history(localObjectList[4][colRow[4]-1].value)
+
+
+
+
+
+##### User notify status read 
+
+
+
+
+          if localObjectList[3][colRow[3]-1].value == "User Notify Status":
+            print("ALERT the user notify status is being read\n\n\n\n")
+            for q in range(0,column):
+              # Only update if silence is not silenced, if silenced then "OK"
+              if localObjectList[q][localObjectList[column][colRow[3]-1].parentIndices[q]].userSilenceStatus == "Silenced":
+
+                localObjectList[q][localObjectList[column][colRow[3]-1].parentIndices[q]].userNotifyStatus = "OK"
+                localObjectList[q][localObjectList[column][colRow[3]-1].parentIndices[q]].alarm.userNotifySelfStatus = "OK"
+              # Else just copy the value shown
+              elif localObjectList[q][localObjectList[column][colRow[3]-1].parentIndices[q]].alarmStatus != "OK" and localObjectList[4][colRow[4]-1].value.split(' ')[0] != "Cooldown":
+                print("Reading object list, setting parameters, User Notify Status == {}".format(localObjectList[4][colRow[4]-1].value))
+                localObjectList[q][localObjectList[column][colRow[3]-1].parentIndices[q]].userNotifyStatus = localObjectList[q][localObjectList[column][colRow[3]-1].parentIndices[q]].alarmStatus
+                localObjectList[q][localObjectList[column][colRow[3]-1].parentIndices[q]].alarm.userNotifySelfStatus = localObjectList[q][localObjectList[column][colRow[3]-1].parentIndices[q]].alarmStatus
+              elif localObjectList[q][localObjectList[column][colRow[3]-1].parentIndices[q]].alarmStatus != "OK":
+                localObjectList[q][localObjectList[column][colRow[3]-1].parentIndices[q]].userNotifyStatus = localObjectList[4][colRow[4]-1].value
+                localObjectList[q][localObjectList[column][colRow[3]-1].parentIndices[q]].alarm.userNotifySelfStatus = localObjectList[4][colRow[4]-1].value
+              # Edit some colors for non-ok notify stati?
+              #for o in range(0,colRow[4]):
+                #if localObjectList[4][o].value != "OK":
+                  #localObjectList[q][localObjectList[column][colRow[3]-1].parentIndices[q]].color = red_color
+
+
+
         if (column==4 and isnew!=1):
           ### This one records just the value/name parameter history
           localObjectList[2][localObjectList[column][colRow[3]-1].parentIndices[2]].add_parameter_history(localObjectList[4][colRow[4]-1].value)

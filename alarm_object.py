@@ -10,6 +10,7 @@ Cameron Clarke 2019-05-28
 import tkinter as tk
 from tkinter import ttk
 import utils as u
+import bclient as bclient
 import os
 import time
 from decimal import Decimal
@@ -31,7 +32,33 @@ class ALARM_LOOP():
     self.checkExternalStatus = True # Check the externalAlarms.csv file
     self.globalLoopStatus = "Looping" # Start in looping state
     self.globalUserAlarmSilence = "Alert"
+    self.userNotifyLoop = USER_NOTIFY(self)
+    self.userNotifyLoop.user_notify_loop(self,alarmHandlerGUI.OL,alarmHandlerGUI.fileArray,alarmHandlerGUI)
     
+  def ok_notify_check(self,checkNotifyStatus):
+    checkedStat = "OK"
+    if checkNotifyStatus != "OK":
+      if checkNotifyStatus.split(' ')[0] == "Cooldown":
+        print("Checked if we are in a countdown, we are, status = {}".format(checkNotifyStatus))
+        checkedStat = "OK"
+      else:
+        print("Checked if we are in a countdown, we are not, status = {}".format(checkNotifyStatus))
+        checkedStat = checkNotifyStatus
+    return checkedStat
+
+  def ok_notify_update(checkNotifyStatus,reduction):
+    checkedStat = "OK"
+    if checkNotifyStatus != "OK":
+      tmpCheck = checkNotifyStatus.split(' ')
+      if tmpCheck[0] == "Cooldown":
+        if tmpCheck[1] != '':
+          checkedStat = "Cooldown {}".format(int(tmpCheck[1])-reduction)
+        if int(tmpCheck[1]) <= reduction:
+          checkedStat = "OK" # Reset
+      else:
+        checkedStat = checkNotifyStatus
+    return checkedStat
+  
   def reset_alarmList(self,OL):
     self.alarmList = []
     for i in range(0,len(OL.objectList[2])):
@@ -53,12 +80,17 @@ class ALARM_LOOP():
       for i in range (0,len(self.alarmList)):
         self.alarmList[i].alarm_analysis()
         self.alarmList[i].alarm_evaluate()
-        if self.alarmList[i].alarmSelfStatus != "OK":
+        # Check if the alarm is alarming and has not been "OK"ed by the user acknowledge
+        print("Checking alarm {} status = {} and user acknowledge = {}".format(i,self.alarmList[i].alarmSelfStatus,self.ok_notify_check(self.alarmList[i].userNotifySelfStatus)))
+        # If the userNotifyStatus is NULL (i.e. not set) then the alarm handler will just read it and move on with its life
+        if self.alarmList[i].alarmSelfStatus != "OK" and self.ok_notify_check(self.alarmList[i].userNotifySelfStatus) != "OK":
           self.globalAlarmStatus = self.alarmList[i].alarmSelfStatus
           localStat = self.alarmList[i].alarmSelfStatus
           print("alarm {} = {}".format(i,localStat))
       if localStat == "OK":
         self.globalAlarmStatus = "OK"
+      else:
+        print("Global Alarm Alarmed")
         #print("After: Parameter list value for \"Value\" updated to be {}".format(self.alarmList[i].pList.get("Value",u.defaultKey)))
       u.update_objectList(alarmHandlerGUI.OL,alarmHandlerGUI.fileArray,self.alarmList)
       u.write_textfile(alarmHandlerGUI.OL,alarmHandlerGUI.fileArray) #FIXME Do this here?
@@ -74,6 +106,8 @@ class ALARM_LOOP():
         alarmHandlerGUI.masterAlarmButton = tk.Label(alarmHandlerGUI.win, image=alarmHandlerGUI.masterAlarmImage, cursor="hand2", bg=u.lightgrey_color)
         alarmHandlerGUI.masterAlarmButton.image = tk.PhotoImage(file='ok.ppm')
       if alarmHandlerGUI.alarmLoop.globalAlarmStatus != "OK":
+        #alarmHandlerGUI.alarmClient.sendPacket("2")
+        #self.userNotifyLoop.update_user_notify_status(alarmHandlerGUI.OL)
         alarmHandlerGUI.masterAlarmImage = tk.PhotoImage(file='alarm.ppm')
         alarmHandlerGUI.masterAlarmButton = tk.Label(alarmHandlerGUI.win, image=alarmHandlerGUI.masterAlarmImage, cursor="hand2", bg=u.lightgrey_color)
         alarmHandlerGUI.masterAlarmButton.image = tk.PhotoImage(file='alarm.ppm')
@@ -84,6 +118,43 @@ class ALARM_LOOP():
       alarmHandlerGUI.win.after(10000,self.alarm_loop, alarmHandlerGUI) # Recursion loop here - splits off a new instance of this function and finishes the one currently running (be careful)
       print("In sleep mode: waited 10 seconds to try to check alarm status again")
 
+class USER_NOTIFY():
+  def __init__(self,alarmLoop):
+    pass
+
+  def user_notify_loop(self,alarmLoop,OL,fileArray,alarmHandlerGUI):
+    if (alarmLoop.globalLoopStatus=="Looping"):
+      self.update_user_notify_status(alarmLoop,OL,fileArray) # Assumes OK, checks each OL.objectList[2] entry for its notify status, continues
+      if alarmHandlerGUI.alertTheUser == True and alarmLoop.globalAlarmStatus != "OK": # globalAlarmStatus determined by these set acknowledged stati
+        alarmHandlerGUI.alarmClient.sendPacket("2") # Have a case series here for passing different packets based on different alarm stati
+      # Recursion loop here - splits off a new instance of this function and finishes the one currently running (be careful)
+      #alarmHandlerGUI.win.after(1000*OL.cooldownReduction,self.user_notify_loop(alarmLoop,OL,alarmHandlerGUI), alarmHandlerGUI) 
+      alarmHandlerGUI.win.after(1000*OL.cooldownReduction,self.user_notify_loop, alarmLoop,OL,fileArray,alarmHandlerGUI) 
+    else:                                                                                     
+      # Recursion loop here - splits off a new instance of this function and finishes the one currently running (be careful) - Wait longer if paused, no need to overkill # FIXME Probably use the global cooldownReduction wait time for this
+      alarmHandlerGUI.win.after(1000*10*OL.cooldownReduction,self.user_notify_loop, alarmLoop,OL,fileArray,alarmHandlerGUI) 
+
+  def update_user_notify_status(self,alarmLoop,OL,fileArray):
+    print("Checking All Cooldowns")
+    tmpUNS = "OK" # Assume its ok, then update with the alarmList's "self" values
+    for e in range(0,len(OL.objectList[2])):
+      if OL.objectList[2][e].userNotifyStatus != "OK":
+        tmpCheck = OL.objectList[2][e].userNotifyStatus.split(' ')
+        if tmpCheck[0] == "Cooldown":
+          if tmpCheck[1] != '':
+            tmpUNS = "Cooldown {}".format(int(tmpCheck[1])-OL.cooldownReduction)
+          if int(tmpCheck[1]) <= OL.cooldownReduction:
+            tmpUNS = "OK" # Reset upond 2nd click
+        else: # it isn't a Cooldown # array, so just take the 0th element
+          tmpUNS = tmpCheck[0]
+        OL.objectList[2][e].parameterList["User Notify Status"] = tmpUNS
+        OL.objectList[2][e].userNotifyStatus = tmpUNS
+        for t in range(0,len(fileArray.filearray)):
+          if fileArray.filearray[t][3] == "User Notify Status":
+            fileArray.filearray[t][4] = tmpUNS
+            # Update the object list all children's user notify status
+      
+
 class ALARM():
   def __init__(self,myAO):
     #self.alarmName = myAO.name
@@ -93,6 +164,7 @@ class ALARM():
     self.alarmAnalysisReturn = None
     self.alarmErrorReturn = None
     self.alarmSelfStatus = myAO.alarmStatus
+    self.userNotifySelfStatus = myAO.userNotifyStatus
     self.alarmType = self.pList.get("Alarm Type",u.defaultKey)
     self.alarmEvaluateType = "Exists" # Default alarm criteria is whether the value is not-null and otherwise is defined on context from given parameterList entries
     # Do I need to make a lambda initialized instance of the alarm action per event? I don't think this matters like it did for button context menu placements.... especially since these actions are being taken by the alarm handler in a loop over objectList
@@ -256,6 +328,8 @@ class ALARM():
     if self.pList.get("Alarm Status",u.defaultKey) != "OK" and self.pList.get("Alarm Status",u.defaultKey) != "Invalid" and self.pList.get("Alarm Status",u.defaultKey) != "NULL": # Update global alarm status unless NULL or invalid
       self.alarmSelfStatus = self.pList.get("Alarm Status",u.defaultKey)
       myAO.alarmStatus = self.pList.get("Alarm Status",u.defaultKey)
+      self.userNotifySelfStatus = self.pList.get("User Notify Status",u.defaultKey)
+      myAO.userNotifyStatus = self.pList.get("User Notify Status",u.defaultKey)
       myAO.userSilenceStatus = self.pList.get("User Silence Status",u.defaultKey)
       if myAO.userSilenceStatus != "Silenced":
         myAO.color = u.red_color
@@ -267,6 +341,9 @@ class ALARM():
       return "Not OK"
     else:
       self.alarmSelfStatus = self.pList.get("Alarm Status",u.defaultKey)
+      self.userNotifySelfStatus = self.pList.get("User Notify Status",u.defaultKey)
+      # FIXME needed? # myAO.userNotifyStatus = self.pList.get("User Notify Status",u.defaultKey)
+      #myAO.userSilenceStatus = self.pList.get("User Silence Status",u.defaultKey)
       myAO.alarmStatus = "OK"
       myAO.color = u.lightgrey_color
       return "OK"
@@ -282,6 +359,8 @@ class OBJECT_LIST():
     self.objectList = u.create_objects(fileArray)
     self.currentlySelectedButton = -1
     self.displayPList = 0
+    self.cooldownLength = 60 # Wait a minute before alarming again
+    self.cooldownReduction = 2
     self.selectedButtonColumnIndicesList = []
     self.activeObjectColumnIndicesList = [] # This stores the location where insertion will take place
     self.selectedColumnButtonLengthList = [] # This is the thing to store the number of buttons that should be displayed -> == the number of children of the parent clicked button
@@ -343,6 +422,7 @@ class ALARM_OBJECT():
     self.color = u.lightgrey_color
     self.alarmStatus = "OK"
     self.userSilenceStatus = "Alert"
+    self.userNotifyStatus = "OK"
     #self.parameterList["User Silence Status"] = self.userSilenceStatus
     self.alarm = lambda: ALARM(self);
     self.clicked = 0
