@@ -159,16 +159,21 @@ class GRID_ALARM_HANDLER(tk.Frame):
         # Loop over the list of objects, creating displayFrames
         disp = tk.LabelFrame(self.alarmRows[int(1.0*i/self.NperRow)], text="{}, {}\n{}".format(OL.objectList[0][OL.objectList[2][i].parentIndices[0]].value,OL.objectList[1][OL.objectList[2][i].parentIndices[1]].value,OL.objectList[2][i].value), background=u.lightgrey_color) # FIXME want red alarm full label frame?
         disp.redStat = tk.IntVar()
+        disp.orangeStat = tk.IntVar()
         disp.yellowStat = tk.IntVar()
         disp.greenStat = tk.IntVar()
         disp.alarmStatus = 1
         disp.greenAlarmStatus = 0
+        disp.userNotifyStatus = 1
         disp.userSilenceStatus = 1
         if OL.objectList[2][i].alarmStatus != "OK":
           disp.alarmStatus = 0
           disp.greenAlarmStatus = 1
         if OL.objectList[2][i].userSilenceStatus != "Alert":
           disp.userSilenceStatus = 0 
+        if OL.objectList[2][i].userSilenceStatus != "Silenced" and OL.objectList[2][i].userNotifyStatus.split(' ')[0] == "Cooldown":
+          # Not silenced, and in Cooldown time period, then show this button instead
+          disp.userNotifyStatus = 0
         lgrid.append(disp)
 
         disp.butt = tk.Button(lgrid[i], text="Value = {}".format(OL.objectList[2][i].parameterList.get("Value",u.defaultKey)), justify='center', background=u.lightgrey_color) # loop over displayFrames
@@ -180,7 +185,15 @@ class GRID_ALARM_HANDLER(tk.Frame):
             activebackground=u.grey_color, activeforeground=u.black_color, selectcolor = u.red_color, highlightbackground=u.red_color, highlightcolor=u.red_color, highlightthickness=1)
         disp.radioButRed.indices = (2,i)
         disp.radioButRed.config(command = lambda radRed=disp.radioButRed: self.select_red_button(OL,fileArray,radRed))
-        disp.radioButRed.grid(row=1,column=0)
+        disp.radioButOrange = tk.Radiobutton(lgrid[i], text=OL.objectList[2][i].userNotifyStatus, indicatoron=False, justify='center', value=lgrid[i].userNotifyStatus, variable=lgrid[i].orangeStat, fg=u.black_color, bg=u.lightgrey_color,
+            activebackground=u.grey_color, activeforeground=u.black_color, selectcolor = u.orange_color, highlightbackground=u.orange_color, highlightcolor=u.orange_color, highlightthickness=1)
+        disp.radioButOrange.indices = (2,i)
+        disp.radioButOrange.config(command = lambda radOrange=disp.radioButOrange: self.select_orange_button(OL,fileArray,radOrange))
+        if OL.objectList[2][i].userNotifyStatus.split(' ')[0] != "Cooldown" or OL.objectList[2][i].userSilenceStatus == "Silenced":
+          disp.radioButRed.grid(row=1,column=0,sticky='W')
+        elif OL.objectList[2][i].userNotifyStatus.split(' ')[0] == "Cooldown" and OL.objectList[2][i].userSilenceStatus != "Silenced":
+          disp.radioButOrange.grid(row=1,column=0,sticky='W')
+          disp.radioButOrange.config(text=OL.objectList[2][i].userNotifyStatus.split(' ')[1])
         disp.radioButYellow = tk.Radiobutton(lgrid[i], text=OL.objectList[2][i].userSilenceStatus, indicatoron=False, justify='center', value=lgrid[i].userSilenceStatus, variable=lgrid[i].yellowStat, fg=u.black_color, bg=u.lightgrey_color,
             activebackground=u.grey_color, activeforeground=u.black_color, selectcolor = u.yellow_color, highlightbackground=u.yellow_color, highlightcolor=u.yellow_color, highlightthickness=1)
         disp.radioButYellow.indices = (2,i)
@@ -263,9 +276,22 @@ class GRID_ALARM_HANDLER(tk.Frame):
     i,j = but.indices
     self.select_button(OL,fileArray,but)
     alStat = 1
+    # Add a feature where clicking the red button counts as an alarm acknowledge
+    u.notify_acknowledge_filearray_menu(OL,fileArray,but)
     if OL.objectList[i][j].alarmStatus != "OK":
       alStat = 0
     but.config(value=alStat)
+    self.update_GUI(OL,fileArray)
+
+  def select_orange_button(self,OL,fileArray,but):
+    i,j = but.indices
+    self.select_button(OL,fileArray,but)
+    # If the user has acknowledged the alarm then we will be in a cooldown state and this button is visible, now if the user clicks again they will force->"OK" the userNotifyStatus to skip the cooldown period # FIXME this may not be desired behavior...
+    u.notify_acknowledge_filearray_menu(OL,fileArray,but)
+    notStat = 1
+    if OL.objectList[i][j].userNotifyStatus.split(' ')[0] == "Cooldown":
+      notStat = 0
+    but.config(value=notStat)
     self.update_GUI(OL,fileArray)
 
   def select_yellow_button(self,OL,fileArray,but):

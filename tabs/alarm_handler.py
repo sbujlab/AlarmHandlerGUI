@@ -157,16 +157,21 @@ class ALARM_HANDLER(tk.Frame):
           localStr = "{}, {}\n{}".format(OL.objectList[0][OL.objectList[2][i].parentIndices[0]].value,OL.objectList[1][OL.objectList[2][i].parentIndices[1]].value[:25],OL.objectList[2][i].value[:35])
         disp = tk.LabelFrame(self.alarmCols[int(1.0*i/self.NperCol)], text=localStr, font=('Helvetica 8'), background=u.lightgrey_color) # FIXME want red alarm full label frame?
         disp.redStat = tk.IntVar()
+        disp.orangeStat = tk.IntVar()
         disp.yellowStat = tk.IntVar()
         disp.greenStat = tk.IntVar()
         disp.alarmStatus = 1
         disp.greenAlarmStatus = 0
+        disp.userNotifyStatus = 1
         disp.userSilenceStatus = 1
         if OL.objectList[2][i].alarmStatus != "OK":
           disp.alarmStatus = 0
           disp.greenAlarmStatus = 1
         if OL.objectList[2][i].userSilenceStatus != "Alert":
           disp.userSilenceStatus = 0 
+        if OL.objectList[2][i].userSilenceStatus != "Silenced" and OL.objectList[2][i].userNotifyStatus.split(' ')[0] == "Cooldown":
+          # Not silenced, and in Cooldown time period, then show this button instead
+          disp.userNotifyStatus = 0
         lgrid.append(disp)
 
         disp.butt = tk.Button(lgrid[i], text="Value = {}".format(OL.objectList[2][i].parameterList.get("Value",u.defaultKey)), justify='center', background=u.lightgrey_color) # loop over displayFrames
@@ -178,6 +183,10 @@ class ALARM_HANDLER(tk.Frame):
             activebackground=u.grey_color, activeforeground=u.black_color, selectcolor = u.red_color, highlightbackground=u.red_color, highlightcolor=u.red_color, highlightthickness=1)
         disp.radioButRed.indices = (2,i)
         disp.radioButRed.config(command = lambda radRed=disp.radioButRed: self.select_red_button(OL,fileArray,radRed))
+        disp.radioButOrange = tk.Radiobutton(lgrid[i], text=OL.objectList[2][i].userNotifyStatus, indicatoron=False, justify='center', value=lgrid[i].userNotifyStatus, variable=lgrid[i].orangeStat, fg=u.black_color, bg=u.lightgrey_color,
+            activebackground=u.grey_color, activeforeground=u.black_color, selectcolor = u.orange_color, highlightbackground=u.orange_color, highlightcolor=u.orange_color, highlightthickness=1)
+        disp.radioButOrange.indices = (2,i)
+        disp.radioButOrange.config(command = lambda radOrange=disp.radioButOrange: self.select_orange_button(OL,fileArray,radOrange))
         disp.radioButYellow = tk.Radiobutton(lgrid[i], text=OL.objectList[2][i].userSilenceStatus, indicatoron=False, justify='center', value=lgrid[i].userSilenceStatus, variable=lgrid[i].yellowStat, fg=u.black_color, bg=u.lightgrey_color,
             activebackground=u.grey_color, activeforeground=u.black_color, selectcolor = u.yellow_color, highlightbackground=u.yellow_color, highlightcolor=u.yellow_color, highlightthickness=1)
         disp.radioButYellow.indices = (2,i)
@@ -187,15 +196,20 @@ class ALARM_HANDLER(tk.Frame):
         disp.radioButGreen.indices = (2,i)
         print("OL 2,{} alarm status = {}".format(i,OL.objectList[2][i].alarmStatus))
         disp.radioButGreen.config(command = lambda radGreen=disp.radioButGreen: self.select_green_button(OL,fileArray,radGreen))
-        if OL.objectList[2][i].alarmStatus != "OK" and OL.objectList[2][i].userSilenceStatus != "Silenced":
+        if OL.objectList[2][i].alarmStatus != "OK" and OL.objectList[2][i].userSilenceStatus != "Silenced" and OL.objectList[2][i].userNotifyStatus.split(' ')[0] != "Cooldown":
           disp.radioButRed.grid(row=0,column=0,sticky='W')
+        if OL.objectList[2][i].userNotifyStatus.split(' ')[0] == "Cooldown" and OL.objectList[2][i].userSilenceStatus != "Silenced":
+          disp.radioButOrange.grid(row=0,column=0,sticky='W')
+          disp.radioButOrange.config(text=OL.objectList[2][i].userNotifyStatus.split(' ')[1])
+        # Silence takes precedent over alarm and over notify/acknowledge
         if OL.objectList[2][i].alarmStatus == "OK" and OL.objectList[2][i].userSilenceStatus == "Silenced":
           disp.radioButYellow.grid(row=0,column=0,sticky='W')
           disp.radioButYellow.config(text=OL.objectList[2][i].userSilenceStatus)
         if OL.objectList[2][i].alarmStatus != "OK" and OL.objectList[2][i].userSilenceStatus == "Silenced":
           disp.radioButYellow.grid(row=0,column=0,sticky='W')
           disp.radioButYellow.config(text=OL.objectList[2][i].alarmStatus)
-        if OL.objectList[2][i].alarmStatus == "OK" and OL.objectList[2][i].userSilenceStatus != "Silenced":
+        if OL.objectList[2][i].alarmStatus == "OK" and OL.objectList[2][i].userSilenceStatus != "Silenced" and OL.objectList[2][i].userNotifyStatus == "OK": 
+          # Add check on userNotifyStatus so that the user will keep seeing the alarm indicator on even after the alarm itself has disappeared
           disp.radioButGreen.grid(row=0,column=0,sticky='W')
     return lgrid
 
@@ -209,6 +223,7 @@ class ALARM_HANDLER(tk.Frame):
         buttMenu.moveN = 0
         buttMenu.editValue = None
         buttMenu.add_command(label = 'Information', command = lambda butMenu = buttMenu: self.button_information_menu(OL,fileArray,butMenu))
+        buttMenu.add_command(label = 'Acknowledge Alarm', command = lambda butMenu = buttMenu: self.button_notify_acknowledge_menu(OL,fileArray,butMenu))
         buttMenu.add_command(label = 'Silence', command = lambda butMenu = buttMenu: self.button_silence_menu(OL,fileArray,butMenu))
         self.displayFrames[i].butt.bind("<Button-3>",lambda event, butMenu = buttMenu: self.do_popup(event,butMenu))
       grid.append(buttMenu)
@@ -263,9 +278,22 @@ class ALARM_HANDLER(tk.Frame):
     i,j = but.indices
     self.select_button(OL,fileArray,but)
     alStat = 1
+    # Add a feature where clicking the red button counts as an alarm acknowledge
+    u.notify_acknowledge_filearray_menu(OL,fileArray,but)
     if OL.objectList[i][j].alarmStatus != "OK":
       alStat = 0
     but.config(value=alStat)
+    self.update_GUI(OL,fileArray)
+
+  def select_orange_button(self,OL,fileArray,but):
+    i,j = but.indices
+    self.select_button(OL,fileArray,but)
+    # If the user has acknowledged the alarm then we will be in a cooldown state and this button is visible, now if the user clicks again they will force->"OK" the userNotifyStatus to skip the cooldown period # FIXME this may not be desired behavior...
+    u.notify_acknowledge_filearray_menu(OL,fileArray,but)
+    notStat = 1
+    if OL.objectList[i][j].userNotifyStatus.split(' ')[0] == "Cooldown":
+      notStat = 0
+    but.config(value=notStat)
     self.update_GUI(OL,fileArray)
 
   def select_yellow_button(self,OL,fileArray,but):
@@ -316,6 +344,12 @@ class ALARM_HANDLER(tk.Frame):
     i,j = butMenu.indices
     self.select_button(OL,fileArray,self.displayFrames[j].butt)
     u.silence_filearray_menu(OL,fileArray,butMenu)
+    self.update_GUI(OL,fileArray)
+
+  def button_notify_acknowledge_menu(self,OL,fileArray,butMenu):
+    i,j = butMenu.indices
+    self.select_button(OL,fileArray,self.displayFrames[j].butt)
+    u.notify_acknowledge_filearray_menu(OL,fileArray,butMenu)
     self.update_GUI(OL,fileArray)
 
   def refresh_screen(self,OL,fileArray,alarmLoop):

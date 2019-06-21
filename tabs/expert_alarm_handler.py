@@ -196,6 +196,7 @@ class EXPERT_ALARM_HANDLER(tk.Frame):
           buttMenu.editValue = None
           if i<=2:
             buttMenu.add_command(label = 'Silence', command = lambda butMenu = buttMenu: self.button_silence_menu(OL,fileArray,butMenu))
+            buttMenu.add_command(label = 'Acknowledge Alarm', command = lambda butMenu = buttMenu: self.button_notify_acknowledge_menu(OL,fileArray,butMenu))
           buttMenu.add_command(label = 'Edit', command = lambda butMenu = buttMenu: self.button_edit_menu(OL,fileArray,butMenu))
           buttMenu.add_command(label = 'Move', command = lambda butMenu = buttMenu: self.button_move_menu(OL,fileArray,butMenu))
           buttMenu.add_command(label = 'Copy', command = lambda butMenu = buttMenu: self.button_copy_menu(OL,fileArray,butMenu))
@@ -296,6 +297,15 @@ class EXPERT_ALARM_HANDLER(tk.Frame):
     i,j = butMenu.indices
     self.select_button(OL,fileArray,butMenu)
     u.silence_filearray_menu(OL,fileArray,butMenu)
+    self.update_GUI(OL,fileArray)
+    for coli in range(0,i):
+      if OL.selectedButtonColumnIndicesList[coli] != -1:
+        self.refresh_button(OL,fileArray,self.buttons[coli][OL.selectedButtonColumnIndicesList[coli]])
+
+  def button_notify_acknowledge_menu(self,OL,fileArray,butMenu):
+    i,j = butMenu.indices
+    self.select_button(OL,fileArray,butMenu)
+    u.notify_acknowledge_filearray_menu(OL,fileArray,butMenu)
     self.update_GUI(OL,fileArray)
     for coli in range(0,i):
       if OL.selectedButtonColumnIndicesList[coli] != -1:

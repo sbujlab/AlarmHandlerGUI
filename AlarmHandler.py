@@ -42,6 +42,8 @@ class AlarmHandler:
     self.masterAlarmImage = tk.PhotoImage(file='ok.ppm')
     self.masterAlarmButton = tk.Label(self.win, image=self.masterAlarmImage, cursor="hand2", bg=u.lightgrey_color)
     self.remoteName = 'hacweb7'
+    #self.alertTheUser = True
+    self.alertTheUser = False
     self.alarmClient = bclient.sockClient(self.remoteName)
     self.alarmLoop = alarm_object.ALARM_LOOP(self)
     self.tabs = self.create_widgets()
