@@ -120,12 +120,17 @@ def notify_acknowledge_filearray_menu(OL,fileArray,butMenu):
   tmpStat = OL.objectList[i][j].userNotifyStatus.split(' ')
   if tmpStat[0] == "Cooldown":
     OL.objectList[i][j].userNotifyStatus = "OK" # The user is manually OKing this alarm... maybe this is not safe FIXME
+    OL.objectList[i][j].parameterList["User Notify Status"] = "OK"
+    OL.objectList[i][j].alarm.userNotifySelfStatus = "OK"
   else:
     # The user is just now acknowledging, therefore start the cooldown
     OL.objectList[i][j].userNotifyStatus = "Cooldown {}".format(int(OL.cooldownLength))
+    OL.objectList[i][j].parameterList["User Notify Status"] = "Cooldown {}".format(int(OL.cooldownLength))
+    OL.objectList[i][j].alarm.userNotifySelfStatus = "Cooldown {}".format(int(OL.cooldownLength))
     #OL.objectList[i][j].color = yellow_color
   for q in range(OL.objectList[i][j].indexStart,OL.objectList[i][j].indexEnd+1):
     if fileArray.filearray[q][3] == "User Notify Status": # Update the filearray too
+      print("Printing to filearray[{}][{}] User Notify Status = {}".format(q,4,OL.objectList[i][j].userNotifyStatus))
       fileArray.filearray[q][4] = OL.objectList[i][j].userNotifyStatus
 
 def edit_filearray_menu(OL,fileArray,butMenu):
@@ -202,7 +207,7 @@ def write_filearray(fileArray):
     print("writing file array")
     return fileArray.filearray
 
-def create_objects(fileArray):
+def create_objects(fileArray,cooldownLength):
   ncolumns = 0
   if len(fileArray.filearray)>0: 
     ncolumns = len(fileArray.filearray[len(fileArray.filearray)-1]) # FIXME should this just be hardcoded to 5 layers or should I keep it generic??
@@ -238,6 +243,7 @@ def create_objects(fileArray):
 #####FIXME        newObject.add_parameter_history(newObject.value) # Commenting out then assumes you are only recording value history
         newObject.alarmStatus = "OK"
         newObject.userSilenceStatus = "Alert"
+        newObject.cooldownLength = cooldownLength
         newObject.userNotifyStatus = "OK"
         #newObject.parameterList["User Silence Status"] = newObject.userSilenceStatus
         newObject.color = lightgrey_color
@@ -329,14 +335,24 @@ def create_objects(fileArray):
               # Only update if silence is not silenced, if silenced then "OK"
               if localObjectList[q][localObjectList[column][colRow[3]-1].parentIndices[q]].userSilenceStatus == "Silenced":
 
+                print("OK")
+                if q == 2:
+                  localObjectList[q][localObjectList[column][colRow[3]-1].parentIndices[q]].parameterList["User Notify Status"] = "OK"
                 localObjectList[q][localObjectList[column][colRow[3]-1].parentIndices[q]].userNotifyStatus = "OK"
                 localObjectList[q][localObjectList[column][colRow[3]-1].parentIndices[q]].alarm.userNotifySelfStatus = "OK"
-              # Else just copy the value shown
+              # Else if we aren't OK but also aren't in a cooldown, then copy the alarm value for Latching purposes
               elif localObjectList[q][localObjectList[column][colRow[3]-1].parentIndices[q]].alarmStatus != "OK" and localObjectList[4][colRow[4]-1].value.split(' ')[0] != "Cooldown":
                 print("Reading object list, setting parameters, User Notify Status == {}".format(localObjectList[4][colRow[4]-1].value))
+                if q == 2:
+                  localObjectList[q][localObjectList[column][colRow[3]-1].parentIndices[q]].parameterList["User Notify Status"] = localObjectList[q][localObjectList[column][colRow[3]-1].parentIndices[q]].alarmStatus
                 localObjectList[q][localObjectList[column][colRow[3]-1].parentIndices[q]].userNotifyStatus = localObjectList[q][localObjectList[column][colRow[3]-1].parentIndices[q]].alarmStatus
                 localObjectList[q][localObjectList[column][colRow[3]-1].parentIndices[q]].alarm.userNotifySelfStatus = localObjectList[q][localObjectList[column][colRow[3]-1].parentIndices[q]].alarmStatus
-              elif localObjectList[q][localObjectList[column][colRow[3]-1].parentIndices[q]].alarmStatus != "OK":
+              # Else just copy the dang value, this will be the initialized value or the OK status or the Cooldown
+              else:
+              #elif localObjectList[q][localObjectList[column][colRow[3]-1].parentIndices[q]].alarmStatus != "OK":
+                print("Updating with self status = {}".format(localObjectList[4][colRow[4]-1].value))
+                if q == 2:
+                  localObjectList[q][localObjectList[column][colRow[3]-1].parentIndices[q]].parameterList["User Notify Status"] = localObjectList[4][colRow[4]-1].value
                 localObjectList[q][localObjectList[column][colRow[3]-1].parentIndices[q]].userNotifyStatus = localObjectList[4][colRow[4]-1].value
                 localObjectList[q][localObjectList[column][colRow[3]-1].parentIndices[q]].alarm.userNotifySelfStatus = localObjectList[4][colRow[4]-1].value
               # Edit some colors for non-ok notify stati?

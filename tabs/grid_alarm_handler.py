@@ -320,7 +320,7 @@ class GRID_ALARM_HANDLER(tk.Frame):
 
   def update_GUI(self,OL,fileArray):
     fileArray.filearray = u.write_filearray(fileArray)
-    OL.objectList = u.create_objects(fileArray)
+    OL.objectList = u.create_objects(fileArray,OL.cooldownLength)
     self.make_screen(OL,fileArray)
 
   def display_parameter_list(self,OL,fileArray,i,j):

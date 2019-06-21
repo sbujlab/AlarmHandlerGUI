@@ -196,8 +196,10 @@ class ALARM_HANDLER(tk.Frame):
         disp.radioButGreen.indices = (2,i)
         print("OL 2,{} alarm status = {}".format(i,OL.objectList[2][i].alarmStatus))
         disp.radioButGreen.config(command = lambda radGreen=disp.radioButGreen: self.select_green_button(OL,fileArray,radGreen))
-        if OL.objectList[2][i].alarmStatus != "OK" and OL.objectList[2][i].userSilenceStatus != "Silenced" and OL.objectList[2][i].userNotifyStatus.split(' ')[0] != "Cooldown":
+        if (OL.objectList[2][i].alarmStatus != "OK" or (OL.objectList[2][i].userNotifyStatus.split(' ')[0] != "OK" and OL.objectList[2][i].userNotifyStatus.split(' ')[0] != "Cooldown")) and OL.objectList[2][i].userSilenceStatus != "Silenced":
+          disp.alarmStatus = 0
           disp.radioButRed.grid(row=0,column=0,sticky='W')
+          disp.radioButRed.config(text=OL.objectList[2][i].alarmStatus, value = disp.alarmStatus)
         if OL.objectList[2][i].userNotifyStatus.split(' ')[0] == "Cooldown" and OL.objectList[2][i].userSilenceStatus != "Silenced":
           disp.radioButOrange.grid(row=0,column=0,sticky='W')
           disp.radioButOrange.config(text=OL.objectList[2][i].userNotifyStatus.split(' ')[1])
@@ -208,9 +210,10 @@ class ALARM_HANDLER(tk.Frame):
         if OL.objectList[2][i].alarmStatus != "OK" and OL.objectList[2][i].userSilenceStatus == "Silenced":
           disp.radioButYellow.grid(row=0,column=0,sticky='W')
           disp.radioButYellow.config(text=OL.objectList[2][i].alarmStatus)
-        if OL.objectList[2][i].alarmStatus == "OK" and OL.objectList[2][i].userSilenceStatus != "Silenced" and OL.objectList[2][i].userNotifyStatus == "OK": 
+        if OL.objectList[2][i].alarmStatus == "OK" and OL.objectList[2][i].userSilenceStatus != "Silenced" and OL.objectList[2][i].userNotifyStatus.split(' ')[0] == "OK":
           # Add check on userNotifyStatus so that the user will keep seeing the alarm indicator on even after the alarm itself has disappeared
           disp.radioButGreen.grid(row=0,column=0,sticky='W')
+          disp.radioButGreen.config(text='   ')
     return lgrid
 
   def initialize_menus(self,OL,fileArray):
@@ -322,7 +325,7 @@ class ALARM_HANDLER(tk.Frame):
 
   def update_GUI(self,OL,fileArray):
     fileArray.filearray = u.write_filearray(fileArray)
-    OL.objectList = u.create_objects(fileArray)
+    OL.objectList = u.create_objects(fileArray,OL.cooldownLength)
     self.make_screen(OL,fileArray)
 
   def display_parameter_list(self,OL,fileArray,i,j):

@@ -282,7 +282,7 @@ class EXPERT_ALARM_HANDLER(tk.Frame):
 
   def update_GUI(self,OL,fileArray):
     fileArray.filearray = u.write_filearray(fileArray)
-    OL.objectList = u.create_objects(fileArray)
+    OL.objectList = u.create_objects(fileArray,OL.cooldownLength)
     self.make_screen(OL,fileArray)
 
   def select_add_button(self,OL,fileArray,but):

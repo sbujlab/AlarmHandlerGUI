@@ -71,7 +71,7 @@ class ALARM_LOOP():
       if os.path.exists(alarmHandlerGUI.externalFilename) and self.checkExternalStatus == True and (time.time() - os.path.getmtime(alarmHandlerGUI.externalFilename)) < 300000: # 5 minute wait time for external to update
         print("Adding External alarms from {}".format(alarmHandlerGUI.externalFileArray.filename))
         u.update_extra_filearray(alarmHandlerGUI.fileArray,alarmHandlerGUI.externalFileArray)
-        alarmHandlerGUI.OL.objectList = u.create_objects(alarmHandlerGUI.fileArray)
+        alarmHandlerGUI.OL.objectList = u.create_objects(alarmHandlerGUI.fileArray,alarmHandlerGUI.OL.cooldownLength)
         self.reset_alarmList(alarmHandlerGUI.OL)
         u.write_textfile(alarmHandlerGUI.OL,alarmHandlerGUI.fileArray) #FIXME Do this here?
       else:
@@ -83,9 +83,9 @@ class ALARM_LOOP():
         # Check if the alarm is alarming and has not been "OK"ed by the user acknowledge
         print("Checking alarm {} status = {} and user acknowledge = {}".format(i,self.alarmList[i].alarmSelfStatus,self.ok_notify_check(self.alarmList[i].userNotifySelfStatus)))
         # If the userNotifyStatus is NULL (i.e. not set) then the alarm handler will just read it and move on with its life
-        if self.alarmList[i].alarmSelfStatus != "OK" and self.ok_notify_check(self.alarmList[i].userNotifySelfStatus) != "OK":
-          self.globalAlarmStatus = self.alarmList[i].alarmSelfStatus
-          localStat = self.alarmList[i].alarmSelfStatus
+        if self.alarmList[i].alarmSelfStatus != "OK" or self.ok_notify_check(self.alarmList[i].userNotifySelfStatus) != "OK":
+          self.globalAlarmStatus = self.alarmList[i].userNotifySelfStatus
+          localStat = self.alarmList[i].userNotifySelfStatus
           print("alarm {} = {}".format(i,localStat))
       if localStat == "OK":
         self.globalAlarmStatus = "OK"
@@ -128,28 +128,34 @@ class USER_NOTIFY():
       if alarmHandlerGUI.alertTheUser == True and alarmLoop.globalAlarmStatus != "OK": # globalAlarmStatus determined by these set acknowledged stati
         alarmHandlerGUI.alarmClient.sendPacket("2") # Have a case series here for passing different packets based on different alarm stati
       # Recursion loop here - splits off a new instance of this function and finishes the one currently running (be careful)
-      #alarmHandlerGUI.win.after(1000*OL.cooldownReduction,self.user_notify_loop(alarmLoop,OL,alarmHandlerGUI), alarmHandlerGUI) 
       alarmHandlerGUI.win.after(1000*OL.cooldownReduction,self.user_notify_loop, alarmLoop,OL,fileArray,alarmHandlerGUI) 
     else:                                                                                     
       # Recursion loop here - splits off a new instance of this function and finishes the one currently running (be careful) - Wait longer if paused, no need to overkill # FIXME Probably use the global cooldownReduction wait time for this
       alarmHandlerGUI.win.after(1000*10*OL.cooldownReduction,self.user_notify_loop, alarmLoop,OL,fileArray,alarmHandlerGUI) 
 
   def update_user_notify_status(self,alarmLoop,OL,fileArray):
-    print("Checking All Cooldowns")
-    tmpUNS = "OK" # Assume its ok, then update with the alarmList's "self" values
+    print("COOL: Checking All Cooldowns")
     for e in range(0,len(OL.objectList[2])):
+      tmpUNS = "OK" # Assume its ok, then update with the alarmList's "self" values
       if OL.objectList[2][e].userNotifyStatus != "OK":
         tmpCheck = OL.objectList[2][e].userNotifyStatus.split(' ')
+        print("COOL: Previous saved value = {}".format(tmpCheck))
         if tmpCheck[0] == "Cooldown":
+          print("COOL: In cooldown save region")
           if tmpCheck[1] != '':
+            print("COOL: In cooldown save region - actually cooling down")
             tmpUNS = "Cooldown {}".format(int(tmpCheck[1])-OL.cooldownReduction)
           if int(tmpCheck[1]) <= OL.cooldownReduction:
             tmpUNS = "OK" # Reset upond 2nd click
+            print("COOL: In cooldown save region - cooldown over, now we're OK")
         else: # it isn't a Cooldown # array, so just take the 0th element
+          print("COOL: Not in cooldown region, just save the current set value")
           tmpUNS = tmpCheck[0]
+        print("COOL: Saving to file [{}][{}] userNotifyStatus = {}".format(2,e,tmpUNS))
         OL.objectList[2][e].parameterList["User Notify Status"] = tmpUNS
         OL.objectList[2][e].userNotifyStatus = tmpUNS
-        for t in range(0,len(fileArray.filearray)):
+        OL.objectList[2][e].alarm.userNotifySelfStatus = tmpUNS
+        for t in range(OL.objectList[2][e].indexStart,OL.objectList[2][e].indexEnd+1):
           if fileArray.filearray[t][3] == "User Notify Status":
             fileArray.filearray[t][4] = tmpUNS
             # Update the object list all children's user notify status
@@ -328,8 +334,12 @@ class ALARM():
     if self.pList.get("Alarm Status",u.defaultKey) != "OK" and self.pList.get("Alarm Status",u.defaultKey) != "Invalid" and self.pList.get("Alarm Status",u.defaultKey) != "NULL": # Update global alarm status unless NULL or invalid
       self.alarmSelfStatus = self.pList.get("Alarm Status",u.defaultKey)
       myAO.alarmStatus = self.pList.get("Alarm Status",u.defaultKey)
-      self.userNotifySelfStatus = self.pList.get("User Notify Status",u.defaultKey)
-      myAO.userNotifyStatus = self.pList.get("User Notify Status",u.defaultKey)
+      # If the alarm is alarming and we aren't in cooldown the update user status
+      if self.pList.get("Alarm Status",u.defaultKey) != "OK" and self.pList.get("User Notify Status",u.defaultKey).split(' ')[0] != "Cooldown":
+        self.userNotifySelfStatus = self.pList.get("Alarm Status",u.defaultKey)
+        myAO.userNotifyStatus = self.pList.get("Alarm Status",u.defaultKey)
+        self.pList["User Notify Status"] = self.pList.get("Alarm Status",u.defaultKey)
+        print("COOLER: Editing value of User Notify Status to = {}".format(myAO.userNotifyStatus))
       myAO.userSilenceStatus = self.pList.get("User Silence Status",u.defaultKey)
       if myAO.userSilenceStatus != "Silenced":
         myAO.color = u.red_color
@@ -341,7 +351,7 @@ class ALARM():
       return "Not OK"
     else:
       self.alarmSelfStatus = self.pList.get("Alarm Status",u.defaultKey)
-      self.userNotifySelfStatus = self.pList.get("User Notify Status",u.defaultKey)
+      #self.userNotifySelfStatus = self.pList.get("User Notify Status",u.defaultKey)
       # FIXME needed? # myAO.userNotifyStatus = self.pList.get("User Notify Status",u.defaultKey)
       #myAO.userSilenceStatus = self.pList.get("User Silence Status",u.defaultKey)
       myAO.alarmStatus = "OK"
@@ -355,11 +365,11 @@ class FILE_ARRAY():
     self.filearray = u.parse_textfile(self)
 
 class OBJECT_LIST():
-  def __init__(self,fileArray):
-    self.objectList = u.create_objects(fileArray)
+  def __init__(self,fileArray,cooldownLength):
+    self.objectList = u.create_objects(fileArray,cooldownLength)
     self.currentlySelectedButton = -1
     self.displayPList = 0
-    self.cooldownLength = 60 # Wait a minute before alarming again
+    self.cooldownLength = cooldownLength # Wait a minute before alarming again
     self.cooldownReduction = 2
     self.selectedButtonColumnIndicesList = []
     self.activeObjectColumnIndicesList = [] # This stores the location where insertion will take place
@@ -423,6 +433,7 @@ class ALARM_OBJECT():
     self.alarmStatus = "OK"
     self.userSilenceStatus = "Alert"
     self.userNotifyStatus = "OK"
+    self.cooldownLength = 60 # Default initialize, will be overwritten later
     #self.parameterList["User Silence Status"] = self.userSilenceStatus
     self.alarm = lambda: ALARM(self);
     self.clicked = 0

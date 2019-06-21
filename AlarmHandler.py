@@ -38,7 +38,8 @@ class AlarmHandler:
       self.externalFileArray = alarm_object.FILE_ARRAY(self.externalFilename,self.delim)
     else:
       self.externalFileArray = None
-    self.OL = alarm_object.OBJECT_LIST(self.fileArray)
+    self.cooldownLength = 60
+    self.OL = alarm_object.OBJECT_LIST(self.fileArray,self.cooldownLength)
     self.masterAlarmImage = tk.PhotoImage(file='ok.ppm')
     self.masterAlarmButton = tk.Label(self.win, image=self.masterAlarmImage, cursor="hand2", bg=u.lightgrey_color)
     self.remoteName = 'hacweb7'
