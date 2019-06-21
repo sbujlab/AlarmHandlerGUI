@@ -179,7 +179,7 @@ class GRID_ALARM_HANDLER(tk.Frame):
         disp.butt = tk.Button(lgrid[i], text="Value = {}".format(OL.objectList[2][i].parameterList.get("Value",u.defaultKey)), justify='center', background=u.lightgrey_color) # loop over displayFrames
         #disp.butt = tk.Button(lgrid[i], text="Value = {}".format(OL.objectList[2][i].parameterList.get("Value",u.defaultKey)), justify='center', background=OL.objectList[2][i].color) # loop over displayFrames
         disp.butt.indices = (2,OL.objectList[2][i].columnIndex)
-        disp.butt.config(command = lambda but=disp.butt: self.select_button(OL,fileArray,but))
+        disp.butt.config(command = lambda but=disp.butt: self.select_disp_button(OL,fileArray,but))
         disp.butt.grid(columnspan=3, row=0,column=0)
         disp.radioButRed = tk.Radiobutton(lgrid[i], text=OL.objectList[2][i].alarmStatus, indicatoron=False, justify='left', value=lgrid[i].alarmStatus, variable=lgrid[i].redStat, fg=u.black_color, bg=u.lightgrey_color,
             activebackground=u.grey_color, activeforeground=u.black_color, selectcolor = u.red_color, highlightbackground=u.red_color, highlightcolor=u.red_color, highlightthickness=1)
@@ -271,6 +271,11 @@ class GRID_ALARM_HANDLER(tk.Frame):
       else:
         self.displayFrames[k].butt.config(background=u.lightgrey_color) 
     #self.displayFrames[j].config(background=OL.objectList[i][j].color) # Update that button to be the newly update object's new color (could just use but.config)
+
+  def select_disp_button(self,OL,fileArray,but):
+    i,j = but.indices
+    self.select_button(OL,fileArray,but)
+    self.update_GUI(OL,fileArray)
 
   def select_red_button(self,OL,fileArray,but):
     i,j = but.indices
