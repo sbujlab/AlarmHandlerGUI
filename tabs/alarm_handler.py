@@ -50,9 +50,11 @@ class ALARM_HANDLER(tk.Frame):
       newButt = tk.Button(self.controlFrame, text="{}{}".format(self.controlButtonsText[i],self.CBTextSuffix1[i]), default='active', justify='center', font = ('Helvetica 14 bold'),background=u.lightgrey_color)
       if self.controlButtonsText[i]=="Alarm Checker" and alarmLoop.globalLoopStatus != "Looping":
         newButt.config(background=u.yellow_color)
+        newButt.config(fg=u.black_color)
         newButt.config(text="{}{}".format(self.controlButtonsText[i],self.CBTextSuffix2[i]))
       if self.controlButtonsText[i]=="Silencer" and alarmLoop.globalUserAlarmSilence == "Silenced":
         newButt.config(background=u.yellow_color)
+        newButt.config(fg=u.black_color)
         newButt.config(text="{}{}".format(self.controlButtonsText[i],self.CBTextSuffix2[i]))
       if self.controlButtonsText[i]=="Alarm Status":
         if alarmLoop.globalAlarmStatus != "OK" and alarmLoop.globalUserAlarmSilence != "Silenced":
@@ -60,9 +62,11 @@ class ALARM_HANDLER(tk.Frame):
           newButt.config(fg=u.white_color)
         elif alarmLoop.globalAlarmStatus == "OK" and alarmLoop.globalUserAlarmSilence != "Silenced":
           newButt.config(background=u.lightgrey_color)
-        elif alarmLoop.globalUserAlarmSilence == "Silenced":
+        elif alarmLoop.globalUserAlarmSilence == "Silenced": 
+          newButt.config(fg=u.black_color)
           newButt.config(background=u.yellow_color)
         if alarmLoop.globalLoopStatus != "Looping":
+          newButt.config(fg=u.black_color)
           newButt.config(background=u.yellow_color)
       newButt.indices = (i,0)
       newButt.config(command = lambda newBut=newButt: self.select_control_buttons(OL,fileArray,alarmLoop,newBut))
@@ -196,11 +200,12 @@ class ALARM_HANDLER(tk.Frame):
         disp.radioButGreen.indices = (2,i)
         print("OL 2,{} alarm status = {}".format(i,OL.objectList[2][i].alarmStatus))
         disp.radioButGreen.config(command = lambda radGreen=disp.radioButGreen: self.select_green_button(OL,fileArray,radGreen))
-        if (OL.objectList[2][i].alarmStatus != "OK" or (OL.objectList[2][i].userNotifyStatus.split(' ')[0] != "OK" and OL.objectList[2][i].userNotifyStatus.split(' ')[0] != "Cooldown")) and OL.objectList[2][i].userSilenceStatus != "Silenced":
+        #if (OL.objectList[2][i].alarmStatus != "OK" or (OL.objectList[2][i].userNotifyStatus.split(' ')[0] != "OK" and OL.objectList[2][i].userNotifyStatus.split(' ')[0] != "Cooldown")) and OL.objectList[2][i].userSilenceStatus != "Silenced":
+        if OL.objectList[2][i].userNotifyStatus != "OK" and OL.objectList[2][i].userNotifyStatus.split(' ')[0] != "Cooldown" and OL.objectList[2][i].userSilenceStatus != "Silenced":
           disp.alarmStatus = 0
           disp.radioButRed.grid(row=0,column=0,sticky='W')
           disp.radioButRed.config(text=OL.objectList[2][i].alarmStatus, value = disp.alarmStatus)
-        if OL.objectList[2][i].userNotifyStatus.split(' ')[0] == "Cooldown" and OL.objectList[2][i].userSilenceStatus != "Silenced":
+        if OL.objectList[2][i].alarmStatus == "OK" and OL.objectList[2][i].userNotifyStatus.split(' ')[0] == "Cooldown" and OL.objectList[2][i].userSilenceStatus != "Silenced":
           disp.radioButOrange.grid(row=0,column=0,sticky='W')
           disp.radioButOrange.config(text=OL.objectList[2][i].userNotifyStatus.split(' ')[1])
         # Silence takes precedent over alarm and over notify/acknowledge

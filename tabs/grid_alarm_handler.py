@@ -51,9 +51,11 @@ class GRID_ALARM_HANDLER(tk.Frame):
       newButt = tk.Button(self.controlFrame, text="{}{}".format(self.controlButtonsText[i],self.CBTextSuffix1[i]), default='active', justify='center', font = ('Helvetica 14 bold'),background=u.lightgrey_color)
       if self.controlButtonsText[i]=="Alarm Checker" and alarmLoop.globalLoopStatus != "Looping":
         newButt.config(background=u.yellow_color)
+        newButt.config(fg=u.black_color)
         newButt.config(text="{}{}".format(self.controlButtonsText[i],self.CBTextSuffix2[i]))
       if self.controlButtonsText[i]=="Silencer" and alarmLoop.globalUserAlarmSilence == "Silenced":
         newButt.config(background=u.yellow_color)
+        newButt.config(fg=u.black_color)
         newButt.config(text="{}{}".format(self.controlButtonsText[i],self.CBTextSuffix2[i]))
       if self.controlButtonsText[i]=="Alarm Status":
         if alarmLoop.globalAlarmStatus != "OK" and alarmLoop.globalUserAlarmSilence != "Silenced":
@@ -62,8 +64,11 @@ class GRID_ALARM_HANDLER(tk.Frame):
         elif alarmLoop.globalAlarmStatus == "OK" and alarmLoop.globalUserAlarmSilence != "Silenced":
           newButt.config(background=u.lightgrey_color)
         elif alarmLoop.globalUserAlarmSilence == "Silenced":
+          newButt.config(fg=u.black_color)
           newButt.config(background=u.yellow_color)
+          newButt.config(fg=u.black_color)
         if alarmLoop.globalLoopStatus != "Looping":
+          newButt.config(fg=u.black_color)
           newButt.config(background=u.yellow_color)
       newButt.indices = (i,0)
       newButt.config(command = lambda newBut=newButt: self.select_control_buttons(OL,fileArray,alarmLoop,newBut))

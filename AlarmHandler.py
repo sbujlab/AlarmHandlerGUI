@@ -28,7 +28,6 @@ class AlarmHandler:
     self.win = tk.Tk()
     self.win.title("Continuous Aggregate Monitor: Alarm Handler")
     self.win.configure(background=u.lightgrey_color)
-    self.adc_options_vars = [tk.StringVar(), tk.StringVar(), tk.StringVar(), tk.StringVar()]
     self.get_alarm_handler_style()
     self.filename = "/adaqfs/home/apar/alarms/alarm.csv" # FIXME this should eventually be pushed into the config file read by default main program at runtime
     self.externalFilename = "/adaqfs/home/apar/alarms/japanAlarms.csv"
@@ -43,8 +42,8 @@ class AlarmHandler:
     self.masterAlarmImage = tk.PhotoImage(file='ok.ppm')
     self.masterAlarmButton = tk.Label(self.win, image=self.masterAlarmImage, cursor="hand2", bg=u.lightgrey_color)
     self.remoteName = 'hacweb7'
-    #self.alertTheUser = True
-    self.alertTheUser = False
+    self.alertTheUser = True
+    #self.alertTheUser = False
     self.alarmClient = bclient.sockClient(self.remoteName)
     self.alarmLoop = alarm_object.ALARM_LOOP(self)
     self.tabs = self.create_widgets()
@@ -102,16 +101,18 @@ class AlarmHandler:
     tab_titles = [('Alarm Handler', alarm_handler.ALARM_HANDLER),('Grid Alarm Handler', grid_alarm_handler.GRID_ALARM_HANDLER),('Expert Alarm Handler', expert_alarm_handler.EXPERT_ALARM_HANDLER),('Alarm History', alarm_history.ALARM_HISTORY)]
     tabs = {}
     for title, fn in tab_titles:
-      tab = ttk.Frame(tab_control, width=800, height=600, style="My.TFrame")
+      tab = ttk.Frame(tab_control, width=1200, height=400, style="My.TFrame")
       tab_control.add(tab, text=title)
       tabs[title] = fn(self.win,tab,self.OL,self.fileArray,self.alarmLoop)
-    tab_control.grid(row=0, column=0, columnspan=3)
+    tab_control.grid(row=0, column=0, columnspan=5)
     #self.masterAlarmButton = tk.Label(self.win, image=self.masterAlarmImage, cursor="hand2", bg=u.lightgrey_color)
     self.masterAlarmButton.image = self.masterAlarmImage
-    self.masterAlarmButton.grid(row=1, column=0, padx=5, pady=10, sticky='SW')
+    self.masterAlarmButton.grid(rowspan=3, row=1, column=0, padx=5, pady=10, sticky='SW')
     self.masterAlarmButton.bind("<Button-1>", self.update_show_alarms)
-    tk.Button(self.win, text='QUIT', command=quit, font = ('Helvetica 24 bold'), background=u.grey_color, width=10, height=4).grid(row=1, column=2, padx=15, pady=15, sticky='E')
-    tk.Button(self.win, text='Help', command=self.helpMe, font = ('Helvetica 24 bold'), background=u.lightgrey_color, width=4, height=4).grid(row=1, column=1, padx=15, pady=15, sticky=tk.W+tk.E)
+    tk.Button(self.win, text='History', command=self.helpMe, font = ('Helvetica 24 bold'), background=u.lightgrey_color, width=8).grid(row=1, column=1, padx=15, pady=3, sticky=tk.N+tk.S+tk.W+tk.E)
+    tk.Button(self.win, text='Help', command=self.helpMe, font = ('Helvetica 24 bold'), background=u.lightgrey_color, width=8).grid(row=2, column=1, padx=15, pady=3, sticky=tk.N+tk.S+tk.W+tk.E)
+    tk.Button(self.win, text='Contact Info', command=self.helpMe, font = ('Helvetica 24 bold'), background=u.lightgrey_color, width=8).grid(row=3, column=1, padx=15, pady=3, sticky=tk.N+tk.S+tk.W+tk.E)
+    tk.Button(self.win, text='QUIT', command=quit, font = ('Helvetica 24 bold'), background=u.grey_color, width=10, height=4).grid(rowspan=3, row=1, column=2, padx=15, pady=15, sticky='E')
     return tabs
 
 alarm_handler_GUI = AlarmHandler()

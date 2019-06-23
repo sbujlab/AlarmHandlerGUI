@@ -68,7 +68,7 @@ class ALARM_LOOP():
   def alarm_loop(self,alarmHandlerGUI):
     if (self.globalLoopStatus=="Looping"):
       print("waited 10 seconds, analyzing alarms")
-      if os.path.exists(alarmHandlerGUI.externalFilename) and self.checkExternalStatus == True and (time.time() - os.path.getmtime(alarmHandlerGUI.externalFilename)) < 300000: # 5 minute wait time for external to update
+      if os.path.exists(alarmHandlerGUI.externalFilename) and self.checkExternalStatus == True and (time.time() - os.path.getmtime(alarmHandlerGUI.externalFilename)) < 300000: # 5 minute wait time for external to update FIXME paramter file
         print("Adding External alarms from {}".format(alarmHandlerGUI.externalFileArray.filename))
         u.update_extra_filearray(alarmHandlerGUI.fileArray,alarmHandlerGUI.externalFileArray)
         alarmHandlerGUI.OL.objectList = u.create_objects(alarmHandlerGUI.fileArray,alarmHandlerGUI.OL.cooldownLength)
@@ -83,7 +83,8 @@ class ALARM_LOOP():
         # Check if the alarm is alarming and has not been "OK"ed by the user acknowledge
         print("Checking alarm {} status = {} and user acknowledge = {}".format(i,self.alarmList[i].alarmSelfStatus,self.ok_notify_check(self.alarmList[i].userNotifySelfStatus)))
         # If the userNotifyStatus is NULL (i.e. not set) then the alarm handler will just read it and move on with its life
-        if self.alarmList[i].alarmSelfStatus != "OK" or self.ok_notify_check(self.alarmList[i].userNotifySelfStatus) != "OK":
+        if self.ok_notify_check(self.alarmList[i].userNotifySelfStatus) != "OK": 
+          # Just let the method I wrote take care of determining global alarm status
           self.globalAlarmStatus = self.alarmList[i].userNotifySelfStatus
           localStat = self.alarmList[i].userNotifySelfStatus
           print("alarm {} = {}".format(i,localStat))
@@ -111,7 +112,7 @@ class ALARM_LOOP():
         alarmHandlerGUI.masterAlarmImage = tk.PhotoImage(file='alarm.ppm')
         alarmHandlerGUI.masterAlarmButton = tk.Label(alarmHandlerGUI.win, image=alarmHandlerGUI.masterAlarmImage, cursor="hand2", bg=u.lightgrey_color)
         alarmHandlerGUI.masterAlarmButton.image = tk.PhotoImage(file='alarm.ppm')
-      alarmHandlerGUI.masterAlarmButton.grid(row=1, column=0, padx=5, pady=10, sticky='SW')
+      alarmHandlerGUI.masterAlarmButton.grid(rowspan=3, row=1, column=0, padx=5, pady=10, sticky='SW')
       alarmHandlerGUI.masterAlarmButton.bind("<Button-1>", alarmHandlerGUI.update_show_alarms)
       alarmHandlerGUI.win.after(10000,self.alarm_loop, alarmHandlerGUI) # Recursion loop here - splits off a new instance of this function and finishes the one currently running (be careful)
     if (self.globalLoopStatus=="Paused"):
@@ -123,10 +124,19 @@ class USER_NOTIFY():
     pass
 
   def user_notify_loop(self,alarmLoop,OL,fileArray,alarmHandlerGUI):
+    #if alarmHandlerGUI.tabs.get("Alarm Handler",u.defaultKey) != u.defaultKey:
+    #  alarmHandlerGUI.tabs["Alarm Handler"].refresh_screen(alarmHandlerGUI.OL,alarmHandlerGUI.fileArray,alarmHandlerGUI.alarmLoop)
+    #if alarmHandlerGUI.tabs.get("Grid Alarm Handler",u.defaultKey) != u.defaultKey:
+    #  alarmHandlerGUI.tabs["Grid Alarm Handler"].refresh_screen(alarmHandlerGUI.OL,alarmHandlerGUI.fileArray,alarmHandlerGUI.alarmLoop)
+    #if alarmHandlerGUI.tabs.get("Expert Alarm Handler",u.defaultKey) != u.defaultKey:
+    #  alarmHandlerGUI.tabs["Expert Alarm Handler"].refresh_screen(alarmHandlerGUI.OL,alarmHandlerGUI.fileArray,alarmHandlerGUI.alarmLoop)
     if (alarmLoop.globalLoopStatus=="Looping"):
       self.update_user_notify_status(alarmLoop,OL,fileArray) # Assumes OK, checks each OL.objectList[2] entry for its notify status, continues
       if alarmHandlerGUI.alertTheUser == True and alarmLoop.globalAlarmStatus != "OK": # globalAlarmStatus determined by these set acknowledged stati
-        alarmHandlerGUI.alarmClient.sendPacket("2") # Have a case series here for passing different packets based on different alarm stati
+        try:
+          alarmHandlerGUI.alarmClient.sendPacket("2") # Have a case series here for passing different packets based on different alarm stati
+        except:
+          print("Alarm Sound Server not running\nPlease Launch an instance on the EPICS computer\nssh hacuser@hacweb7, cd parity-alarms, ./bserver&")
       # Recursion loop here - splits off a new instance of this function and finishes the one currently running (be careful)
       alarmHandlerGUI.win.after(1000*OL.cooldownReduction,self.user_notify_loop, alarmLoop,OL,fileArray,alarmHandlerGUI) 
     else:                                                                                     
