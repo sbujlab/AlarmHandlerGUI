@@ -108,9 +108,9 @@ class AlarmHandler:
     help_but = help_buttons.HELP_BUTTONS()
     resp_but = help_buttons.HELP_BUTTONS()
 
-    tk.Button(self.win, text='Physics/Analysis', command= lambda: phys_but.physicsAnalysis(self), font = ('Helvetica 16 bold'), background=u.lightgrey_color, width=18).grid(row=1, column=1, padx=15, pady=2)#, sticky=tk.N+tk.S+tk.W+tk.E)
-    tk.Button(self.win, text='Help', command= lambda: help_but.helpMe(self), font = ('Helvetica 16 bold'), background=u.lightgrey_color, width=18).grid(row=2, column=1, padx=15, pady=2)#, sticky=tk.N+tk.S+tk.W+tk.E)
-    tk.Button(self.win, text='Response Info', command= lambda: resp_but.responseInfo(self), font = ('Helvetica 16 bold'), background=u.lightgrey_color, width=18).grid(row=3, column=1, padx=15, pady=2)#, sticky=tk.N+tk.S+tk.W+tk.E)
+    tk.Button(self.win, text='Help', command= lambda: help_but.helpMe(self), font = ('Helvetica 16 bold'), background=u.lightgrey_color, width=18).grid(row=1, column=1, padx=15, pady=3)#, sticky=tk.N+tk.S+tk.W+tk.E)
+    tk.Button(self.win, text='Response Info', command= lambda: resp_but.responseInfo(self), font = ('Helvetica 16 bold'), background=u.lightgrey_color, width=18).grid(row=2, column=1, padx=15, pady=3)#, sticky=tk.N+tk.S+tk.W+tk.E)
+    tk.Button(self.win, text='Physics/Analysis', command= lambda: phys_but.physicsAnalysis(self), font = ('Helvetica 16 bold'), background=u.lightgrey_color, width=18).grid(row=3, column=1, padx=15, pady=3)#, sticky=tk.N+tk.S+tk.W+tk.E)
     tk.Button(self.win, text='QUIT', command=quit, font = ('Helvetica 24 bold'), background=u.grey_color, width=5, height=2).grid(rowspan=3, row=1, column=2, padx=10, pady=10)#, sticky='NESW')
     return tabs
 
