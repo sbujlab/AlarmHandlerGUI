@@ -81,9 +81,9 @@ class ALARM_LOOP():
         self.alarmList[i].alarm_analysis()
         self.alarmList[i].alarm_evaluate()
         # Check if the alarm is alarming and has not been "OK"ed by the user acknowledge
-        print("Checking alarm {} status = {} and user acknowledge = {}".format(i,self.alarmList[i].alarmSelfStatus,self.ok_notify_check(self.alarmList[i].userNotifySelfStatus)))
+        print("Checking alarm {} alarm status = {}, silence status = {}, and user acknowledge = {}".format(i,self.alarmList[i].alarmSelfStatus,self.alarmList[i].userSilenceSelfStatus,self.ok_notify_check(self.alarmList[i].userNotifySelfStatus)))
         # If the userNotifyStatus is NULL (i.e. not set) then the alarm handler will just read it and move on with its life
-        if self.ok_notify_check(self.alarmList[i].userNotifySelfStatus) != "OK": 
+        if self.ok_notify_check(self.alarmList[i].userNotifySelfStatus) != "OK" and self.alarmList[i].userSilenceSelfStatus == "Alert":
           # Just let the method I wrote take care of determining global alarm status
           self.globalAlarmStatus = self.alarmList[i].userNotifySelfStatus
           localStat = self.alarmList[i].userNotifySelfStatus
@@ -181,6 +181,7 @@ class ALARM():
     self.alarmErrorReturn = None
     self.alarmSelfStatus = myAO.alarmStatus
     self.userNotifySelfStatus = myAO.userNotifyStatus
+    self.userSilenceSelfStatus = myAO.userSilenceStatus
     self.alarmType = self.pList.get("Alarm Type",u.defaultKey)
     self.alarmEvaluateType = "Exists" # Default alarm criteria is whether the value is not-null and otherwise is defined on context from given parameterList entries
     # Do I need to make a lambda initialized instance of the alarm action per event? I don't think this matters like it did for button context menu placements.... especially since these actions are being taken by the alarm handler in a loop over objectList

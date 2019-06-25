@@ -108,8 +108,10 @@ def silence_filearray_menu(OL,fileArray,butMenu):
   # For it and its children set alarmStatus = "OK"
   if OL.objectList[i][j].userSilenceStatus == "Silenced":
     OL.objectList[i][j].userSilenceStatus = "Alert" 
+    OL.objectList[i][j].alarm.userSilenceSelfStatus = "Alert" 
   elif OL.objectList[i][j].userSilenceStatus == "Alert":
     OL.objectList[i][j].userSilenceStatus = "Silenced" 
+    OL.objectList[i][j].alarm.userSilenceSelfStatus = "Silenced" 
     OL.objectList[i][j].color = yellow_color
   for q in range(OL.objectList[i][j].indexStart,OL.objectList[i][j].indexEnd+1):
     if fileArray.filearray[q][3] == "User Silence Status": # Update the filearray too
@@ -264,6 +266,7 @@ def create_objects(fileArray,cooldownLength):
 
           if localObjectList[3][colRow[3]-1].value == "User Silence Status":
             localObjectList[2][localObjectList[column][colRow[3]-1].parentIndices[2]].userSilenceStatus = localObjectList[4][colRow[4]-1].value 
+            localObjectList[2][localObjectList[column][colRow[3]-1].parentIndices[2]].alarm.userSilenceSelfStatus = localObjectList[4][colRow[4]-1].value 
             # Check for user silenced status
             #print("user silence status: {}".format(localObjectList[2][localObjectList[column][colRow[3]-1].parentIndices[2]].userSilenceStatus))
             # Editing the parameterList entry..... instead of the object value itself...

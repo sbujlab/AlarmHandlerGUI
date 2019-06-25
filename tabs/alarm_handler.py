@@ -205,7 +205,7 @@ class ALARM_HANDLER(tk.Frame):
           disp.alarmStatus = 0
           disp.radioButRed.grid(row=0,column=0,sticky='W')
           disp.radioButRed.config(text=OL.objectList[2][i].alarmStatus, value = disp.alarmStatus)
-        if OL.objectList[2][i].alarmStatus == "OK" and OL.objectList[2][i].userNotifyStatus.split(' ')[0] == "Cooldown" and OL.objectList[2][i].userSilenceStatus != "Silenced":
+        if OL.objectList[2][i].userNotifyStatus.split(' ')[0] == "Cooldown" and OL.objectList[2][i].userSilenceStatus != "Silenced":
           disp.radioButOrange.grid(row=0,column=0,sticky='W')
           disp.radioButOrange.config(text=OL.objectList[2][i].userNotifyStatus.split(' ')[1])
         # Silence takes precedent over alarm and over notify/acknowledge

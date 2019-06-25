@@ -13,6 +13,7 @@ import webbrowser
 
 import csv
 import alarm_object
+import help_buttons
 import tabs.expert_alarm_handler as expert_alarm_handler
 import tabs.alarm_handler as alarm_handler
 import tabs.grid_alarm_handler as grid_alarm_handler
@@ -55,13 +56,6 @@ class AlarmHandler:
       "TNotebook.Tab": {"configure": {"background": u.lightgrey_color}}})
     style.theme_use("alarm_handler")
 
-  def helpMe(self):
-    window = tk.Toplevel(self.win)
-    label_str = "Help Text"
-    tk.Label(window, text=label_str, wraplength=200).grid(row=0,column=0,padx=5,pady=5)
-    tk.Button(window, text="Close", command=window.destroy).grid(row=1,column=0,padx=5,pady=5)
-
-
   def quit(self):
     self.win.quit()
     self.win.destroy()
@@ -101,17 +95,21 @@ class AlarmHandler:
     tab_titles = [('Alarm Handler', alarm_handler.ALARM_HANDLER),('Grid Alarm Handler', grid_alarm_handler.GRID_ALARM_HANDLER),('Expert Alarm Handler', expert_alarm_handler.EXPERT_ALARM_HANDLER),('Alarm History', alarm_history.ALARM_HISTORY)]
     tabs = {}
     for title, fn in tab_titles:
-      tab = ttk.Frame(tab_control, width=1200, height=400, style="My.TFrame")
+      tab = ttk.Frame(tab_control, width=20, height=40, style="My.TFrame")
       tab_control.add(tab, text=title)
       tabs[title] = fn(self.win,tab,self.OL,self.fileArray,self.alarmLoop)
-    tab_control.grid(row=0, column=0, columnspan=5)
+    tab_control.grid(row=0, column=0, columnspan=3, sticky='NSEW')
     #self.masterAlarmButton = tk.Label(self.win, image=self.masterAlarmImage, cursor="hand2", bg=u.lightgrey_color)
     self.masterAlarmButton.image = self.masterAlarmImage
     self.masterAlarmButton.grid(rowspan=3, row=1, column=0, padx=5, pady=10, sticky='SW')
     self.masterAlarmButton.bind("<Button-1>", self.update_show_alarms)
-    tk.Button(self.win, text='History', command=self.helpMe, font = ('Helvetica 24 bold'), background=u.lightgrey_color, width=8).grid(row=1, column=1, padx=15, pady=3, sticky=tk.N+tk.S+tk.W+tk.E)
-    tk.Button(self.win, text='Help', command=self.helpMe, font = ('Helvetica 24 bold'), background=u.lightgrey_color, width=8).grid(row=2, column=1, padx=15, pady=3, sticky=tk.N+tk.S+tk.W+tk.E)
-    tk.Button(self.win, text='Contact Info', command=self.helpMe, font = ('Helvetica 24 bold'), background=u.lightgrey_color, width=8).grid(row=3, column=1, padx=15, pady=3, sticky=tk.N+tk.S+tk.W+tk.E)
+    phys_but = help_buttons.HELP_BUTTONS()
+    help_but = help_buttons.HELP_BUTTONS()
+    resp_but = help_buttons.HELP_BUTTONS()
+
+    tk.Button(self.win, text='Physics/Analysis', command= lambda: phys_but.physicsAnalysis(self), font = ('Helvetica 24 bold'), background=u.lightgrey_color, width=8).grid(row=1, column=1, padx=15, pady=3, sticky=tk.N+tk.S+tk.W+tk.E)
+    tk.Button(self.win, text='Help', command= lambda: help_but.helpMe(self), font = ('Helvetica 24 bold'), background=u.lightgrey_color, width=8).grid(row=2, column=1, padx=15, pady=3, sticky=tk.N+tk.S+tk.W+tk.E)
+    tk.Button(self.win, text='Response Info', command= lambda: resp_but.responseInfo(self), font = ('Helvetica 24 bold'), background=u.lightgrey_color, width=8).grid(row=3, column=1, padx=15, pady=3, sticky=tk.N+tk.S+tk.W+tk.E)
     tk.Button(self.win, text='QUIT', command=quit, font = ('Helvetica 24 bold'), background=u.grey_color, width=10, height=4).grid(rowspan=3, row=1, column=2, padx=15, pady=15, sticky='E')
     return tabs
 

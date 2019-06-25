@@ -29,7 +29,7 @@ class GRID_ALARM_HANDLER(tk.Frame):
     self.pDataFrame = tk.LabelFrame(tab, text='Alarm Parameter Display', background=u.white_color)
     self.pDataFrame.disp = []
     self.rowTitles = {0:"Alarms"}
-    self.NperRow = 3
+    self.NperRow = 6
     OL.currentlySelectedButton = -1
     OL.displayPList = 0
     self.rowsp = 1
