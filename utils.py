@@ -132,7 +132,7 @@ def notify_acknowledge_filearray_menu(OL,fileArray,butMenu):
     #OL.objectList[i][j].color = yellow_color
   for q in range(OL.objectList[i][j].indexStart,OL.objectList[i][j].indexEnd+1):
     if fileArray.filearray[q][3] == "User Notify Status": # Update the filearray too
-      print("Printing to filearray[{}][{}] User Notify Status = {}".format(q,4,OL.objectList[i][j].userNotifyStatus))
+      #print("Printing to filearray[{}][{}] User Notify Status = {}".format(q,4,OL.objectList[i][j].userNotifyStatus))
       fileArray.filearray[q][4] = OL.objectList[i][j].userNotifyStatus
 
 def edit_filearray_menu(OL,fileArray,butMenu):
@@ -155,7 +155,7 @@ def move_filearray_menu(OL,fileArray,butMenu):
   # Shift fileArray[+moveNind] up by size of moved bit
   file_ind_start = OL.objectList[i][j].indexStart
   file_ind_stop = OL.objectList[i][j].indexEnd
-  print("col {}, entry {}, move by {}, start file ind {}, end file ind {}, position to plant into {}".format(i,j,mvN,file_ind_start,file_ind_stop,OL.objectList[i][j+mvN].indexEnd))
+  #print("col {}, entry {}, move by {}, start file ind {}, end file ind {}, position to plant into {}".format(i,j,mvN,file_ind_start,file_ind_stop,OL.objectList[i][j+mvN].indexEnd))
   #inplace_shift(fileArray.filearray,file_ind_start,file_ind_stop-file_ind_start+1,file_ind_distance+file_ind_start)
   if mvN>0:
     #fileArray.filearray = subshift(fileArray.filearray,file_ind_start,file_ind_stop+1,OL.objectList[i][j+mvN].indexEnd)
@@ -170,7 +170,7 @@ def copy_filearray_menu(OL,fileArray,butMenu):
   copyFileArray = []
   file_ind_start = OL.objectList[i][j].indexStart
   file_ind_stop = OL.objectList[i][j].indexEnd
-  print("col {}, entry {}, copy newName = {}, start file ind {}, end file ind {}".format(i,j,copyN,file_ind_start,file_ind_stop))
+  #print("col {}, entry {}, copy newName = {}, start file ind {}, end file ind {}".format(i,j,copyN,file_ind_start,file_ind_stop))
   if copyN != None:
     for l in range(file_ind_start,file_ind_stop+1):
       copyFileArray.append(fileArray.filearray[l].copy())
@@ -206,7 +206,7 @@ def write_filearray(fileArray):
   if len(fileArray.filearray)!=0:
     filearrayrows=zip(*fileArray.filearray)
     wr.writerows(fileArray.filearray)
-    print("writing file array")
+    print("Writing file array to disk")
     return fileArray.filearray
 
 def create_objects(fileArray,cooldownLength):
@@ -224,7 +224,7 @@ def create_objects(fileArray,cooldownLength):
   for lineN in range(0,nlines):
     line = fileArray.filearray[lineN]
     if len(line) != ncolumns:
-      print("Error, line {} = {} has the wrong number of entries for alarm handling parsing".format(lineN,line))
+      #print("Error, line {} = {} has the wrong number of entries for alarm handling parsing".format(lineN,line))
       return None
     isnew = 0
     for column in range(0,ncolumns):
@@ -333,19 +333,19 @@ def create_objects(fileArray,cooldownLength):
 
 
           if localObjectList[3][colRow[3]-1].value == "User Notify Status":
-            print("ALERT the user notify status is being read\n\n\n\n")
+            #print("ALERT the user notify status is being read\n\n\n\n")
             for q in range(0,column):
               # Only update if silence is not silenced, if silenced then "OK"
               if localObjectList[q][localObjectList[column][colRow[3]-1].parentIndices[q]].userSilenceStatus == "Silenced":
 
-                print("OK")
+                #print("OK")
                 if q == 2:
                   localObjectList[q][localObjectList[column][colRow[3]-1].parentIndices[q]].parameterList["User Notify Status"] = "OK"
                 localObjectList[q][localObjectList[column][colRow[3]-1].parentIndices[q]].userNotifyStatus = "OK"
                 localObjectList[q][localObjectList[column][colRow[3]-1].parentIndices[q]].alarm.userNotifySelfStatus = "OK"
               # Else if we aren't OK but also aren't in a cooldown, then copy the alarm value for Latching purposes
               elif localObjectList[q][localObjectList[column][colRow[3]-1].parentIndices[q]].alarmStatus != "OK" and localObjectList[4][colRow[4]-1].value.split(' ')[0] != "Cooldown":
-                print("Reading object list, setting parameters, User Notify Status == {}".format(localObjectList[4][colRow[4]-1].value))
+                #print("Reading object list, setting parameters, User Notify Status == {}".format(localObjectList[4][colRow[4]-1].value))
                 if q == 2:
                   localObjectList[q][localObjectList[column][colRow[3]-1].parentIndices[q]].parameterList["User Notify Status"] = localObjectList[q][localObjectList[column][colRow[3]-1].parentIndices[q]].alarmStatus
                 localObjectList[q][localObjectList[column][colRow[3]-1].parentIndices[q]].userNotifyStatus = localObjectList[q][localObjectList[column][colRow[3]-1].parentIndices[q]].alarmStatus
@@ -353,7 +353,7 @@ def create_objects(fileArray,cooldownLength):
               # Else just copy the dang value, this will be the initialized value or the OK status or the Cooldown
               else:
               #elif localObjectList[q][localObjectList[column][colRow[3]-1].parentIndices[q]].alarmStatus != "OK":
-                print("Updating with self status = {}".format(localObjectList[4][colRow[4]-1].value))
+                #print("Updating with self status = {}".format(localObjectList[4][colRow[4]-1].value))
                 if q == 2:
                   localObjectList[q][localObjectList[column][colRow[3]-1].parentIndices[q]].parameterList["User Notify Status"] = localObjectList[4][colRow[4]-1].value
                 localObjectList[q][localObjectList[column][colRow[3]-1].parentIndices[q]].userNotifyStatus = localObjectList[4][colRow[4]-1].value
@@ -374,7 +374,7 @@ def create_objects(fileArray,cooldownLength):
   for i in range(0,len(localObjectList[2])): # The 3rd column is the list of alarm objects
     localObjectList[2][i].alarm = alarm_object.ALARM(localObjectList[2][i]) # NEW ALARM defined here per new object in middle column
     #print("New object's parameterList = {}".format(localObjectList[2][i].parameterList))
-    print("Creating alarm for object {} {}, type = {}".format(localObjectList[2][i].column,localObjectList[2][i].columnIndex,localObjectList[2][i].parameterList.get("Alarm Type",defaultKey)))
+    #print("Creating alarm for object {} {}, type = {}".format(localObjectList[2][i].column,localObjectList[2][i].columnIndex,localObjectList[2][i].parameterList.get("Alarm Type",defaultKey)))
   return localObjectList
   
 def update_extra_filearray(fileArray,extraFileArray):
@@ -401,11 +401,11 @@ def update_extra_filearray(fileArray,extraFileArray):
               insertSpot = k+1 # Update insertSpot for each entry with 3th level ana name matching
         if edittedEntry == False:
           if insertSpot == len(fileArray.filearray):
-            print("Appending {} below {}".format(extraFileArray.filearray[i],fileArray.filearray[len(fileArray.filearray)-1]))
+            #print("Appending {} below {}".format(extraFileArray.filearray[i],fileArray.filearray[len(fileArray.filearray)-1]))
             fileArray.filearray.append(extraFileArray.filearray[i])
           else:
             fileArray.filearray.insert(insertSpot,extraFileArray.filearray[i])
-            print("Inserting {} below {}".format(extraFileArray.filearray[i],fileArray.filearray[indices[x]]))
+            #print("Inserting {} below {}".format(extraFileArray.filearray[i],fileArray.filearray[indices[x]]))
   
 def append_object(OL,coli): 
   colLen = len(OL.objectList[coli])

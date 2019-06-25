@@ -36,33 +36,33 @@ class sockClient:
       ready_to_read, ready_to_write, in_error = select.select(readers, writers, errs, timeout)
       self.s.setblocking(1)
       #self.s.setblocking(0)
-      print("Socket successfully created")
+      #print("Socket successfully created")
     except socket.error as err: 
       print("Socket creation failed with error {}".format(err))
 
     try:
       self.s.connect(self.server_addr)
-      print("Connected to {}".format(repr(self.server_addr)))
+      #print("Connected to {}".format(repr(self.server_addr)))
     except:
       print("ERROR: Connection to {} refused".format(repr(self.server_addr)))
       sys.exit(1)
 
     try:
-      print("Sending new packet, data = {}".format(buff))
+      #print("Sending new packet, data = {}".format(buff))
       payload_out = Payload()
       payload_out.ibuf[0] = int(buff)
 
-      print("Sending ibuf[0]={}".format(payload_out.ibuf[0]))
+      #print("Sending ibuf[0]={}".format(payload_out.ibuf[0]))
       nsent = self.s.send(payload_out)
 
       # all data has been sent or an error occurs. No return value.
-      print("Sent {} bytes".format(nsent))
+      #print("Sent {} bytes".format(nsent))
       # Hypothetically one would want to know if the server 
       # successfully alarmed or not, but for now just move on
       #buff = self.s.recv(sizeof(Payload))
       #payload_in = Payload.from_buffer_copy(buff)
       #print("Received ibuf[0]={}".format(payload_in.ibuf[0]))
     finally:
-      print("Closing socket")
+      #print("Closing socket")
       self.s.close()
     return "Sent Packet"

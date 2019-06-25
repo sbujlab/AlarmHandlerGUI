@@ -383,7 +383,7 @@ class EXPERT_ALARM_HANDLER(tk.Frame):
     self.buttonMenus = self.initialize_menus(OL,fileArray) # FIXME Necessary?
 
   def refresh_screen(self,OL,fileArray,alarmLoop):
-    print("Refreshing expert alarm handler")
+    #print("Refreshing expert alarm handler")
     self.controlButtons = self.make_control_buttons(OL,fileArray, alarmLoop)
     self.update_GUI(OL,fileArray)
     for coli in range(0,len(OL.selectedButtonColumnIndicesList)):

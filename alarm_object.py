@@ -39,10 +39,10 @@ class ALARM_LOOP():
     checkedStat = "OK"
     if checkNotifyStatus != "OK":
       if checkNotifyStatus.split(' ')[0] == "Cooldown":
-        print("Checked if we are in a countdown, we are, status = {}".format(checkNotifyStatus))
+        #print("Checked if we are in a countdown, we are, status = {}".format(checkNotifyStatus))
         checkedStat = "OK"
       else:
-        print("Checked if we are in a countdown, we are not, status = {}".format(checkNotifyStatus))
+        #print("Checked if we are in a countdown, we are not, status = {}".format(checkNotifyStatus))
         checkedStat = checkNotifyStatus
     return checkedStat
 
@@ -67,9 +67,9 @@ class ALARM_LOOP():
 
   def alarm_loop(self,alarmHandlerGUI):
     if (self.globalLoopStatus=="Looping"):
-      print("waited 10 seconds, analyzing alarms")
+      print("Waited 10 seconds, analyzing alarms")
       if os.path.exists(alarmHandlerGUI.externalFilename) and self.checkExternalStatus == True and (time.time() - os.path.getmtime(alarmHandlerGUI.externalFilename)) < 300000: # 5 minute wait time for external to update FIXME paramter file
-        print("Adding External alarms from {}".format(alarmHandlerGUI.externalFileArray.filename))
+        #print("Adding External alarms from {}".format(alarmHandlerGUI.externalFileArray.filename))
         u.update_extra_filearray(alarmHandlerGUI.fileArray,alarmHandlerGUI.externalFileArray)
         alarmHandlerGUI.OL.objectList = u.create_objects(alarmHandlerGUI.fileArray,alarmHandlerGUI.OL.cooldownLength)
         self.reset_alarmList(alarmHandlerGUI.OL)
@@ -81,13 +81,12 @@ class ALARM_LOOP():
         self.alarmList[i].alarm_analysis()
         self.alarmList[i].alarm_evaluate()
         # Check if the alarm is alarming and has not been "OK"ed by the user acknowledge
-        print("Checking alarm {} alarm status = {}, silence status = {}, and user acknowledge = {}".format(i,self.alarmList[i].alarmSelfStatus,self.alarmList[i].userSilenceSelfStatus,self.ok_notify_check(self.alarmList[i].userNotifySelfStatus)))
+        #print("Checking alarm {} alarm status = {}, silence status = {}, and user acknowledge = {}".format(i,self.alarmList[i].alarmSelfStatus,self.alarmList[i].userSilenceSelfStatus,self.ok_notify_check(self.alarmList[i].userNotifySelfStatus)))
         # If the userNotifyStatus is NULL (i.e. not set) then the alarm handler will just read it and move on with its life
         if self.ok_notify_check(self.alarmList[i].userNotifySelfStatus) != "OK" and self.alarmList[i].userSilenceSelfStatus == "Alert":
           # Just let the method I wrote take care of determining global alarm status
           self.globalAlarmStatus = self.alarmList[i].userNotifySelfStatus
           localStat = self.alarmList[i].userNotifySelfStatus
-          print("alarm {} = {}".format(i,localStat))
       if localStat == "OK":
         self.globalAlarmStatus = "OK"
       else:
@@ -103,16 +102,16 @@ class ALARM_LOOP():
         alarmHandlerGUI.tabs["Expert Alarm Handler"].refresh_screen(alarmHandlerGUI.OL,alarmHandlerGUI.fileArray,alarmHandlerGUI.alarmLoop)
       alarmHandlerGUI.masterAlarmButton.destroy()
       if alarmHandlerGUI.alarmLoop.globalAlarmStatus == "OK":
-        alarmHandlerGUI.masterAlarmImage = tk.PhotoImage(file='ok.ppm')
+        alarmHandlerGUI.masterAlarmImage = tk.PhotoImage(file='ok.ppm').subsample(2)
         alarmHandlerGUI.masterAlarmButton = tk.Label(alarmHandlerGUI.win, image=alarmHandlerGUI.masterAlarmImage, cursor="hand2", bg=u.lightgrey_color)
-        alarmHandlerGUI.masterAlarmButton.image = tk.PhotoImage(file='ok.ppm')
+        alarmHandlerGUI.masterAlarmButton.image = tk.PhotoImage(file='ok.ppm').subsample(2)
       if alarmHandlerGUI.alarmLoop.globalAlarmStatus != "OK":
         #alarmHandlerGUI.alarmClient.sendPacket("2")
         #self.userNotifyLoop.update_user_notify_status(alarmHandlerGUI.OL)
-        alarmHandlerGUI.masterAlarmImage = tk.PhotoImage(file='alarm.ppm')
+        alarmHandlerGUI.masterAlarmImage = tk.PhotoImage(file='alarm.ppm').subsample(2)
         alarmHandlerGUI.masterAlarmButton = tk.Label(alarmHandlerGUI.win, image=alarmHandlerGUI.masterAlarmImage, cursor="hand2", bg=u.lightgrey_color)
-        alarmHandlerGUI.masterAlarmButton.image = tk.PhotoImage(file='alarm.ppm')
-      alarmHandlerGUI.masterAlarmButton.grid(rowspan=3, row=1, column=0, padx=5, pady=10, sticky='SW')
+        alarmHandlerGUI.masterAlarmButton.image = tk.PhotoImage(file='alarm.ppm').subsample(2)
+      alarmHandlerGUI.masterAlarmButton.grid(rowspan=3, row=1, column=0, padx=5, pady=10, sticky='NESW')
       alarmHandlerGUI.masterAlarmButton.bind("<Button-1>", alarmHandlerGUI.update_show_alarms)
       alarmHandlerGUI.win.after(10000,self.alarm_loop, alarmHandlerGUI) # Recursion loop here - splits off a new instance of this function and finishes the one currently running (be careful)
     if (self.globalLoopStatus=="Paused"):
@@ -144,24 +143,20 @@ class USER_NOTIFY():
       alarmHandlerGUI.win.after(1000*10*OL.cooldownReduction,self.user_notify_loop, alarmLoop,OL,fileArray,alarmHandlerGUI) 
 
   def update_user_notify_status(self,alarmLoop,OL,fileArray):
-    print("COOL: Checking All Cooldowns")
     for e in range(0,len(OL.objectList[2])):
       tmpUNS = "OK" # Assume its ok, then update with the alarmList's "self" values
       if OL.objectList[2][e].userNotifyStatus != "OK":
         tmpCheck = OL.objectList[2][e].userNotifyStatus.split(' ')
-        print("COOL: Previous saved value = {}".format(tmpCheck))
         if tmpCheck[0] == "Cooldown":
-          print("COOL: In cooldown save region")
           if tmpCheck[1] != '':
-            print("COOL: In cooldown save region - actually cooling down")
+            print("In cooldown save region - actually cooling down")
             tmpUNS = "Cooldown {}".format(int(tmpCheck[1])-OL.cooldownReduction)
           if int(tmpCheck[1]) <= OL.cooldownReduction:
             tmpUNS = "OK" # Reset upond 2nd click
-            print("COOL: In cooldown save region - cooldown over, now we're OK")
+            print("In cooldown save region - cooldown over, now we're OK")
         else: # it isn't a Cooldown # array, so just take the 0th element
-          print("COOL: Not in cooldown region, just save the current set value")
           tmpUNS = tmpCheck[0]
-        print("COOL: Saving to file [{}][{}] userNotifyStatus = {}".format(2,e,tmpUNS))
+        #print("COOL: Saving to file [{}][{}] userNotifyStatus = {}".format(2,e,tmpUNS))
         OL.objectList[2][e].parameterList["User Notify Status"] = tmpUNS
         OL.objectList[2][e].userNotifyStatus = tmpUNS
         OL.objectList[2][e].alarm.userNotifySelfStatus = tmpUNS
@@ -200,9 +195,9 @@ class ALARM():
         cond_out = "NULL"
         cond_out = subprocess.Popen(cmds, stdout=subprocess.PIPE).stdout.read().strip().decode('ascii') # Needs to be decoded... be careful #FIXME
         #print("EPICS: Doing alarm analysis for object {} {}, name = {}".format(myAO.column,myAO.columnIndex,myAO.name+" "+myAO.value))
-        print("The epics output for variable {} is {}".format(self.pList["Variable Name"],cond_out))
+        #print("The epics output for variable {} is {}".format(self.pList["Variable Name"],cond_out))
         if "Invalid" in str(cond_out): # Then the epics variable was invalid
-          print("ERROR Invalid epics channel, check with caget again:\t {}".format(self.pList["Variable Name"]))
+          #print("ERROR Invalid epics channel, check with caget again:\t {}".format(self.pList["Variable Name"]))
           cond_out = "NULL"
         self.pList["Value"] = cond_out
       else: # User didn't have "Value" in their parameter list, add it and make it init to NULL
@@ -224,7 +219,7 @@ class ALARM():
     highhigh = self.pList.get("High High",u.defaultKey)
     exactly = self.pList.get("Exactly",u.defaultKey)
     if not u.is_number(str(val)): # Then we are not dealing with a number alarm - for now just return false
-      print("ERROR: Assume alarms values can only be numbers for now")
+      #print("ERROR: Assume alarms values can only be numbers for now")
       return "Invalid"
     else:
       val = Decimal(self.pList.get("Value",u.defaultKey))
@@ -350,7 +345,7 @@ class ALARM():
         self.userNotifySelfStatus = self.pList.get("Alarm Status",u.defaultKey)
         myAO.userNotifyStatus = self.pList.get("Alarm Status",u.defaultKey)
         self.pList["User Notify Status"] = self.pList.get("Alarm Status",u.defaultKey)
-        print("COOLER: Editing value of User Notify Status to = {}".format(myAO.userNotifyStatus))
+        #print("COOLER: Editing value of User Notify Status to = {}".format(myAO.userNotifyStatus))
       myAO.userSilenceStatus = self.pList.get("User Silence Status",u.defaultKey)
       if myAO.userSilenceStatus != "Silenced":
         myAO.color = u.red_color

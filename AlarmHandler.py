@@ -40,7 +40,7 @@ class AlarmHandler:
       self.externalFileArray = None
     self.cooldownLength = 60
     self.OL = alarm_object.OBJECT_LIST(self.fileArray,self.cooldownLength)
-    self.masterAlarmImage = tk.PhotoImage(file='ok.ppm')
+    self.masterAlarmImage = tk.PhotoImage(file='ok.ppm').subsample(2)
     self.masterAlarmButton = tk.Label(self.win, image=self.masterAlarmImage, cursor="hand2", bg=u.lightgrey_color)
     self.remoteName = 'hacweb7'
     self.alertTheUser = True
@@ -92,25 +92,26 @@ class AlarmHandler:
 
     tab_control = ttk.Notebook(self.win)
     #tab_titles = [('Expert Alarm Handler', self.expert_alarm_handler_tab),('Alarm History', self.alarm_history_tab)]
-    tab_titles = [('Alarm Handler', alarm_handler.ALARM_HANDLER),('Grid Alarm Handler', grid_alarm_handler.GRID_ALARM_HANDLER),('Expert Alarm Handler', expert_alarm_handler.EXPERT_ALARM_HANDLER),('Alarm History', alarm_history.ALARM_HISTORY)]
+    #tab_titles = [('Alarm Handler', alarm_handler.ALARM_HANDLER),('Grid Alarm Handler', grid_alarm_handler.GRID_ALARM_HANDLER),('Expert Alarm Handler', expert_alarm_handler.EXPERT_ALARM_HANDLER),('Alarm History', alarm_history.ALARM_HISTORY)]
+    tab_titles = [('Alarm Handler', alarm_handler.ALARM_HANDLER),('Expert Alarm Handler', expert_alarm_handler.EXPERT_ALARM_HANDLER),('Alarm History', alarm_history.ALARM_HISTORY)]
     tabs = {}
     for title, fn in tab_titles:
-      tab = ttk.Frame(tab_control, width=20, height=40, style="My.TFrame")
+      tab = ttk.Frame(tab_control, width=10, height=20, style="My.TFrame")
       tab_control.add(tab, text=title)
       tabs[title] = fn(self.win,tab,self.OL,self.fileArray,self.alarmLoop)
     tab_control.grid(row=0, column=0, columnspan=3, sticky='NSEW')
     #self.masterAlarmButton = tk.Label(self.win, image=self.masterAlarmImage, cursor="hand2", bg=u.lightgrey_color)
     self.masterAlarmButton.image = self.masterAlarmImage
-    self.masterAlarmButton.grid(rowspan=3, row=1, column=0, padx=5, pady=10, sticky='SW')
+    self.masterAlarmButton.grid(rowspan=3, row=1, column=0, padx=5, pady=10, sticky='NESW')
     self.masterAlarmButton.bind("<Button-1>", self.update_show_alarms)
     phys_but = help_buttons.HELP_BUTTONS()
     help_but = help_buttons.HELP_BUTTONS()
     resp_but = help_buttons.HELP_BUTTONS()
 
-    tk.Button(self.win, text='Physics/Analysis', command= lambda: phys_but.physicsAnalysis(self), font = ('Helvetica 24 bold'), background=u.lightgrey_color, width=8).grid(row=1, column=1, padx=15, pady=3, sticky=tk.N+tk.S+tk.W+tk.E)
-    tk.Button(self.win, text='Help', command= lambda: help_but.helpMe(self), font = ('Helvetica 24 bold'), background=u.lightgrey_color, width=8).grid(row=2, column=1, padx=15, pady=3, sticky=tk.N+tk.S+tk.W+tk.E)
-    tk.Button(self.win, text='Response Info', command= lambda: resp_but.responseInfo(self), font = ('Helvetica 24 bold'), background=u.lightgrey_color, width=8).grid(row=3, column=1, padx=15, pady=3, sticky=tk.N+tk.S+tk.W+tk.E)
-    tk.Button(self.win, text='QUIT', command=quit, font = ('Helvetica 24 bold'), background=u.grey_color, width=10, height=4).grid(rowspan=3, row=1, column=2, padx=15, pady=15, sticky='E')
+    tk.Button(self.win, text='Physics/Analysis', command= lambda: phys_but.physicsAnalysis(self), font = ('Helvetica 16 bold'), background=u.lightgrey_color, width=18).grid(row=1, column=1, padx=15, pady=2)#, sticky=tk.N+tk.S+tk.W+tk.E)
+    tk.Button(self.win, text='Help', command= lambda: help_but.helpMe(self), font = ('Helvetica 16 bold'), background=u.lightgrey_color, width=18).grid(row=2, column=1, padx=15, pady=2)#, sticky=tk.N+tk.S+tk.W+tk.E)
+    tk.Button(self.win, text='Response Info', command= lambda: resp_but.responseInfo(self), font = ('Helvetica 16 bold'), background=u.lightgrey_color, width=18).grid(row=3, column=1, padx=15, pady=2)#, sticky=tk.N+tk.S+tk.W+tk.E)
+    tk.Button(self.win, text='QUIT', command=quit, font = ('Helvetica 24 bold'), background=u.grey_color, width=5, height=2).grid(rowspan=3, row=1, column=2, padx=10, pady=10)#, sticky='NESW')
     return tabs
 
 alarm_handler_GUI = AlarmHandler()

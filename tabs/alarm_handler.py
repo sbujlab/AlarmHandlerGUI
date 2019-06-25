@@ -144,7 +144,7 @@ class ALARM_HANDLER(tk.Frame):
     if OL.currentlySelectedButton != -1:
       OL.currentlySelectedButton = OL.selectedButtonColumnIndicesList[2] #Overwrite with expert list
       self.select_button(OL,fileArray,self.displayFrames[OL.currentlySelectedButton].butt)
-    print("currently selected button = {}".format(OL.currentlySelectedButton))
+    #print("currently selected button = {}".format(OL.currentlySelectedButton))
 
   def initialize_cols(self,OL):
     for i in range(0, int(1.0*len(OL.objectList[2])/self.NperCol)+1):
@@ -198,7 +198,7 @@ class ALARM_HANDLER(tk.Frame):
         disp.radioButGreen = tk.Radiobutton(lgrid[i], text=OL.objectList[2][i].alarmStatus, indicatoron=False, justify='right', value=lgrid[i].greenAlarmStatus, variable=lgrid[i].greenStat, fg=u.black_color, bg=u.lightgrey_color,
             activebackground=u.grey_color, activeforeground=u.black_color, selectcolor = u.green_color, highlightbackground=u.green_color, highlightcolor=u.green_color, highlightthickness=1)
         disp.radioButGreen.indices = (2,i)
-        print("OL 2,{} alarm status = {}".format(i,OL.objectList[2][i].alarmStatus))
+        #print("OL 2,{} alarm status = {}".format(i,OL.objectList[2][i].alarmStatus))
         disp.radioButGreen.config(command = lambda radGreen=disp.radioButGreen: self.select_green_button(OL,fileArray,radGreen))
         #if (OL.objectList[2][i].alarmStatus != "OK" or (OL.objectList[2][i].userNotifyStatus.split(' ')[0] != "OK" and OL.objectList[2][i].userNotifyStatus.split(' ')[0] != "Cooldown")) and OL.objectList[2][i].userSilenceStatus != "Silenced":
         if OL.objectList[2][i].userNotifyStatus != "OK" and OL.objectList[2][i].userNotifyStatus.split(' ')[0] != "Cooldown" and OL.objectList[2][i].userSilenceStatus != "Silenced":
