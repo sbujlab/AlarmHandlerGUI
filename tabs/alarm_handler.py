@@ -113,7 +113,6 @@ class ALARM_HANDLER(tk.Frame):
       but.config(text="{}{}".format(self.controlButtonsText[1],self.CBTextSuffix1[1]))
     if but.cget('text')=="{}{}".format(self.controlButtonsText[0],self.CBTextSuffix1[0]): 
       # Alarm Go To
-      #FIXME would be good to select the most recently activated red button and show its contents
       if alarmLoop.globalAlarmStatus != "OK" and alarmLoop.globalUserAlarmSilence != "Silenced":
         but.config(background=u.red_color)
       elif alarmLoop.globalAlarmStatus != "OK" and alarmLoop.globalUserAlarmSilence == "Silenced":

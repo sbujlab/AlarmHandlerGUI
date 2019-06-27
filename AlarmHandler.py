@@ -65,8 +65,9 @@ class AlarmHandler:
 
   def update_show_alarms(self, event):
     for key in self.tabs:
-      if key != "Alarm History":
-        self.tabs[key].select_control_buttons(self.OL,self.fileArray,self.alarmLoop,self.tabs[key].controlButtons[0])
+      if key != "Alarm History" and self.OL.currentlySelectedButton != -1:
+        #self.OL.selectedButtonColumnIndicesList[2]=u.recentAlarmButtons[2] # Update the currently clicked button index to the alarming one
+        self.tabs[key].select_control_buttons(self.OL,self.fileArray,self.alarmLoop,self.tabs[key].controlButtons[3])
       #webbrowser.open_new(r"https://en.wikipedia.org/wiki/Green_Monster")
 
 #    def alarm_handler_tab(self, expt_tab):
@@ -108,7 +109,7 @@ class AlarmHandler:
     #self.masterAlarmButton = tk.Label(self.win, image=self.masterAlarmImage, cursor="hand2", bg=u.lightgrey_color)
     self.masterAlarmButton.image = self.masterAlarmImage
     self.masterAlarmButton.grid(rowspan=3, row=1, column=0, padx=5, pady=10, sticky='NESW')
-    self.masterAlarmButton.bind("<Button-1>", self.update_show_alarms)
+    #self.masterAlarmButton.bind("<Button-1>", self.update_show_alarms)
     phys_but = help_buttons.HELP_BUTTONS()
     help_but = help_buttons.HELP_BUTTONS()
     resp_but = help_buttons.HELP_BUTTONS()
