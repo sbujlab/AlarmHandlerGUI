@@ -109,9 +109,11 @@ def silence_filearray_menu(OL,fileArray,butMenu):
   if OL.objectList[i][j].userSilenceStatus == "Silenced":
     OL.objectList[i][j].userSilenceStatus = "Alert" 
     OL.objectList[i][j].alarm.userSilenceSelfStatus = "Alert" 
+    OL.objectList[2][j].parameterList["User Silence Status"] = "Alert"
   elif OL.objectList[i][j].userSilenceStatus == "Alert":
     OL.objectList[i][j].userSilenceStatus = "Silenced" 
     OL.objectList[i][j].alarm.userSilenceSelfStatus = "Silenced" 
+    OL.objectList[2][j].parameterList["User Silence Status"] = "Silenced"
     OL.objectList[i][j].color = yellow_color
   for q in range(OL.objectList[i][j].indexStart,OL.objectList[i][j].indexEnd+1):
     if fileArray.filearray[q][3] == "User Silence Status": # Update the filearray too

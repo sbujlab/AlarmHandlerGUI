@@ -43,8 +43,10 @@ class AlarmHandler:
     self.masterAlarmImage = tk.PhotoImage(file='ok.ppm').subsample(2)
     self.masterAlarmButton = tk.Label(self.win, image=self.masterAlarmImage, cursor="hand2", bg=u.lightgrey_color)
     self.remoteName = 'hacweb7'
-    self.alertTheUser = True
-    #self.alertTheUser = False
+    #self.alertTheUser = True
+    self.alertTheUser = False
+    self.includeExpert = False
+    #self.includeExpert = True
     self.alarmClient = bclient.sockClient(self.remoteName)
     self.alarmLoop = alarm_object.ALARM_LOOP(self)
     self.tabs = self.create_widgets()
@@ -93,7 +95,10 @@ class AlarmHandler:
     tab_control = ttk.Notebook(self.win)
     #tab_titles = [('Expert Alarm Handler', self.expert_alarm_handler_tab),('Alarm History', self.alarm_history_tab)]
     #tab_titles = [('Alarm Handler', alarm_handler.ALARM_HANDLER),('Grid Alarm Handler', grid_alarm_handler.GRID_ALARM_HANDLER),('Expert Alarm Handler', expert_alarm_handler.EXPERT_ALARM_HANDLER),('Alarm History', alarm_history.ALARM_HISTORY)]
-    tab_titles = [('Alarm Handler', alarm_handler.ALARM_HANDLER),('Expert Alarm Handler', expert_alarm_handler.EXPERT_ALARM_HANDLER),('Alarm History', alarm_history.ALARM_HISTORY)]
+    if self.includeExpert == True:
+      tab_titles = [('Alarm Handler', alarm_handler.ALARM_HANDLER),('Expert Alarm Handler', expert_alarm_handler.EXPERT_ALARM_HANDLER),('Alarm History', alarm_history.ALARM_HISTORY)]
+    else:
+      tab_titles = [('Alarm Handler', alarm_handler.ALARM_HANDLER),('Alarm History', alarm_history.ALARM_HISTORY)]
     tabs = {}
     for title, fn in tab_titles:
       tab = ttk.Frame(tab_control, width=10, height=20, style="My.TFrame")

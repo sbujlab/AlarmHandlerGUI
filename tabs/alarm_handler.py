@@ -33,9 +33,9 @@ class ALARM_HANDLER(tk.Frame):
     OL.currentlySelectedButton = -1
     OL.displayPList = 0
     self.colsp = 1
-    self.controlButtonsText = ["Alarm Status","Alarm Checker","Silencer","Reset GUI"]
-    self.CBTextSuffix1 = ["\nFind Alarm","\nTurn Off" ,"\nTurn On",""]
-    self.CBTextSuffix2 = ["\nFind Alarm","\nTurn On","\nTurn Off" ,""]
+    self.controlButtonsText = ["Alarm Status","Alarm Checker","Silencer","Alarm Info"]
+    self.CBTextSuffix1 = ["\nFind Alarm","\nPause" ,"\nSilence","\nShow Parameters"]
+    self.CBTextSuffix2 = ["\nFind Alarm","\nUnpause","\nUnsilence" ,"\nHide Parameters"]
 
     self.alarmCols = []
     self.initialize_cols(OL)
@@ -68,6 +68,12 @@ class ALARM_HANDLER(tk.Frame):
         if alarmLoop.globalLoopStatus != "Looping":
           newButt.config(fg=u.black_color)
           newButt.config(background=u.yellow_color)
+      if self.controlButtonsText[i]=="Alarm Info":
+      # Alarm Info
+        if OL.displayPList == 0:
+          newButt.config(text="{}{}".format(self.controlButtonsText[i],self.CBTextSuffix1[i]))
+        else:
+          newButt.config(text="{}{}".format(self.controlButtonsText[i],self.CBTextSuffix2[i]))
       newButt.indices = (i,0)
       newButt.config(command = lambda newBut=newButt: self.select_control_buttons(OL,fileArray,alarmLoop,newBut))
       newButt.grid(row = 0, column = i,columnspan=self.colsp,padx=10,pady=10,sticky='W')
@@ -117,14 +123,26 @@ class ALARM_HANDLER(tk.Frame):
       for k in range(0,len(u.recentAlarmButtons)):
         OL.selectedButtonColumnIndicesList[k]=u.recentAlarmButtons[k] # Update the currently clicked button index to the alarming one
       OL.currentlySelectedButton = OL.selectedButtonColumnIndicesList[2]
-      self.update_GUI(OL,fileArray)
+      self.select_button(OL,fileArray,self.displayFrames[OL.currentlySelectedButton].butt)
+      #self.update_GUI(OL,fileArray)
     if but.cget('text')=="{}{}".format(self.controlButtonsText[3],self.CBTextSuffix1[3]): 
-      # Reset GUI
+      # Alarm Info
+      if OL.currentlySelectedButton != -1:
+        #Show parameters of currently selected button, else do nothing
+        but.config(text="{}{}".format(self.controlButtonsText[3],self.CBTextSuffix2[3]))
+        self.display_parameter_list(OL,fileArray,2,OL.currentlySelectedButton)
+        self.pDataFrame.grid(column=1,row=1, sticky='NE')
+    elif but.cget('text')=="{}{}".format(self.controlButtonsText[3],self.CBTextSuffix2[3]):
+      # Hide parameters
+      but.config(text="{}{}".format(self.controlButtonsText[3],self.CBTextSuffix1[3]))
       OL.currentlySelectedButton = -1
       OL.displayPList = 0
       for k in range(0,len(OL.selectedButtonColumnIndicesList)):
         OL.selectedButtonColumnIndicesList[k]=-1
+      self.erase_pDataFrame()
       self.update_GUI(OL,fileArray)
+    for each in self.controlButtons:
+      each.destroy()
     self.controlButtons = self.make_control_buttons(OL,fileArray,alarmLoop)
 
   def make_screen(self,OL,fileArray):
@@ -132,8 +150,13 @@ class ALARM_HANDLER(tk.Frame):
       self.alarmCols[i].destroy()
     self.alarmCols = []
     self.initialize_cols(OL)
+    for each in self.displayFrames:
+      each.destroy()
     self.displayFrames = self.initialize_displayFrames(OL,fileArray)
+    for each in self.buttonMenus:
+      each.destroy()
     self.buttonMenus = self.initialize_menus(OL,fileArray)
+    self.alarmFrame.grid_forget()
     self.alarmFrame.grid(column=0, row=1, sticky='NW')
     self.erase_pDataFrame()
     if OL.currentlySelectedButton != -1 and OL.displayPList == 1:
@@ -142,7 +165,7 @@ class ALARM_HANDLER(tk.Frame):
     self.erase_grid_all_col()
     self.layout_grid_all_col(OL,fileArray)
     if OL.currentlySelectedButton != -1:
-      OL.currentlySelectedButton = OL.selectedButtonColumnIndicesList[2] #Overwrite with expert list
+      OL.currentlySelectedButton = OL.selectedButtonColumnIndicesList[2] #Overwrite with expert list in case in use
       self.select_button(OL,fileArray,self.displayFrames[OL.currentlySelectedButton].butt)
     #print("currently selected button = {}".format(OL.currentlySelectedButton))
 
@@ -150,6 +173,40 @@ class ALARM_HANDLER(tk.Frame):
     for i in range(0, int(1.0*len(OL.objectList[2])/self.NperCol)+1):
       self.alarmCols.append(tk.LabelFrame(self.alarmFrame, text=self.colTitles.get(i,"ctd."), background=u.lightgrey_color))
       self.alarmCols[i].grid(column=i,row=0,pady=10,padx=10,sticky='N')
+
+  def update_displayFrame(self,OL,localBut):
+    i,j = localBut.indices
+    self.displayFrames[j].radioButGreen.grid_forget()
+    self.displayFrames[j].radioButRed.grid_forget()
+    self.displayFrames[j].radioButYellow.grid_forget()
+    self.displayFrames[j].radioButOrange.grid_forget()
+
+    self.displayFrames[j].alarmStatus = 0
+    self.displayFrames[j].greenAlarmStatus = 0
+    self.displayFrames[j].userNotifyStatus = 0
+    self.displayFrames[j].userSilenceStatus = 0
+
+    if OL.objectList[2][j].userNotifyStatus != "OK" and OL.objectList[2][j].userNotifyStatus.split(' ')[0] != "Cooldown" and OL.objectList[2][j].userSilenceStatus != "Silenced":
+      # Then we are alarmed
+      self.displayFrames[j].alarmStatus = 0
+      self.displayFrames[j].radioButRed.grid(row=0,column=0,sticky='W')
+      self.displayFrames[j].radioButRed.config(text=OL.objectList[2][j].alarmStatus, value = self.displayFrames[j].alarmStatus)
+    if OL.objectList[2][j].userNotifyStatus.split(' ')[0] == "Cooldown" and OL.objectList[2][j].userSilenceStatus != "Silenced":
+      self.displayFrames[j].radioButOrange.grid(row=0,column=0,sticky='W')
+      self.displayFrames[j].radioButOrange.config(text=OL.objectList[2][j].userNotifyStatus.split(' ')[1])
+    # Silence takes precedent over alarm and over notify/acknowledge
+    if OL.objectList[2][j].alarmStatus == "OK" and OL.objectList[2][j].userSilenceStatus == "Silenced":
+      self.displayFrames[j].radioButYellow.grid(row=0,column=0,sticky='W')
+      self.displayFrames[j].radioButYellow.config(text=OL.objectList[2][j].userSilenceStatus)
+    if OL.objectList[2][j].alarmStatus != "OK" and OL.objectList[2][j].userSilenceStatus == "Silenced":
+      self.displayFrames[j].radioButYellow.grid(row=0,column=0,sticky='W')
+      self.displayFrames[j].radioButYellow.config(text=OL.objectList[2][j].alarmStatus)
+    if OL.objectList[2][j].alarmStatus == "OK" and OL.objectList[2][j].userSilenceStatus != "Silenced" and OL.objectList[2][j].userNotifyStatus.split(' ')[0] == "OK":
+      # Add check on userNotifyStatus so that the user will keep seeing the alarm indicator on even after the alarm itself has disappeared
+      self.displayFrames[j].radioButGreen.grid(row=0,column=0,sticky='W')
+      self.displayFrames[j].radioButGreen.config(text='   ')
+    
+
 
   def initialize_displayFrames(self,OL,fileArray): # Needs a short row to contain [name = value, alarm status = type, alarm stat !OK, user silence stat, alarm stat OK], context menu displays full parameter list
     lgrid = []
@@ -164,13 +221,13 @@ class ALARM_HANDLER(tk.Frame):
         disp.orangeStat = tk.IntVar()
         disp.yellowStat = tk.IntVar()
         disp.greenStat = tk.IntVar()
-        disp.alarmStatus = 1
+        disp.alarmStatus = 0
         disp.greenAlarmStatus = 0
-        disp.userNotifyStatus = 1
-        disp.userSilenceStatus = 1
+        disp.userNotifyStatus = 0
+        disp.userSilenceStatus = 0
         if OL.objectList[2][i].alarmStatus != "OK":
           disp.alarmStatus = 0
-          disp.greenAlarmStatus = 1
+          disp.greenAlarmStatus = 0
         if OL.objectList[2][i].userSilenceStatus != "Alert":
           disp.userSilenceStatus = 0 
         if OL.objectList[2][i].userSilenceStatus != "Silenced" and OL.objectList[2][i].userNotifyStatus.split(' ')[0] == "Cooldown":
@@ -280,57 +337,64 @@ class ALARM_HANDLER(tk.Frame):
         self.displayFrames[k].butt.config(background=u.darkgrey_color) 
       else:
         self.displayFrames[k].butt.config(background=u.lightgrey_color) 
+    if OL.currentlySelectedButton != -1 and OL.displayPList == 1:
+      self.display_parameter_list(OL,fileArray,2,OL.currentlySelectedButton)
+      self.pDataFrame.grid(column=1,row=1, sticky='NE')
     #self.displayFrames[j].config(background=OL.objectList[i][j].color) # Update that button to be the newly update object's new color (could just use but.config)
 
   def select_disp_button(self,OL,fileArray,but):
     i,j = but.indices
     self.select_button(OL,fileArray,but)
-    self.update_GUI(OL,fileArray)
+    #self.update_GUI(OL,fileArray)
 
   def select_red_button(self,OL,fileArray,but):
     i,j = but.indices
     self.select_button(OL,fileArray,but)
-    alStat = 1
     # Add a feature where clicking the red button counts as an alarm acknowledge
+    self.displayFrames[j].greenAlarmStatus = 1
     u.notify_acknowledge_filearray_menu(OL,fileArray,but)
-    if OL.objectList[i][j].alarmStatus != "OK":
-      alStat = 0
+    alStat = 0 # Always maintain buttons in activated state, just hide them
     but.config(value=alStat)
-    self.update_GUI(OL,fileArray)
+    self.update_displayFrame(OL,but)
+    self.select_button(OL,fileArray,but)
+    #self.update_GUI(OL,fileArray)
 
   def select_orange_button(self,OL,fileArray,but):
     i,j = but.indices
     self.select_button(OL,fileArray,but)
     # If the user has acknowledged the alarm then we will be in a cooldown state and this button is visible, now if the user clicks again they will force->"OK" the userNotifyStatus to skip the cooldown period # FIXME this may not be desired behavior...
     u.notify_acknowledge_filearray_menu(OL,fileArray,but)
-    notStat = 1
-    if OL.objectList[i][j].userNotifyStatus.split(' ')[0] == "Cooldown":
-      notStat = 0
+    OL.objectList[2][j].userNotifyStatus = "OK"
+    OL.objectList[2][j].alarm.userNotifySelfStatus = "OK"
+    OL.objectList[2][j].alarmStatus = "OK"
+    OL.objectList[2][j].alarm.alarmSelfStatus = "OK"
+    OL.objectList[2][j].parameterList["Alarm Status"] = "OK"
+    notStat = 0 # Always maintain buttons in activated state, just hide them
     but.config(value=notStat)
-    self.update_GUI(OL,fileArray)
+    self.update_displayFrame(OL,but)
+    self.select_button(OL,fileArray,but)
+    #self.update_GUI(OL,fileArray)
 
   def select_yellow_button(self,OL,fileArray,but):
     i,j = but.indices
     self.select_button(OL,fileArray,but)
     u.silence_filearray_menu(OL,fileArray,but)
-    silStat = 1
-    if OL.objectList[i][j].userSilenceStatus != "Alert":
-      silStat = 0
+    silStat = 0 # Always maintain buttons in activated state, just hide them
     but.config(value=silStat)
-    self.update_GUI(OL,fileArray)
+    self.update_displayFrame(OL,but)
+    self.select_button(OL,fileArray,but)
+    #self.update_GUI(OL,fileArray)
 
   def select_green_button(self,OL,fileArray,but):
     i,j = but.indices
     self.select_button(OL,fileArray,but)
-    alStat = 1
-    if OL.objectList[i][j].alarmStatus == "OK":
-      alStat = 0
+    alStat = 0 # Always maintain buttons in activated state, just hide them
     but.config(value=alStat)
-    self.update_GUI(OL,fileArray)
+    #self.update_GUI(OL,fileArray)
 
   def update_GUI(self,OL,fileArray):
     fileArray.filearray = u.write_filearray(fileArray)
-    OL.objectList = u.create_objects(fileArray,OL.cooldownLength)
+    #OL.objectList = u.create_objects(fileArray,OL.cooldownLength)
     self.make_screen(OL,fileArray)
 
   def display_parameter_list(self,OL,fileArray,i,j):
@@ -351,21 +415,39 @@ class ALARM_HANDLER(tk.Frame):
     i,j = butMenu.indices
     self.select_button(OL,fileArray,self.displayFrames[j].butt)
     self.display_parameter_list(OL,fileArray,i,j)
-    self.update_GUI(OL,fileArray)
+    self.controlButtons[3].grid_forget()
+    self.controlButtons[3].config(text="{}{}".format(self.controlButtonsText[3],self.CBTextSuffix2[3]))
+    self.controlButtons[3].grid(row = 0, column = 3,columnspan=self.colsp,padx=10,pady=10,sticky='W')
+    #self.update_GUI(OL,fileArray)
 
   def button_silence_menu(self,OL,fileArray,butMenu):
     i,j = butMenu.indices
     self.select_button(OL,fileArray,self.displayFrames[j].butt)
     u.silence_filearray_menu(OL,fileArray,butMenu)
-    self.update_GUI(OL,fileArray)
+    self.update_displayFrame(OL,self.displayFrames[j].radioButYellow)
+    self.select_button(OL,fileArray,self.displayFrames[j].butt)
+    #self.update_GUI(OL,fileArray)
 
   def button_notify_acknowledge_menu(self,OL,fileArray,butMenu):
     i,j = butMenu.indices
     self.select_button(OL,fileArray,self.displayFrames[j].butt)
-    u.notify_acknowledge_filearray_menu(OL,fileArray,butMenu)
-    self.update_GUI(OL,fileArray)
+    if OL.objectList[2][j].userNotifyStatus.split(' ')[0] != "Cooldown" and OL.objectList[2][j].userNotifyStatus.split(' ')[0] != "OK":
+      self.displayFrames[j].greenAlarmStatus = 1
+      u.notify_acknowledge_filearray_menu(OL,fileArray,butMenu)
+    elif OL.objectList[2][j].userNotifyStatus.split(' ')[0] == "Cooldown":
+      u.notify_acknowledge_filearray_menu(OL,fileArray,butMenu)
+      OL.objectList[2][j].userNotifyStatus = "OK"
+      OL.objectList[2][j].alarm.userNotifySelfStatus = "OK"
+      OL.objectList[2][j].alarmStatus = "OK"
+      OL.objectList[2][j].alarm.alarmSelfStatus = "OK"
+      OL.objectList[2][j].parameterList["Alarm Status"] = "OK"
+    self.update_displayFrame(OL,self.displayFrames[j].radioButGreen)
+    self.select_button(OL,fileArray,self.displayFrames[j].butt)
+    #self.update_GUI(OL,fileArray)
 
   def refresh_screen(self,OL,fileArray,alarmLoop):
+    for each in self.controlButtons:
+      each.destroy()
     self.controlButtons = self.make_control_buttons(OL,fileArray, alarmLoop)
     self.update_GUI(OL,fileArray)
     if OL.selectedButtonColumnIndicesList[2] != -1:
