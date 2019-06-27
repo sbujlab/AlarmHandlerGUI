@@ -178,7 +178,7 @@ class ALARM():
     self.userNotifySelfStatus = myAO.userNotifyStatus
     self.userSilenceSelfStatus = myAO.userSilenceStatus
     self.alarmType = self.pList.get("Alarm Type",u.defaultKey)
-    self.alarmEvaluateType = "Exists" # Default alarm criteria is whether the value is not-null and otherwise is defined on context from given parameterList entries
+    self.alarmEvaluateType = "Exactly" # Default alarm criteria is whether the value is not-null and otherwise is defined on context from given parameterList entries
     # Do I need to make a lambda initialized instance of the alarm action per event? I don't think this matters like it did for button context menu placements.... especially since these actions are being taken by the alarm handler in a loop over objectList
     #print("Initializing new alarm for object {} {}, name = {}".format(myAO.column,myAO.columnIndex,myAO.name+" "+myAO.value))
     self.alarm_analysis = lambda myAOhere = myAO: self.do_alarm_analysis(myAOhere)
@@ -195,7 +195,7 @@ class ALARM():
         cond_out = "NULL"
         cond_out = subprocess.Popen(cmds, stdout=subprocess.PIPE).stdout.read().strip().decode('ascii') # Needs to be decoded... be careful #FIXME
         #print("EPICS: Doing alarm analysis for object {} {}, name = {}".format(myAO.column,myAO.columnIndex,myAO.name+" "+myAO.value))
-        #print("The epics output for variable {} is {}".format(self.pList["Variable Name"],cond_out))
+        print("The epics output for variable {} is {}".format(self.pList["Variable Name"],cond_out))
         if "Invalid" in str(cond_out): # Then the epics variable was invalid
           #print("ERROR Invalid epics channel, check with caget again:\t {}".format(self.pList["Variable Name"]))
           cond_out = "NULL"
@@ -218,6 +218,11 @@ class ALARM():
     high = self.pList.get("High",u.defaultKey)
     highhigh = self.pList.get("High High",u.defaultKey)
     exactly = self.pList.get("Exactly",u.defaultKey)
+    print("Value = {}, high = {}".format(val, high))
+    #valD = Decimal(val)
+    #highD = Decimal(high)
+    #if valD > highD:
+    #  print("Value is > high")
     if not u.is_number(str(val)): # Then we are not dealing with a number alarm - for now just return false
       #print("ERROR: Assume alarms values can only be numbers for now")
       return "Invalid"
@@ -231,119 +236,33 @@ class ALARM():
         high = Decimal(self.pList.get("High",u.defaultKey))
       if u.is_number(str(highhigh)):
         highhigh = Decimal(self.pList.get("High High",u.defaultKey))
-    if lowlow != "NULL" or low != "NULL" or high != "NULL" or highhigh != "NULL":
-      if lowlow != "NULL" and low != "NULL" and high != "NULL" and highhigh != "NULL":
-        self.alarmEvaluateType = "Soft and Hard"
-        if val != "NULL":
-          if val > highhigh:
-            self.pList["Alarm Status"] = "High High"
-          if val > high:
-            self.pList["Alarm Status"] = "High"
-          if val < low:
-            self.pList["Alarm Status"] = "Low"
-          if val < lowlow:
-            self.pList["Alarm Status"] = "Low Low"
-          else:
-            self.pList["Alarm Status"] = "OK"
-        else:
-          self.pList["Alarm Status"] = "Invalid"
-      if lowlow != "NULL" and low != "NULL" and high == "NULL" and highhigh == "NULL":
-        self.alarmEvaluateType = "Hard"
-        if val != "NULL":
-          if val > highhigh:
-            self.pList["Alarm Status"] = "High High"
-          if val < lowlow:
-            self.pList["Alarm Status"] = "Low Low"
-          else:
-            self.pList["Alarm Status"] = "OK"
-        else:
-          self.pList["Alarm Status"] = "Invalid"
-      if lowlow == "NULL" and low != "NULL" and high != "NULL" and highhigh == "NULL":
-        self.alarmEvaluateType = "Soft"
-        if val != "NULL":
-          if val > high:
-            self.pList["Alarm Status"] = "High"
-          if val < low:
-            self.pList["Alarm Status"] = "Low"
-          else:
-            self.pList["Alarm Status"] = "OK"
-        else:
-          self.pList["Alarm Status"] = "Invalid"
-      if lowlow == "NULL" and low == "NULL" and high != "NULL" and highhigh == "NULL":
-        self.alarmEvaluateType = "High"
-        if val != "NULL":
-          if val > high:
-            self.pList["Alarm Status"] = "High"
-          else:
-            self.pList["Alarm Status"] = "OK"
-        else:
-          self.pList["Alarm Status"] = "Invalid"
-      if lowlow == "NULL" and low != "NULL" and high == "NULL" and highhigh == "NULL":
-        self.alarmEvaluateType = "Low"
-        if val != "NULL":
-          if val < low:
-            self.pList["Alarm Status"] = "Low"
-          else:
-            self.pList["Alarm Status"] = "OK"
-        else:
-          self.pList["Alarm Status"] = "Invalid"
-      if lowlow == "NULL" and low == "NULL" and high == "NULL" and highhigh != "NULL":
-        self.alarmEvaluateType = "High Hard"
-        if val != "NULL":
-          if val > highhigh:
-            self.pList["Alarm Status"] = "High High"
-          else:
-            self.pList["Alarm Status"] = "OK"
-        else:
-          self.pList["Alarm Status"] = "Invalid"
-      if lowlow != "NULL" and low == "NULL" and high == "NULL" and highhigh == "NULL":
-        self.alarmEvaluateType = "Low Hard"
-        if val != "NULL":
-          if val < lowlow:
-            self.pList["Alarm Status"] = "Low Low"
-          else:
-            self.pList["Alarm Status"] = "OK"
-        else:
-          self.pList["Alarm Status"] = "Invalid"
-      if lowlow == "NULL" and low == "NULL" and high != "NULL" and highhigh != "NULL":
-        self.alarmEvaluateType = "High Soft and High Hard"
-        if val != "NULL":
-          if val > highhigh:
-            self.pList["Alarm Status"] = "High High"
-          if val > high:
-            self.pList["Alarm Status"] = "High"
-          else:
-            self.pList["Alarm Status"] = "OK"
-        else:
-          self.pList["Alarm Status"] = "Invalid"
-      if lowlow != "NULL" and low != "NULL" and high == "NULL" and highhigh == "NULL":
-        self.alarmEvaluateType = "Low Soft and Low Hard"
-        if val != "NULL":
-          if val < low:
-            self.pList["Alarm Status"] = "Low"
-          if val < lowlow:
-            self.pList["Alarm Status"] = "Low Low"
-          else:
-            self.pList["Alarm Status"] = "OK"
-        else:
-          self.pList["Alarm Status"] = "Invalid"
-      if exactly != "NULL":
-        self.alarmEvaluateType = "Exactly"
-        if val != "NULL":
-          if val != exactly:
-            self.pList["Alarm Status"] = "Not-Exactly"
-          else:
-            self.pList["Alarm Status"] = "OK"
-        else:
-          self.pList["Alarm Status"] = "Invalid"
+    if val != "NULL":
+      if low != "NULL" and val < low:
+        self.pList["Alarm Status"] = "Low"
+      elif lowlow != "NULL" and val < lowlow:
+        self.pList["Alarm Status"] = "LowLow"
+      elif high != "NULL" and val > high:
+        print("Updating status to high")
+        self.pList["Alarm Status"] = "High"
+      elif highhigh != "NULL" and val > highhigh:
+        self.pList["Alarm Status"] = "HighHigh"
+      elif exactly != "NULL" and val != exactly:
+        self.pList["Alarm Status"] = "Exactly"
+      else:
+        self.pList["Alarm Status"] = "OK"
+    else:
+      val = "NULL"
+      self.pList["Alarm Status"] = "OK"
     #print("Updated: pList = {}".format(self.pList))
     if self.pList.get("Alarm Status",u.defaultKey) != "OK" and self.pList.get("Alarm Status",u.defaultKey) != "Invalid" and self.pList.get("Alarm Status",u.defaultKey) != "NULL": # Update global alarm status unless NULL or invalid
       self.alarmSelfStatus = self.pList.get("Alarm Status",u.defaultKey)
       myAO.alarmStatus = self.pList.get("Alarm Status",u.defaultKey)
+      print("Alarm status updated to be {}".format(myAO.alarmStatus))
       # If the alarm is alarming and we aren't in cooldown the update user status
       if self.pList.get("Alarm Status",u.defaultKey) != "OK" and self.pList.get("User Notify Status",u.defaultKey).split(' ')[0] != "Cooldown":
         self.userNotifySelfStatus = self.pList.get("Alarm Status",u.defaultKey)
         myAO.userNotifyStatus = self.pList.get("Alarm Status",u.defaultKey)
+        print("User Notify Status updated to be {}".format(myAO.userNotifyStatus))
         self.pList["User Notify Status"] = self.pList.get("Alarm Status",u.defaultKey)
         #print("COOLER: Editing value of User Notify Status to = {}".format(myAO.userNotifyStatus))
       myAO.userSilenceStatus = self.pList.get("User Silence Status",u.defaultKey)
@@ -356,6 +275,7 @@ class ALARM():
       u.recentAlarmButtons[myAO.column] = myAO.columnIndex
       return "Not OK"
     else:
+      print("Alarm OK")
       self.alarmSelfStatus = self.pList.get("Alarm Status",u.defaultKey)
       #self.userNotifySelfStatus = self.pList.get("User Notify Status",u.defaultKey)
       # FIXME needed? # myAO.userNotifyStatus = self.pList.get("User Notify Status",u.defaultKey)
