@@ -121,7 +121,7 @@ class ALARM_HANDLER(tk.Frame):
         but.config(background=u.lightgrey_color)
       for k in range(0,len(u.recentAlarmButtons)):
         OL.selectedButtonColumnIndicesList[k]=u.recentAlarmButtons[k] # Update the currently clicked button index to the alarming one
-      OL.currentlySelectedButton = OL.selectedButtonColumnIndicesList[2]
+      OL.currentlySelectedButton = OL.selectedButtonColumnIndicesList[2] # This screen's buttons are all lvl 2 objects
       self.select_button(OL,fileArray,self.displayFrames[OL.currentlySelectedButton].butt)
       #self.update_GUI(OL,fileArray)
     if but.cget('text')=="{}{}".format(self.controlButtonsText[3],self.CBTextSuffix1[3]): 
