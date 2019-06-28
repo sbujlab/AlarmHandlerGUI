@@ -135,10 +135,10 @@ class ALARM_HANDLER(tk.Frame):
     elif but.cget('text')=="{}{}".format(self.controlButtonsText[3],self.CBTextSuffix2[3]):
       # Hide parameters
       but.config(text="{}{}".format(self.controlButtonsText[3],self.CBTextSuffix1[3]))
-      OL.currentlySelectedButton = -1
+      #OL.currentlySelectedButton = -1
       OL.displayPList = 0
-      for k in range(0,len(OL.selectedButtonColumnIndicesList)):
-        OL.selectedButtonColumnIndicesList[k]=-1
+      #for k in range(0,len(OL.selectedButtonColumnIndicesList)):
+      #  OL.selectedButtonColumnIndicesList[k]=-1
       self.erase_pDataFrame()
       self.update_GUI(OL,fileArray)
     for each in self.controlButtons:
