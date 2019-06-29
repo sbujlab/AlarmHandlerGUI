@@ -226,10 +226,11 @@ class ALARM():
     #if not u.is_number(str(val)): # Then we are not dealing with a number alarm - for now just return false
     if self.pList.get("Exactly",u.defaultKey) != u.defaultKey: # Then we are not dealing with a number alarm - for now just return false
       #print("ERROR: Assume alarms values can only be numbers for now")
-      if exactly != "NULL" and val != exactly:
-        self.pList["Alarm Status"] = "Exactly"
-      else:
-        self.pList["Alarm Status"] = "OK"
+      pass
+      #if exactly != "NULL" and val != exactly:
+      #  self.pList["Alarm Status"] = "Exactly"
+      #else:
+      #  self.pList["Alarm Status"] = "OK"
     else:
       val = Decimal(self.pList.get("Value",u.defaultKey))
       if u.is_number(str(lowlow)): # And now check the other ones too
@@ -250,8 +251,10 @@ class ALARM():
         self.pList["Alarm Status"] = "High"
       elif highhigh != "NULL" and val > highhigh:
         self.pList["Alarm Status"] = "HighHigh"
-      #else:
-      #  self.pList["Alarm Status"] = "OK"
+      elif exactly != "NULL" and val != exactly:
+        self.pList["Alarm Status"] = "Exactly"
+      else:
+        self.pList["Alarm Status"] = "OK"
     else:
       val = "NULL"
       self.pList["Alarm Status"] = "OK"
