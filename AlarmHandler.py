@@ -43,8 +43,8 @@ class AlarmHandler:
     self.masterAlarmImage = tk.PhotoImage(file='ok.ppm').subsample(2)
     self.masterAlarmButton = tk.Label(self.win, image=self.masterAlarmImage, cursor="hand2", bg=u.lightgrey_color)
     self.remoteName = 'hacweb7'
-    #self.alertTheUser = True
-    self.alertTheUser = False
+    self.alertTheUser = True
+    #self.alertTheUser = False
     self.includeExpert = False
     #self.includeExpert = True
     self.alarmClient = bclient.sockClient(self.remoteName)

@@ -191,7 +191,7 @@ class ALARM():
 
     if "EPICS" in self.alarmType:
       if self.pList.get("Variable Name"):
-        cmds = ['caget', '-t', self.pList["Variable Name"]]
+        cmds = ['caget', '-t', '-w 1', self.pList["Variable Name"]]
         cond_out = "NULL"
         cond_out = subprocess.Popen(cmds, stdout=subprocess.PIPE).stdout.read().strip().decode('ascii') # Needs to be decoded... be careful #FIXME
         #print("EPICS: Doing alarm analysis for object {} {}, name = {}".format(myAO.column,myAO.columnIndex,myAO.name+" "+myAO.value))
@@ -232,7 +232,8 @@ class ALARM():
       #else:
       #  self.pList["Alarm Status"] = "OK"
     else:
-      val = Decimal(self.pList.get("Value",u.defaultKey))
+      if u.is_number(str(val)):
+        val = Decimal(self.pList.get("Value",u.defaultKey))
       if u.is_number(str(lowlow)): # And now check the other ones too
         lowlow = Decimal(self.pList.get("Low Low",u.defaultKey))
       if u.is_number(str(low)):
@@ -242,12 +243,13 @@ class ALARM():
       if u.is_number(str(highhigh)):
         highhigh = Decimal(self.pList.get("High High",u.defaultKey))
     if val != "NULL":
+      print(val)
       if low != "NULL" and val < low:
         self.pList["Alarm Status"] = "Low"
       elif lowlow != "NULL" and val < lowlow:
         self.pList["Alarm Status"] = "LowLow"
       elif high != "NULL" and val > high:
-        print("Updating status to high")
+        #print("Updating status to high")
         self.pList["Alarm Status"] = "High"
       elif highhigh != "NULL" and val > highhigh:
         self.pList["Alarm Status"] = "HighHigh"
