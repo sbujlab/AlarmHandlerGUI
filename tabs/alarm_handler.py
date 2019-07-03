@@ -13,16 +13,8 @@ from tkinter import simpledialog
 from functools import partial
 import utils as u
 
-class Callback:
-  def __init__(self, func, *args, **kwargs):
-    self.func = func
-    self.args = args
-    self.kwargs = kwargs
-  def __call__(self):
-    self.func(*self.args,**self.kwargs)
-
 class ALARM_HANDLER(tk.Frame):
-  def __init__(self, alarmHandlerWindow, tab, OL, fileArray, alarmLoop):
+  def __init__(self, alarmHandlerWindow, tab, OL, fileArray, alarmLoop, HL):
 
     self.controlFrame = tk.LabelFrame(tab, text='Alarm Controls', background=u.grey_color)
     self.alarmFrame = tk.LabelFrame(tab, text='Alarm Handler Viewer', background=u.lightgrey_color)
@@ -445,7 +437,7 @@ class ALARM_HANDLER(tk.Frame):
     self.select_button(OL,fileArray,self.displayFrames[j].butt)
     #self.update_GUI(OL,fileArray)
 
-  def refresh_screen(self,OL,fileArray,alarmLoop):
+  def refresh_screen(self,OL,fileArray,alarmLoop,HL):
     for each in self.controlButtons:
       each.destroy()
     self.controlButtons = self.make_control_buttons(OL,fileArray, alarmLoop)

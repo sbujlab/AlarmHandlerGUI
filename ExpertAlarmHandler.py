@@ -31,9 +31,12 @@ class AlarmHandler:
     self.win.configure(background=u.lightgrey_color)
     self.get_alarm_handler_style()
     self.filename = "/adaqfs/home/apar/alarms/alarm.csv" # FIXME this should eventually be pushed into the config file read by default main program at runtime
+    self.histfilename = "/adaqfs/home/apar/alarms/alarmHistory.csv" # FIXME this should eventually be pushed into the config file read by default main program at runtime
     self.externalFilename = "/adaqfs/home/apar/alarms/japanAlarms.csv"
     self.delim = ','
+    self.pdelim = '='
     self.fileArray = alarm_object.FILE_ARRAY(self.filename,self.delim)
+    self.HL = alarm_object.HISTORY_LIST(self.histfilename,self.delim,self.pdelim)
     if os.path.exists(self.externalFilename): # Special case for running in an external situation like Japan or camguin analysis
       self.externalFileArray = alarm_object.FILE_ARRAY(self.externalFilename,self.delim)
     else:
@@ -43,9 +46,8 @@ class AlarmHandler:
     self.masterAlarmImage = tk.PhotoImage(file='ok.ppm').subsample(2)
     self.masterAlarmButton = tk.Label(self.win, image=self.masterAlarmImage, cursor="hand2", bg=u.lightgrey_color)
     self.remoteName = 'hacweb7'
-    #self.alertTheUser = True
-    self.alertTheUser = False
-    self.includeExpert = False
+    self.alertTheUser = True
+    #self.alertTheUser = False
     self.includeExpert = True
     self.alarmClient = bclient.sockClient(self.remoteName)
     self.alarmLoop = alarm_object.ALARM_LOOP(self)
@@ -104,7 +106,7 @@ class AlarmHandler:
     for title, fn in tab_titles:
       tab = ttk.Frame(tab_control, width=10, height=20, style="My.TFrame")
       tab_control.add(tab, text=title)
-      tabs[title] = fn(self.win,tab,self.OL,self.fileArray,self.alarmLoop)
+      tabs[title] = fn(self.win,tab,self.OL,self.fileArray,self.alarmLoop,self.OL)
     tab_control.grid(row=0, column=0, columnspan=3, sticky='NSEW')
     #self.masterAlarmButton = tk.Label(self.win, image=self.masterAlarmImage, cursor="hand2", bg=u.lightgrey_color)
     self.masterAlarmButton.image = self.masterAlarmImage

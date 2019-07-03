@@ -85,7 +85,8 @@ class ALARM_LOOP():
         # If the userNotifyStatus is NULL (i.e. not set) then the alarm handler will just read it and move on with its life
         if self.ok_notify_check(self.alarmList[i].userNotifySelfStatus) != "OK" and self.alarmList[i].userSilenceSelfStatus == "Alert":
           # Just let the method I wrote take care of determining global alarm status
-          self.globalAlarmStatus = self.alarmList[i].userNotifySelfStatus
+          self.globalAlarmStatus = self.alarmList[i].userNotifySelfStatus # Update global alarm status
+          u.append_historyList(alarmHandlerGUI.HL,alarmHandlerGUI.OL,i) # Update Alarm History
           localStat = self.alarmList[i].userNotifySelfStatus
       if localStat == "OK":
         self.globalAlarmStatus = "OK"
@@ -95,11 +96,15 @@ class ALARM_LOOP():
       u.update_objectList(alarmHandlerGUI.OL,alarmHandlerGUI.fileArray,self.alarmList)
       u.write_textfile(alarmHandlerGUI.OL,alarmHandlerGUI.fileArray) #FIXME Do this here?
       if alarmHandlerGUI.tabs.get("Alarm Handler",u.defaultKey) != u.defaultKey:
-        alarmHandlerGUI.tabs["Alarm Handler"].refresh_screen(alarmHandlerGUI.OL,alarmHandlerGUI.fileArray,alarmHandlerGUI.alarmLoop)
+        alarmHandlerGUI.tabs["Alarm Handler"].refresh_screen(alarmHandlerGUI.OL,alarmHandlerGUI.fileArray,alarmHandlerGUI.alarmLoop,alarmHandlerGUI.HL)
       if alarmHandlerGUI.tabs.get("Grid Alarm Handler",u.defaultKey) != u.defaultKey:
-        alarmHandlerGUI.tabs["Grid Alarm Handler"].refresh_screen(alarmHandlerGUI.OL,alarmHandlerGUI.fileArray,alarmHandlerGUI.alarmLoop)
+        alarmHandlerGUI.tabs["Grid Alarm Handler"].refresh_screen(alarmHandlerGUI.OL,alarmHandlerGUI.fileArray,alarmHandlerGUI.alarmLoop,alarmHandlerGUI.HL)
       if alarmHandlerGUI.tabs.get("Expert Alarm Handler",u.defaultKey) != u.defaultKey:
-        alarmHandlerGUI.tabs["Expert Alarm Handler"].refresh_screen(alarmHandlerGUI.OL,alarmHandlerGUI.fileArray,alarmHandlerGUI.alarmLoop)
+        alarmHandlerGUI.tabs["Expert Alarm Handler"].refresh_screen(alarmHandlerGUI.OL,alarmHandlerGUI.fileArray,alarmHandlerGUI.alarmLoop,alarmHandlerGUI.HL)
+      if alarmHandlerGUI.tabs.get("Active Alarm Handler",u.defaultKey) != u.defaultKey:
+        alarmHandlerGUI.tabs["Active Alarm Handler"].refresh_screen(alarmHandlerGUI.OL,alarmHandlerGUI.fileArray,alarmHandlerGUI.alarmLoop,alarmHandlerGUI.HL)
+      if alarmHandlerGUI.tabs.get("Alarm History",u.defaultKey) != u.defaultKey:
+        alarmHandlerGUI.tabs["Alarm History"].refresh_screen(alarmHandlerGUI.OL,alarmHandlerGUI.fileArray,alarmHandlerGUI.alarmLoop,alarmHandlerGUI.HL)
       alarmHandlerGUI.masterAlarmButton.destroy()
       if alarmHandlerGUI.alarmLoop.globalAlarmStatus == "OK":
         alarmHandlerGUI.masterAlarmImage = tk.PhotoImage(file='ok.ppm').subsample(2)
@@ -133,7 +138,7 @@ class USER_NOTIFY():
       self.update_user_notify_status(alarmLoop,OL,fileArray) # Assumes OK, checks each OL.objectList[2] entry for its notify status, continues
       if alarmHandlerGUI.alertTheUser == True and alarmLoop.globalAlarmStatus != "OK": # globalAlarmStatus determined by these set acknowledged stati
         try:
-          alarmHandlerGUI.alarmClient.sendPacket("2") # Have a case series here for passing different packets based on different alarm stati
+          alarmHandlerGUI.alarmClient.sendPacket("7") # Have a case series here for passing different packets based on different alarm stati
         except:
           print("Alarm Sound Server not running\nPlease Launch an instance on the EPICS computer\nssh hacuser@hacweb7, cd parity-alarms, ./bserver&")
       # Recursion loop here - splits off a new instance of this function and finishes the one currently running (be careful)
@@ -296,6 +301,14 @@ class FILE_ARRAY():
     self.filename = filen
     self.delim = delimiter
     self.filearray = u.parse_textfile(self)
+
+class HISTORY_LIST():
+  def __init__(self,filen,delimiter,pdelimiter):
+    self.filename = filen
+    self.delim = delimiter
+    self.paramDelim = pdelimiter
+    self.filearray = u.parse_textfile(self) # Reads text file just like fileArray, same names so Python doesn't know the difference
+    self.historyList = u.init_historyList(self)
 
 class OBJECT_LIST():
   def __init__(self,fileArray,cooldownLength):

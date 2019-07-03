@@ -45,6 +45,37 @@ def parse_textfile(fileArray):
       fileArray.filearray.append(rowList)
   return fileArray.filearray
 
+def init_historyList(HL):
+  tmpHistList = []
+  for each in HL.filearray:
+    tmpDict = {}
+    tmpRow = each.split(HL.delim)
+    for entry in tmpRow:
+      entryPair1, entryPair2 = entry.split(HL.paramDelim,1)
+      tmpDict[entryPair1] = entryPair2 
+    tmpHistList.append(tmpDict)
+  return tmpHistList
+
+def append_historyList(HL,OL,i):
+  localStr = "{}, {}\n{}".format(OL.objectList[0][OL.objectList[2][i].parentIndices[0]].value,OL.objectList[1][OL.objectList[2][i].parentIndices[1]].value[:25],OL.objectList[2][i].value[:35]) # FIXME there are better ways to do this...
+  tmpDict = {}
+  tmpList = []
+  tmpDict["Name"] = localStr
+  tmpList.append("Name={}".format(localStr))
+  for eachKey, eachItem in OL.objectList[2][i].parameterList.items():
+    tmpDict[eachKey] = eachItem
+    tmpList.append("{}={}".format(eachKey,eachItem))
+  HL.historyList.append(tmpDict)
+  HL.filearray.append(tmpList)
+
+def write_historyfile(HL):
+  outFile = open(HL.filename,'w+')
+  wr = csv.writer(outFile,delimiter=HL.delim)
+  if len(HL.filearray)!=0:
+    filearrayrows=zip(*HL.filearray)
+    wr.writerows(HL.filearray)
+    return HL.filearray
+
 def update_objectList(OL,fileArray,alarmList):
   # Loop through column 3 (i = 2) and for each parameterList entry check if all column=4 entries have column3[i] as its parent
   # if it does then update it's child [0].value to be == key result
@@ -216,6 +247,10 @@ def create_objects(fileArray,cooldownLength):
   if len(fileArray.filearray)>0: 
     ncolumns = len(fileArray.filearray[len(fileArray.filearray)-1]) # FIXME should this just be hardcoded to 5 layers or should I keep it generic??
   nlines = len(fileArray.filearray)
+  if fileArray.filearray == [] or fileArray.filearray == [[]] or fileArray.filearray == None:
+    nlines = 0
+    ncolumns = 0 # Sanity Check
+    print("Error: Empty alarm file given to Parity Alarm Handler")
   localObjectList = []
   colRow = []
   line_previous = []

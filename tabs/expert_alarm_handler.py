@@ -13,16 +13,8 @@ from tkinter import simpledialog
 from functools import partial
 import utils as u
 
-class Callback:
-  def __init__(self, func, *args, **kwargs):
-    self.func = func
-    self.args = args
-    self.kwargs = kwargs
-  def __call__(self):
-    self.func(*self.args,**self.kwargs)
-
 class EXPERT_ALARM_HANDLER(tk.Frame):
-  def __init__(self, alarmHandlerWindow, tab, OL, fileArray, alarmLoop):
+  def __init__(self, alarmHandlerWindow, tab, OL, fileArray, alarmLoop, HL):
 
     self.controlFrame = tk.LabelFrame(tab, text='Alarm Controls', background=u.grey_color)
     self.alarmFrame = tk.LabelFrame(tab, text='Expert Alarm Handler', background=u.lightgrey_color)
@@ -382,7 +374,7 @@ class EXPERT_ALARM_HANDLER(tk.Frame):
       self.layout_grid_col(i+1,OL,fileArray,self.creatorButtons)
     self.buttonMenus = self.initialize_menus(OL,fileArray) # FIXME Necessary?
 
-  def refresh_screen(self,OL,fileArray,alarmLoop):
+  def refresh_screen(self,OL,fileArray,alarmLoop,HL):
     #print("Refreshing expert alarm handler")
     self.controlButtons = self.make_control_buttons(OL,fileArray, alarmLoop)
     self.update_GUI(OL,fileArray)

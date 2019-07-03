@@ -12,31 +12,15 @@ from tkinter import ttk
 from tkinter import simpledialog
 import utils as u
 
-class ALARM_HISTORY(tk.Frame):
+class ACTIVE_ALARM_HANDLER(tk.Frame):
   def __init__(self, alarmHandlerWindow, tab, OL, fileArray, alarmLoop, HL):
-    self.activeAlarms = 0
-    pass
+    self.colIndexMap = {}
 
-    # The Alarm History is a page that will store information of previous alarms in Labels.
-    
-    # The kinds of alarms to display should be any alarm status that takes place, and the conditions for adding an alarm at the bottom of the list should be contingent upon that information not being superfluous.
-    # An alarm which blinks on and off should not be added to the alarm handler many times, but instead we should utilize the UserNotifyStatus as our indicator of alarm. 
-    # i.e. every time that the UserNotifyStatus turns not OK and not countdown then we want to add a new entry to our alarm handler
-    # Silenced Alarms should be ignored.
-
-    # The information should store the entire parameter list, though the information that is displayed at top level should be the 3 level name, the alarm status violation and the comparator that failed the test, and the time at which the alarm was initiated.
-
-    # The routine should look exactly like the alarm_object Global Alarm Status decision loop, but instead of one global alarm status it will pick out each fresh alarm (that is not othewise currently active/non-user notify accepted) and add it to the list (a history text file).
-    # The History Text file will be read after each checking/writing loop and used to display the alarm history on the screen. The top level details are put into the TLabel and the extra details are put into an information panel for the user to select (similar to the parameterList panel in other windows, but based on history, not an active alarm object)
-    # An active alarm should be red, and allow the user to interact with that alarm similar to the alarm handler page (red, green, yellow, orange buttons mimicked).
-    # An inactive alarm should still persist permenantly in full-history mode, but only the most recent N alarms should be displayed in default display mode. The Full-history mode should be a scrollable TFrame (basically just a redraw of truncated history to include full file contents).
-    # The alarm history list is an independent alarmHistory object which contains just a historyArray file, owned by the main program (like the alarm_object and filearray lists for simplicity), which is comprised of a list of lists, where the columns are [parameter = value] pairs and the rows are individual history entries.
-
-    self.alarmFrame = tk.LabelFrame(tab, text='Alarm Handler Viewer', background=u.lightgrey_color)
-    self.pDataFrame = tk.LabelFrame(tab, text='Alarm Parameter Display', background=u.white_color)
+    self.alarmFrame = tk.LabelFrame(tab, text='Active Alarm Handler Viewer', background=u.lightgrey_color)
+    self.pDataFrame = tk.LabelFrame(tab, text='Active Alarm Parameter Display', background=u.white_color)
     self.pDataFrame.disp = []
     self.colTitles = {0:"Alarms"}
-    self.NperCol = 100
+    self.NperCol = 8
     OL.currentlySelectedButton = -1
     OL.displayPList = 0
     self.colsp = 1
@@ -80,11 +64,11 @@ class ALARM_HISTORY(tk.Frame):
 
   def update_displayFrame(self,OL,localBut):
     i,j = localBut.indices
-    a,b = localBut.indicesHistory
-    #self.displayFrames[j].radioButGreen.grid_forget()
+    a,b = localBut.indicesActive
+    #self.displayFrames[b].radioButGreen.grid_forget()
     self.displayFrames[b].radioButRed.grid_forget()
-    #self.displayFrames[b].radioButYellow.grid_forget()
-    #self.displayFrames[b].radioButOrange.grid_forget()
+    self.displayFrames[b].radioButYellow.grid_forget()
+    self.displayFrames[b].radioButOrange.grid_forget()
 
     self.displayFrames[b].alarmStatus = 0
     self.displayFrames[b].greenAlarmStatus = 0
@@ -119,11 +103,14 @@ class ALARM_HISTORY(tk.Frame):
       for i in range(0,len(OL.objectList[2])):
         if OL.objectList[2][i].userNotifyStatus == "OK":
           continue # Ignore all non-alarming entries
+
+        self.colIndexMap[localActive] = OL.objectList[2][i].columnIndex
+
         # Loop over the list of objects, creating displayFrames
         localStr = "{}, {}, {}".format(OL.objectList[0][OL.objectList[2][i].parentIndices[0]].value,OL.objectList[1][OL.objectList[2][i].parentIndices[1]].value[:25],OL.objectList[2][i].value[:25])
         if len(localStr) > 30:
           localStr = "{}, {}\n{}".format(OL.objectList[0][OL.objectList[2][i].parentIndices[0]].value,OL.objectList[1][OL.objectList[2][i].parentIndices[1]].value[:25],OL.objectList[2][i].value[:35])
-        disp = tk.LabelFrame(self.alarmCols[int(1.0*self.activeAlarms/self.NperCol)], text=localStr, font=('Helvetica 8'), background=u.lightgrey_color) # FIXME want red alarm full label frame?
+        disp = tk.LabelFrame(self.alarmCols[int(1.0*localActive/self.NperCol)], text=localStr, font=('Helvetica 8'), background=u.lightgrey_color) # FIXME want red alarm full label frame?
         disp.redStat = tk.IntVar()
         disp.orangeStat = tk.IntVar()
         disp.yellowStat = tk.IntVar()
@@ -145,28 +132,28 @@ class ALARM_HISTORY(tk.Frame):
         disp.butt = tk.Button(lgrid[localActive], text="Value = {}".format(OL.objectList[2][i].parameterList.get("Value",u.defaultKey)), justify='center', background=u.lightgrey_color) # loop over displayFrames
         #disp.butt = tk.Button(lgrid[i], text="Value = {}".format(OL.objectList[2][i].parameterList.get("Value",u.defaultKey)), justify='center', background=OL.objectList[2][i].color) # loop over displayFrames
         disp.butt.indices = (2,OL.objectList[2][i].columnIndex)
-        disp.butt.indicesHistory = (2,localActive)
+        disp.butt.indicesActive = (2,localActive)
         disp.butt.config(command = lambda but=disp.butt: self.select_disp_button(OL,fileArray,but))
         disp.butt.grid(row=0,column=1,sticky='W')
         disp.radioButRed = tk.Radiobutton(lgrid[localActive], text=OL.objectList[2][i].alarmStatus, indicatoron=False, justify='left', value=lgrid[localActive].alarmStatus, variable=lgrid[localActive].redStat, fg=u.white_color, bg=u.lightgrey_color,
             activebackground=u.grey_color, activeforeground=u.black_color, selectcolor = u.red_color, highlightbackground=u.red_color, highlightcolor=u.red_color, highlightthickness=1)
         disp.radioButRed.indices = (2,i)
-        disp.radioButRed.indicesHistory = (2,localActive)
+        disp.radioButRed.indicesActive = (2,localActive)
         disp.radioButRed.config(command = lambda radRed=disp.radioButRed: self.select_red_button(OL,fileArray,radRed))
         disp.radioButOrange = tk.Radiobutton(lgrid[localActive], text=OL.objectList[2][i].userNotifyStatus, indicatoron=False, justify='center', value=lgrid[localActive].userNotifyStatus, variable=lgrid[localActive].orangeStat, fg=u.black_color, bg=u.lightgrey_color,
             activebackground=u.grey_color, activeforeground=u.black_color, selectcolor = u.orange_color, highlightbackground=u.orange_color, highlightcolor=u.orange_color, highlightthickness=1)
         disp.radioButOrange.indices = (2,i)
-        disp.radioButOrange.indicesHistory = (2,localActive)
+        disp.radioButOrange.indicesActive = (2,localActive)
         disp.radioButOrange.config(command = lambda radOrange=disp.radioButOrange: self.select_orange_button(OL,fileArray,radOrange))
         disp.radioButYellow = tk.Radiobutton(lgrid[localActive], text=OL.objectList[2][i].userSilenceStatus, indicatoron=False, justify='center', value=lgrid[localActive].userSilenceStatus, variable=lgrid[localActive].yellowStat, fg=u.black_color, bg=u.lightgrey_color,
             activebackground=u.grey_color, activeforeground=u.black_color, selectcolor = u.yellow_color, highlightbackground=u.yellow_color, highlightcolor=u.yellow_color, highlightthickness=1)
         disp.radioButYellow.indices = (2,i)
-        disp.radioButYellow.indicesHistory = (2,localActive)
+        disp.radioButYellow.indicesActive = (2,localActive)
         disp.radioButYellow.config(command = lambda radYellow=disp.radioButYellow: self.select_yellow_button(OL,fileArray,radYellow))
         disp.radioButGreen = tk.Radiobutton(lgrid[localActive], text=OL.objectList[2][i].alarmStatus, indicatoron=False, justify='right', value=lgrid[localActive].greenAlarmStatus, variable=lgrid[localActive].greenStat, fg=u.black_color, bg=u.lightgrey_color,
             activebackground=u.grey_color, activeforeground=u.black_color, selectcolor = u.green_color, highlightbackground=u.green_color, highlightcolor=u.green_color, highlightthickness=1)
         disp.radioButGreen.indices = (2,i)
-        disp.radioButGreen.indicesHistory = (2,localActive)
+        disp.radioButGreen.indicesActive = (2,localActive)
         #print("OL 2,{} alarm status = {}".format(i,OL.objectList[2][i].alarmStatus))
         disp.radioButGreen.config(command = lambda radGreen=disp.radioButGreen: self.select_green_button(OL,fileArray,radGreen))
         #if (OL.objectList[2][i].alarmStatus != "OK" or (OL.objectList[2][i].userNotifyStatus.split(' ')[0] != "OK" and OL.objectList[2][i].userNotifyStatus.split(' ')[0] != "Cooldown")) and OL.objectList[2][i].userSilenceStatus != "Silenced":
@@ -197,8 +184,9 @@ class ALARM_HISTORY(tk.Frame):
     for i in range(0, len(self.displayFrames)):
       if len(OL.objectList[2])>=i:
         buttMenu = tk.Menu(self.displayFrames[i].butt, tearoff=0) # Is having the owner be button correct?
-        buttMenu.indices = (2,OL.objectList[2][i].columnIndex)
-        buttMenu.indicesHistory = (2,i)
+        #buttMenu.indices = (2,OL.objectList[2][i].columnIndex)
+        buttMenu.indices = (2,self.colIndexMap[i])
+        buttMenu.indicesActive = (2,i)
         buttMenu.moveN = 0
         buttMenu.editValue = None
         buttMenu.add_command(label = 'Information', command = lambda butMenu = buttMenu: self.button_information_menu(OL,fileArray,butMenu))
@@ -236,7 +224,7 @@ class ALARM_HISTORY(tk.Frame):
 
   def select_button(self,OL,fileArray,but):
     i,j = but.indices
-    a,b = but.indicesHistory
+    a,b = but.indicesActive
     OL.currentlySelectedButton = j
     OL.selectedButtonColumnIndicesList[i] = j
     for k in range(0,i): # When selecting a button update that as the one to show
@@ -264,7 +252,7 @@ class ALARM_HISTORY(tk.Frame):
 
   def select_red_button(self,OL,fileArray,but):
     i,j = but.indices
-    a,b = but.indicesHistory
+    a,b = but.indicesActive
     self.select_button(OL,fileArray,but)
     # Add a feature where clicking the red button counts as an alarm acknowledge
     self.displayFrames[b].greenAlarmStatus = 1
@@ -277,7 +265,7 @@ class ALARM_HISTORY(tk.Frame):
 
   def select_orange_button(self,OL,fileArray,but):
     i,j = but.indices
-    a,b = but.indicesHistory
+    a,b = but.indicesActive
     self.select_button(OL,fileArray,but)
     # If the user has acknowledged the alarm then we will be in a cooldown state and this button is visible, now if the user clicks again they will force->"OK" the userNotifyStatus to skip the cooldown period # FIXME this may not be desired behavior...
     u.notify_acknowledge_filearray_menu(OL,fileArray,but)
@@ -294,7 +282,7 @@ class ALARM_HISTORY(tk.Frame):
 
   def select_yellow_button(self,OL,fileArray,but):
     i,j = but.indices
-    a,b = but.indicesHistory
+    a,b = but.indicesActive
     self.select_button(OL,fileArray,but)
     u.silence_filearray_menu(OL,fileArray,but)
     silStat = 0 # Always maintain buttons in activated state, just hide them
@@ -305,7 +293,7 @@ class ALARM_HISTORY(tk.Frame):
 
   def select_green_button(self,OL,fileArray,but):
     i,j = but.indices
-    a,b = but.indicesHistory
+    a,b = but.indicesActive
     self.select_button(OL,fileArray,but)
     alStat = 0 # Always maintain buttons in activated state, just hide them
     but.config(value=alStat)
@@ -332,14 +320,14 @@ class ALARM_HISTORY(tk.Frame):
 
   def button_information_menu(self,OL,fileArray,butMenu):
     i,j = butMenu.indices
-    a,b = butMenu.indicesHistory
+    a,b = butMenu.indicesActive
     self.display_parameter_list(OL,fileArray,i,j)
     self.select_button(OL,fileArray,self.displayFrames[b].butt)
     #self.update_GUI(OL,fileArray)
 
   def button_silence_menu(self,OL,fileArray,butMenu):
     i,j = butMenu.indices
-    a,b = butMenu.indicesHistory
+    a,b = butMenu.indicesActive
     self.select_button(OL,fileArray,self.displayFrames[b].butt)
     u.silence_filearray_menu(OL,fileArray,butMenu)
     self.update_displayFrame(OL,self.displayFrames[b].radioButYellow)
@@ -348,7 +336,7 @@ class ALARM_HISTORY(tk.Frame):
 
   def button_notify_acknowledge_menu(self,OL,fileArray,butMenu):
     i,j = butMenu.indices
-    a,b = butMenu.indicesHistory
+    a,b = butMenu.indicesActive
     self.select_button(OL,fileArray,self.displayFrames[b].butt)
     if OL.objectList[2][j].userNotifyStatus.split(' ')[0] != "Cooldown" and OL.objectList[2][j].userNotifyStatus.split(' ')[0] != "OK":
       self.displayFrames[b].greenAlarmStatus = 1

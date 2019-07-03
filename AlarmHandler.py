@@ -17,6 +17,7 @@ import help_buttons
 import tabs.expert_alarm_handler as expert_alarm_handler
 import tabs.alarm_handler as alarm_handler
 import tabs.grid_alarm_handler as grid_alarm_handler
+import tabs.active_alarm_handler as active_alarm_handler
 import tabs.alarm_history as alarm_history
 import utils as u
 import bclient as bclient
@@ -31,9 +32,12 @@ class AlarmHandler:
     self.win.configure(background=u.lightgrey_color)
     self.get_alarm_handler_style()
     self.filename = "/adaqfs/home/apar/alarms/alarm.csv" # FIXME this should eventually be pushed into the config file read by default main program at runtime
+    self.histfilename = "/adaqfs/home/apar/alarms/alarmHistory.csv" # FIXME this should eventually be pushed into the config file read by default main program at runtime
     self.externalFilename = "/adaqfs/home/apar/alarms/japanAlarms.csv"
     self.delim = ','
+    self.pdelim = '='
     self.fileArray = alarm_object.FILE_ARRAY(self.filename,self.delim)
+    self.HL = alarm_object.HISTORY_LIST(self.histfilename,self.delim,self.pdelim)
     if os.path.exists(self.externalFilename): # Special case for running in an external situation like Japan or camguin analysis
       self.externalFileArray = alarm_object.FILE_ARRAY(self.externalFilename,self.delim)
     else:
@@ -65,7 +69,7 @@ class AlarmHandler:
 
   def update_show_alarms(self, event):
     for key in self.tabs:
-      if key != "Alarm History" and self.OL.currentlySelectedButton != -1:
+      if (key != "Active Alarm Handler" and key != "Alarm History") and self.OL.currentlySelectedButton != -1:
         #self.OL.selectedButtonColumnIndicesList[2]=u.recentAlarmButtons[2] # Update the currently clicked button index to the alarming one
         self.tabs[key].select_control_buttons(self.OL,self.fileArray,self.alarmLoop,self.tabs[key].controlButtons[3])
       #webbrowser.open_new(r"https://en.wikipedia.org/wiki/Green_Monster")
@@ -97,14 +101,14 @@ class AlarmHandler:
     #tab_titles = [('Expert Alarm Handler', self.expert_alarm_handler_tab),('Alarm History', self.alarm_history_tab)]
     #tab_titles = [('Alarm Handler', alarm_handler.ALARM_HANDLER),('Grid Alarm Handler', grid_alarm_handler.GRID_ALARM_HANDLER),('Expert Alarm Handler', expert_alarm_handler.EXPERT_ALARM_HANDLER),('Alarm History', alarm_history.ALARM_HISTORY)]
     if self.includeExpert == True:
-      tab_titles = [('Alarm Handler', alarm_handler.ALARM_HANDLER),('Expert Alarm Handler', expert_alarm_handler.EXPERT_ALARM_HANDLER),('Alarm History', alarm_history.ALARM_HISTORY)]
+      tab_titles = [('Alarm Handler', alarm_handler.ALARM_HANDLER),('Active Alarm Handler', active_alarm_handler.ACTIVE_ALARM_HANDLER),('Expert Alarm Handler', expert_alarm_handler.EXPERT_ALARM_HANDLER),('Alarm History', alarm_history.ALARM_HISTORY)]
     else:
-      tab_titles = [('Alarm Handler', alarm_handler.ALARM_HANDLER),('Alarm History', alarm_history.ALARM_HISTORY)]
+      tab_titles = [('Alarm Handler', alarm_handler.ALARM_HANDLER),('Active Alarm Handler', active_alarm_handler.ACTIVE_ALARM_HANDLER),('Alarm History', alarm_history.ALARM_HISTORY)]
     tabs = {}
     for title, fn in tab_titles:
       tab = ttk.Frame(tab_control, width=10, height=20, style="My.TFrame")
       tab_control.add(tab, text=title)
-      tabs[title] = fn(self.win,tab,self.OL,self.fileArray,self.alarmLoop)
+      tabs[title] = fn(self.win,tab,self.OL,self.fileArray,self.alarmLoop,self.HL)
     tab_control.grid(row=0, column=0, columnspan=3, sticky='NSEW')
     #self.masterAlarmButton = tk.Label(self.win, image=self.masterAlarmImage, cursor="hand2", bg=u.lightgrey_color)
     self.masterAlarmButton.image = self.masterAlarmImage
