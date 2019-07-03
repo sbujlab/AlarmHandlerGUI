@@ -193,7 +193,7 @@ class ACTIVE_ALARM_HANDLER(tk.Frame):
         buttMenu.add_command(label = 'Acknowledge Alarm', command = lambda butMenu = buttMenu: self.button_notify_acknowledge_menu(OL,fileArray,butMenu))
         buttMenu.add_command(label = 'Silence', command = lambda butMenu = buttMenu: self.button_silence_menu(OL,fileArray,butMenu))
         self.displayFrames[i].butt.bind("<Button-3>",lambda event, butMenu = buttMenu: self.do_popup(event,butMenu))
-      grid.append(buttMenu)
+        grid.append(buttMenu)
     return grid
 
   def do_popup(self,event,butMenu):

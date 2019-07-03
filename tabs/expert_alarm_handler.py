@@ -200,7 +200,7 @@ class EXPERT_ALARM_HANDLER(tk.Frame):
           buttMenu.add_command(label = 'Delete', command = lambda butMenu = buttMenu: self.button_delete_menu(OL,fileArray,butMenu))
           self.buttons[i][j].bind("<Button-3>",lambda event, butMenu = buttMenu: self.do_popup(event,butMenu))
           menuCol.append(buttMenu)
-      grid.append(menuCol)
+        grid.append(menuCol)
     return grid
 
   def do_popup(self,event,butMenu):

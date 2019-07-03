@@ -100,6 +100,19 @@ def write_historyFile(HL):
     wr.writerows(HL.filearray)
     return HL.filearray
 
+def backup_clear_hist(HL):
+  tmpFileStore = HL.filename
+  # Make a new unique name
+  tmpFolderName = HL.filename[:HL.filename.rfind("/")+1] + "history_saves"
+  HL.filename = tmpFolderName + HL.filename[HL.filename.rfind("/"):HL.filename.find(".csv")] + "_Save_{}.csv".format(mktime(localtime())) 
+  # Save the backup
+  write_historyFile(HL) 
+
+  # Clear the current history
+  HL.filename = tmpFileStore 
+  HL.historyList = []
+  HL.filearray = []
+
 def update_objectList(OL,fileArray,alarmList):
   # Loop through column 3 (i = 2) and for each parameterList entry check if all column=4 entries have column3[i] as its parent
   # if it does then update it's child [0].value to be == key result

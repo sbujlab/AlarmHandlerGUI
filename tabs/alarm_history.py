@@ -43,21 +43,70 @@ class ALARM_HISTORY(tk.Frame):
 ### def write_historyFile(HL):
 
 
-    self.alarmFrame = tk.LabelFrame(tab, text='Alarm Handler Viewer', background=u.lightgrey_color)
+    self.controlFrame = tk.LabelFrame(tab, text='Alarm Controls', background=u.grey_color)
+    self.alarmFrame = tk.LabelFrame(tab, text="Alarm History Viewer\nWait {} minutes before duplicating".format(HL.timeWait/60), background=u.lightgrey_color, font = ('Helvetica 14 bold'))
     self.pDataFrame = tk.LabelFrame(tab, text='Alarm Parameter Display', background=u.white_color)
     self.pDataFrame.disp = []
-    self.colTitles = {0:"Alarms"}
-    self.NperCol = 10
+    self.colTitles = {0:"Saved Alarms"}
+    self.NperCol = 8
     HL.displayPList = 0
-    self.colsp = 1
-    self.CBTextSuffix1 = ["\nFind Alarm","\nPause" ,"\nSilence","\nShow Parameters"]
-    self.CBTextSuffix2 = ["\nFind Alarm","\nUnpause","\nUnsilence" ,"\nHide Parameters"]
+    self.colsp = 3
+    self.controlButtonsText = ["Backup History","Alarm Info"]
+    self.CBTextSuffix1 = ["\nClear Current","\nShow Parameters"]
+    self.CBTextSuffix2 = ["\nClear Current","\nHide Parameters"]
 
     self.alarmCols = []
     self.initialize_cols(HL)
     self.displayFrames = []
     self.buttonMenus = []
+    self.controlButtons = self.make_control_buttons(OL,HL)
     self.make_screen(OL,HL)
+
+  def make_control_buttons(self,OL,HL):
+    grid = []
+    for i in range(0, len(self.controlButtonsText)):
+      newButt = tk.Button(self.controlFrame, text="{}{}".format(self.controlButtonsText[i],self.CBTextSuffix1[i]), default='active', justify='center', font = ('Helvetica 14 bold'),background=u.lightgrey_color)
+      if self.controlButtonsText[i]=="Alarm Info":
+      # Alarm Info
+        if HL.displayPList == 0:
+          newButt.config(text="{}{}".format(self.controlButtonsText[i],self.CBTextSuffix1[i]))
+        else:
+          newButt.config(text="{}{}".format(self.controlButtonsText[i],self.CBTextSuffix2[i]))
+      newButt.indices = (i,0)
+      newButt.config(command = lambda newBut=newButt: self.select_control_buttons(OL,HL,newBut))
+      newButt.grid(row = 0, column = i,columnspan=1,padx=10,pady=10,sticky='W')
+      grid.append(newButt)
+    self.controlFrame.grid(columnspan=2, column=0, row=0, sticky='NW')
+    return grid
+
+  def select_control_buttons(self,OL,HL,but):
+    i,j = but.indices
+    for k in range(0,len(self.controlButtons)):
+      self.controlButtons[k].grid_forget()
+    if but.cget('text')=="{}{}".format(self.controlButtonsText[0],self.CBTextSuffix1[0]): 
+      u.backup_clear_hist(HL)
+      HL.currentHist = -1
+      HL.displayPList = 0
+      for each in self.controlButtons:
+        each.destroy()
+      self.controlButtons = self.make_control_buttons(OL,HL)
+      self.update_GUI(OL,HL)
+      return
+    if but.cget('text')=="{}{}".format(self.controlButtonsText[1],self.CBTextSuffix1[1]): 
+      # Alarm Info
+      if HL.currentHist != -1:
+        #Show parameters of currently selected button, else do nothing
+        but.config(text="{}{}".format(self.controlButtonsText[1],self.CBTextSuffix2[1]))
+        self.display_parameter_list(OL,HL,HL.currentHist)
+        self.pDataFrame.grid(column=1,row=1, sticky='NE')
+    elif but.cget('text')=="{}{}".format(self.controlButtonsText[1],self.CBTextSuffix2[1]):
+      # Hide parameters
+      but.config(text="{}{}".format(self.controlButtonsText[1],self.CBTextSuffix1[1]))
+      HL.displayPList = 0
+      self.erase_pDataFrame()
+    for each in self.controlButtons:
+      each.destroy()
+    self.controlButtons = self.make_control_buttons(OL,HL)
 
   def make_screen(self,OL,HL):
     for i in range(0,len(self.alarmCols)):
@@ -90,7 +139,7 @@ class ALARM_HISTORY(tk.Frame):
     if len(HL.historyList)>0 and HL.historyList != []:
       for i in range(0,len(HL.historyList)):
         # Loop over the list of objects, creating displayFrames
-        disp = tk.LabelFrame(self.alarmCols[int(1.0*i/self.NperCol)], text=HL.historyList[i].get("Name",u.defaultKey), font=('Helvetica 8'), background=u.lightgrey_color) # FIXME want red alarm full label frame?
+        disp = tk.LabelFrame(self.alarmCols[int(1.0*i/self.NperCol)], text=HL.historyList[i].get("Name",u.defaultKey), font=('Helvetica 10'), background=u.lightgrey_color)
         lgrid.append(disp)
 
         disp.statbutt = tk.Button(lgrid[i], text="{}".format(HL.historyList[i].get("Alarm Status",u.defaultKey)), justify='center', background=u.white_color) # loop over displayFrames
@@ -98,32 +147,34 @@ class ALARM_HISTORY(tk.Frame):
         disp.statbutt.config(command = lambda but=disp.statbutt: self.select_disp_button(OL,HL,but))
         disp.statbutt.grid(row=0,column=0,sticky='W')
 
-
         disp.butt = tk.Button(lgrid[i], text="Value = {}".format(HL.historyList[i].get("Value",u.defaultKey)), justify='center', background=u.lightgrey_color) # loop over displayFrames
         disp.butt.indices = (0,i)
         disp.butt.config(command = lambda but=disp.butt: self.select_disp_button(OL,HL,but))
-        disp.butt.grid(row=0,column=1,sticky='W')
-
+        disp.butt.grid(row=0,column=1,sticky='EW')
 
         disp.timebutt = tk.Button(lgrid[i], text="Time = {}".format(strftime("%Y-%m-%d %H:%M:%S",HL.historyList[i].get("Time",u.defaultKey))), justify='center', background=u.white_color) # loop over displayFrames
-
         disp.timebutt.indices = (0,i)
         disp.timebutt.config(command = lambda but=disp.timebutt: self.select_disp_button(OL,HL,but))
-        disp.timebutt.grid(row=0,column=2,sticky='W')
+        disp.timebutt.grid(row=0,column=2,sticky='E')
+    else:
+      disp = tk.Label(self.alarmCols[0], text="No Alarms stored in History", font=('Helvetica 12'), background=u.lightgrey_color)
+      disp.grid()
+      lgrid.append(disp)
     return lgrid
 
   def initialize_menus(self,OL,HL):
     grid = []
-    #print("Adding menus, len(self.alarmCols) = {} times".format(len(self.alarmCols)))
     for i in range(0, len(self.displayFrames)):
-      if len(HL.historyList)>=i:
-        buttMenu = tk.Menu(self.displayFrames[i].butt, tearoff=0) # Is having the owner be button correct?
+      if len(HL.historyList)>=i and self.displayFrames[i]['text'] != "No Alarms stored in History":
+        buttMenu = tk.Menu(self.displayFrames[i].butt, tearoff=0) 
         buttMenu.indices = (0,i)
         buttMenu.moveN = 0
         buttMenu.editValue = None
         buttMenu.add_command(label = 'Information', command = lambda butMenu = buttMenu: self.button_information_menu(OL,HL,butMenu))
         self.displayFrames[i].butt.bind("<Button-3>",lambda event, butMenu = buttMenu: self.do_popup(event,butMenu))
-      grid.append(buttMenu)
+        self.displayFrames[i].statbutt.bind("<Button-3>",lambda event, butMenu = buttMenu: self.do_popup(event,butMenu))
+        self.displayFrames[i].timebutt.bind("<Button-3>",lambda event, butMenu = buttMenu: self.do_popup(event,butMenu))
+        grid.append(buttMenu)
     return grid
 
   def do_popup(self,event,butMenu):
@@ -131,7 +182,7 @@ class ALARM_HISTORY(tk.Frame):
 
   def layout_grid_all_col(self,HL):
     for i in range(0,len(self.displayFrames)):
-      self.displayFrames[i].grid(column=int(1.0*i/self.NperCol),row=i%self.NperCol,columnspan=self.colsp,padx=10,pady=10,sticky='W')
+      self.displayFrames[i].grid(column=int(1.0*i/self.NperCol),row=i%self.NperCol,columnspan=self.colsp,padx=0,pady=0,sticky='EW')
 
   def erase_grid_all_col(self):
     for i in range(0,len(self.displayFrames)):
@@ -139,16 +190,22 @@ class ALARM_HISTORY(tk.Frame):
 
   def select_disp_button(self,OL,HL,but):
     i,j = but.indices
+    self.displayFrames[HL.currentHist].grid_forget()
+    self.displayFrames[HL.currentHist].butt.grid_forget()
+    self.displayFrames[HL.currentHist].butt.config(background=u.lightgrey_color)
+    self.displayFrames[HL.currentHist].butt.grid(row=0,column=1,sticky='EW')
+    self.displayFrames[HL.currentHist].grid(column=int(1.0*HL.currentHist/self.NperCol),row=HL.currentHist%self.NperCol,columnspan=self.colsp,padx=0,pady=0,sticky='EW')
     HL.currentHist = j
-    for k in range (0, len(self.displayFrames)):
-      self.displayFrames[k].grid_forget()
-      self.displayFrames[k].butt.config(background=u.lightgrey_color)
-      self.displayFrames[k].butt.grid(row=0,column=1,sticky='W')
-      self.displayFrames[k].grid(column=int(1.0*k/self.NperCol),row=k%self.NperCol,columnspan=self.colsp,padx=10,pady=10,sticky='W')
+    #for k in range (0, len(self.displayFrames)):
+    #  self.displayFrames[k].grid_forget()
+    #  self.displayFrames[k].butt.config(background=u.lightgrey_color)
+    #  self.displayFrames[k].butt.grid(row=0,column=1,sticky='EW')
+    #  self.displayFrames[k].grid(column=int(1.0*k/self.NperCol),row=k%self.NperCol,columnspan=self.colsp,padx=0,pady=0,sticky='EW')
     self.displayFrames[j].grid_forget()
+    self.displayFrames[j].butt.grid_forget()
     self.displayFrames[j].butt.config(background=u.grey_color)
-    self.displayFrames[j].butt.grid(row=0,column=1,sticky='W')
-    self.displayFrames[j].grid(column=int(1.0*j/self.NperCol),row=j%self.NperCol,columnspan=self.colsp,padx=10,pady=10,sticky='W')
+    self.displayFrames[j].butt.grid(row=0,column=1,sticky='EW')
+    self.displayFrames[j].grid(column=int(1.0*j/self.NperCol),row=j%self.NperCol,columnspan=self.colsp,padx=0,pady=0,sticky='EW')
     self.erase_pDataFrame()
     if HL.currentHist != -1 and HL.displayPList == 1:
       self.display_parameter_list(OL,HL,HL.currentHist)
@@ -159,11 +216,12 @@ class ALARM_HISTORY(tk.Frame):
       self.pDataFrame.disp[k].grid_forget()
     self.pDataFrame.grid_forget()
 
-
   def update_GUI(self,OL,HL):
     self.make_screen(OL,HL)
 
   def display_parameter_list(self,OL,HL,j):
+    if j >= len(HL.historyList):
+      return
     self.erase_pDataFrame()
     self.pDataFrame.disp = []
     HL.displayPList = 1
@@ -176,15 +234,20 @@ class ALARM_HISTORY(tk.Frame):
         self.pDataFrame.disp.append(tk.Label(self.pDataFrame, text="{} = {}".format(key,strftime("%Y-%m-%d %H:%M:%S",localPlist[key])), background=u.lightgrey_color)) # FIXME want red alarm full label frame?
       else:
         self.pDataFrame.disp.append(tk.Label(self.pDataFrame, text="{} = {}".format(key, localPlist[key]), background=u.lightgrey_color)) # FIXME want red alarm full label frame?
-      self.pDataFrame.disp[k].grid(row=k,column=0,padx=10,pady=10,sticky='W')
+      self.pDataFrame.disp[k].grid(row=k,column=0,padx=5,pady=5,sticky='W')
       k+=1
-
 
   def button_information_menu(self,OL,HL,butMenu):
     i,j = butMenu.indices
     self.select_disp_button(OL,HL,butMenu)
     self.display_parameter_list(OL,HL,j)
-
+    self.controlButtons[1].grid_forget()
+    self.controlButtons[1].config(text="{}{}".format(self.controlButtonsText[1],self.CBTextSuffix2[1]))
+    self.controlButtons[1].grid(row = 0, column = 1,columnspan=1,padx=10,pady=10,sticky='N')
 
   def refresh_screen(self,OL,fileArray,alarmLoop,HL):
+    for each in self.controlButtons:
+      each.destroy()
+    self.controlButtons = self.make_control_buttons(OL,HL)
     self.update_GUI(OL,HL)
+
