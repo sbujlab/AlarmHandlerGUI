@@ -95,6 +95,7 @@ class ALARM_LOOP():
         #print("After: Parameter list value for \"Value\" updated to be {}".format(self.alarmList[i].pList.get("Value",u.defaultKey)))
       u.update_objectList(alarmHandlerGUI.OL,alarmHandlerGUI.fileArray,self.alarmList)
       u.write_textfile(alarmHandlerGUI.OL,alarmHandlerGUI.fileArray) #FIXME Do this here?
+      u.write_historyFile(alarmHandlerGUI.HL)
       if alarmHandlerGUI.tabs.get("Alarm Handler",u.defaultKey) != u.defaultKey:
         alarmHandlerGUI.tabs["Alarm Handler"].refresh_screen(alarmHandlerGUI.OL,alarmHandlerGUI.fileArray,alarmHandlerGUI.alarmLoop,alarmHandlerGUI.HL)
       if alarmHandlerGUI.tabs.get("Grid Alarm Handler",u.defaultKey) != u.defaultKey:
@@ -200,7 +201,7 @@ class ALARM():
         cond_out = "NULL"
         cond_out = subprocess.Popen(cmds, stdout=subprocess.PIPE).stdout.read().strip().decode('ascii') # Needs to be decoded... be careful #FIXME
         #print("EPICS: Doing alarm analysis for object {} {}, name = {}".format(myAO.column,myAO.columnIndex,myAO.name+" "+myAO.value))
-        print("The epics output for variable {} is {}".format(self.pList["Variable Name"],cond_out))
+        #print("The epics output for variable {} is {}".format(self.pList["Variable Name"],cond_out))
         if "Invalid" in str(cond_out): # Then the epics variable was invalid
           #print("ERROR Invalid epics channel, check with caget again:\t {}".format(self.pList["Variable Name"]))
           cond_out = "NULL"
@@ -223,7 +224,7 @@ class ALARM():
     high = self.pList.get("High",u.defaultKey)
     highhigh = self.pList.get("High High",u.defaultKey)
     exactly = self.pList.get("Exactly",u.defaultKey)
-    print("Value = {}, high = {}".format(val, high))
+    #print("Value = {}, high = {}".format(val, high))
     #valD = Decimal(val)
     #highD = Decimal(high)
     #if valD > highD:
@@ -248,7 +249,6 @@ class ALARM():
       if u.is_number(str(highhigh)):
         highhigh = Decimal(self.pList.get("High High",u.defaultKey))
     if val != "NULL":
-      print(val)
       if low != "NULL" and val < low:
         self.pList["Alarm Status"] = "Low"
       elif lowlow != "NULL" and val < lowlow:
@@ -269,12 +269,12 @@ class ALARM():
     if self.pList.get("Alarm Status",u.defaultKey) != "OK" and self.pList.get("Alarm Status",u.defaultKey) != "Invalid" and self.pList.get("Alarm Status",u.defaultKey) != "NULL": # Update global alarm status unless NULL or invalid
       self.alarmSelfStatus = self.pList.get("Alarm Status",u.defaultKey)
       myAO.alarmStatus = self.pList.get("Alarm Status",u.defaultKey)
-      print("Alarm status updated to be {}".format(myAO.alarmStatus))
+      #print("Alarm status updated to be {}".format(myAO.alarmStatus))
       # If the alarm is alarming and we aren't in cooldown the update user status
       if self.pList.get("Alarm Status",u.defaultKey) != "OK" and self.pList.get("User Notify Status",u.defaultKey).split(' ')[0] != "Cooldown":
         self.userNotifySelfStatus = self.pList.get("Alarm Status",u.defaultKey)
         myAO.userNotifyStatus = self.pList.get("Alarm Status",u.defaultKey)
-        print("User Notify Status updated to be {}".format(myAO.userNotifyStatus))
+        #print("User Notify Status updated to be {}".format(myAO.userNotifyStatus))
         self.pList["User Notify Status"] = self.pList.get("Alarm Status",u.defaultKey)
         #print("COOLER: Editing value of User Notify Status to = {}".format(myAO.userNotifyStatus))
       myAO.userSilenceStatus = self.pList.get("User Silence Status",u.defaultKey)
@@ -287,7 +287,7 @@ class ALARM():
       u.recentAlarmButtons[myAO.column] = myAO.columnIndex
       return "Not OK"
     else:
-      print("Alarm OK")
+      #print("Alarm OK")
       self.alarmSelfStatus = self.pList.get("Alarm Status",u.defaultKey)
       #self.userNotifySelfStatus = self.pList.get("User Notify Status",u.defaultKey)
       # FIXME needed? # myAO.userNotifyStatus = self.pList.get("User Notify Status",u.defaultKey)
@@ -303,7 +303,10 @@ class FILE_ARRAY():
     self.filearray = u.parse_textfile(self)
 
 class HISTORY_LIST():
-  def __init__(self,filen,delimiter,pdelimiter):
+  def __init__(self,filen,delimiter,pdelimiter,time):
+    self.currentHist = -1
+    self.displayPList = 0
+    self.timeWait = time
     self.filename = filen
     self.delim = delimiter
     self.paramDelim = pdelimiter

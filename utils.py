@@ -10,6 +10,7 @@ import tkinter as tk
 import subprocess, os
 import csv
 import alarm_object
+from time import gmtime, strftime, localtime, strptime, mktime
 
 green_color = '#3C8373'
 lightgrey_color = '#E0E0E0'
@@ -36,39 +37,62 @@ camguinIDdict = {
 
 def parse_textfile(fileArray):
   fileArray.filearray = []
-  with open(fileArray.filename) as csv_file:
-    csv_reader = csv.reader(csv_file, delimiter=fileArray.delim)
-    for row in csv_reader:
-      rowList = []
-      for col in row:
-        rowList.append(col)
-      fileArray.filearray.append(rowList)
-  return fileArray.filearray
+  try:
+    with open(fileArray.filename) as csv_file:
+      csv_reader = csv.reader(csv_file, delimiter=fileArray.delim)
+      for row in csv_reader:
+        rowList = []
+        for col in row:
+          rowList.append(col)
+        fileArray.filearray.append(rowList)
+    return fileArray.filearray
+  except IOError:
+    print("Error, no textfile {} found".format(fileArray.filename))
+    return []
 
 def init_historyList(HL):
   tmpHistList = []
   for each in HL.filearray:
     tmpDict = {}
-    tmpRow = each.split(HL.delim)
-    for entry in tmpRow:
+    for entry in each:
+      #print(entry)
       entryPair1, entryPair2 = entry.split(HL.paramDelim,1)
-      tmpDict[entryPair1] = entryPair2 
+      if entryPair1 == "Time":
+        entryPair2 = entryPair2.replace(' ','')
+        tmpTimeList = entryPair2[entryPair2.find("(")+1:entryPair2.find(")")]
+        tmpTimeList = tmpTimeList.split(',')
+        tmpTimeMap = {}
+        for ents in tmpTimeList:
+          #print(ents)
+          a, b = ents.split('=')
+          tmpTimeMap[a] = b
+        tmpDict[entryPair1] = strptime("{}-{}-{} {}:{}:{}".format(tmpTimeMap["tm_year"],tmpTimeMap["tm_mon"],tmpTimeMap["tm_mday"],tmpTimeMap["tm_hour"],tmpTimeMap["tm_min"],tmpTimeMap["tm_sec"]),"%Y-%m-%d %H:%M:%S")
+      else:
+        tmpDict[entryPair1] = entryPair2 
     tmpHistList.append(tmpDict)
   return tmpHistList
 
 def append_historyList(HL,OL,i):
-  localStr = "{}, {}\n{}".format(OL.objectList[0][OL.objectList[2][i].parentIndices[0]].value,OL.objectList[1][OL.objectList[2][i].parentIndices[1]].value[:25],OL.objectList[2][i].value[:35]) # FIXME there are better ways to do this...
-  tmpDict = {}
-  tmpList = []
-  tmpDict["Name"] = localStr
-  tmpList.append("Name={}".format(localStr))
-  for eachKey, eachItem in OL.objectList[2][i].parameterList.items():
-    tmpDict[eachKey] = eachItem
-    tmpList.append("{}={}".format(eachKey,eachItem))
-  HL.historyList.append(tmpDict)
-  HL.filearray.append(tmpList)
+  freshAlarm = 1
+  localStr = "{}, {}, {}".format(OL.objectList[0][OL.objectList[2][i].parentIndices[0]].value,OL.objectList[1][OL.objectList[2][i].parentIndices[1]].value[:25],OL.objectList[2][i].value[:35]) # FIXME there are better ways to do this...
+  for hl in HL.historyList: # Loop over all objects, check to see if they are already in the history, and if so then check their time stamp against right now + wait time
+    print("History time: {}, local time: {}, wait time: {}".format(mktime(hl.get("Time",defaultKey)), mktime(localtime()), HL.timeWait))
+    if hl.get("Name",defaultKey) == localStr and hl.get("Time",defaultKey) != "NULL" and mktime(hl.get("Time",defaultKey)) > mktime(localtime()) - HL.timeWait:
+      freshAlarm = 0
+  if freshAlarm == 1:
+    tmpDict = {}
+    tmpList = []
+    tmpDict["Name"] = localStr
+    tmpList.append("Name={}".format(localStr))
+    for eachKey, eachItem in OL.objectList[2][i].parameterList.items():
+      tmpDict[eachKey] = eachItem
+      tmpList.append("{}={}".format(eachKey,eachItem))
+    tmpDict["Time"] = localtime()
+    tmpList.append("Time={}".format(localtime()))
+    HL.historyList.append(tmpDict)
+    HL.filearray.append(tmpList)
 
-def write_historyfile(HL):
+def write_historyFile(HL):
   outFile = open(HL.filename,'w+')
   wr = csv.writer(outFile,delimiter=HL.delim)
   if len(HL.filearray)!=0:

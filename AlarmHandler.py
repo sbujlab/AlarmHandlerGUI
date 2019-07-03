@@ -36,8 +36,9 @@ class AlarmHandler:
     self.externalFilename = "/adaqfs/home/apar/alarms/japanAlarms.csv"
     self.delim = ','
     self.pdelim = '='
+    self.timeWait = 600 # 10 minute alarm wait time before we assume the alarm is fresh FIXME Parameter file
     self.fileArray = alarm_object.FILE_ARRAY(self.filename,self.delim)
-    self.HL = alarm_object.HISTORY_LIST(self.histfilename,self.delim,self.pdelim)
+    self.HL = alarm_object.HISTORY_LIST(self.histfilename,self.delim,self.pdelim,self.timeWait)
     if os.path.exists(self.externalFilename): # Special case for running in an external situation like Japan or camguin analysis
       self.externalFileArray = alarm_object.FILE_ARRAY(self.externalFilename,self.delim)
     else:
