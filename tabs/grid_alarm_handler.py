@@ -218,6 +218,7 @@ class GRID_ALARM_HANDLER(tk.Frame):
         buttMenu.moveN = 0
         buttMenu.editValue = None
         buttMenu.add_command(label = 'Information', command = lambda butMenu = buttMenu: self.button_information_menu(OL,fileArray,butMenu))
+        buttMenu.add_command(label = 'Acknowledge Alarm', command = lambda butMenu = buttMenu: self.button_notify_acknowledge_menu(OL,fileArray,butMenu))
         buttMenu.add_command(label = 'Silence', command = lambda butMenu = buttMenu: self.button_silence_menu(OL,fileArray,butMenu))
         self.displayFrames[i].butt.bind("<Button-3>",lambda event, butMenu = buttMenu: self.do_popup(event,butMenu))
         grid.append(buttMenu)
@@ -291,6 +292,12 @@ class GRID_ALARM_HANDLER(tk.Frame):
     # If the user has acknowledged the alarm then we will be in a cooldown state and this button is visible, now if the user clicks again they will force->"OK" the userNotifyStatus to skip the cooldown period # FIXME this may not be desired behavior...
     u.notify_acknowledge_filearray_menu(OL,fileArray,but)
     notStat = 1
+    OL.objectList[2][j].userNotifyStatus = OL.objectList[2][j].alarmStatus #"OK"
+    OL.objectList[2][j].alarm.userNotifySelfStatus = OL.objectList[2][j].alarmStatus #"OK"
+    OL.objectList[2][j].parameterList["User Notify Status"] = OL.objectList[2][j].alarmStatus #"OK"
+    OL.objectList[2][j].alarmStatus = OL.objectList[2][j].alarmStatus #"OK"
+    OL.objectList[2][j].alarm.alarmSelfStatus = OL.objectList[2][j].alarmStatus #"OK"
+    OL.objectList[2][j].parameterList["Alarm Status"] = OL.objectList[2][j].alarmStatus #"OK"
     if OL.objectList[i][j].userNotifyStatus.split(' ')[0] == "Cooldown":
       notStat = 0
     but.config(value=notStat)
@@ -345,6 +352,24 @@ class GRID_ALARM_HANDLER(tk.Frame):
     self.select_button(OL,fileArray,but)
     u.silence_filearray_menu(OL,fileArray,butMenu)
     self.update_GUI(OL,fileArray)
+
+  def button_notify_acknowledge_menu(self,OL,fileArray,butMenu):
+    i,j = butMenu.indices
+    self.select_button(OL,fileArray,self.displayFrames[j].butt)
+    if OL.objectList[2][j].userNotifyStatus.split(' ')[0] != "Cooldown" and OL.objectList[2][j].userNotifyStatus.split(' ')[0] != "OK":
+      self.displayFrames[j].greenAlarmStatus = 1
+      u.notify_acknowledge_filearray_menu(OL,fileArray,butMenu)
+    elif OL.objectList[2][j].userNotifyStatus.split(' ')[0] == "Cooldown":
+      u.notify_acknowledge_filearray_menu(OL,fileArray,butMenu)
+      OL.objectList[2][j].userNotifyStatus = OL.objectList[2][j].alarmStatus #"OK"
+      OL.objectList[2][j].alarm.userNotifySelfStatus = OL.objectList[2][j].alarmStatus #"OK"
+      OL.objectList[2][j].parameterList["User Notify Status"] = OL.objectList[2][j].alarmStatus #"OK"
+      OL.objectList[2][j].alarmStatus = OL.objectList[2][j].alarmStatus #"OK"
+      OL.objectList[2][j].alarm.alarmSelfStatus = OL.objectList[2][j].alarmStatus #"OK"
+      OL.objectList[2][j].parameterList["Alarm Status"] = OL.objectList[2][j].alarmStatus #"OK"
+    self.update_displayFrame(OL,self.displayFrames[j].radioButGreen)
+    self.select_button(OL,fileArray,self.displayFrames[j].butt)
+    #self.update_GUI(OL,fileArray)
 
   def refresh_screen(self,OL,fileArray,alarmLoop,HL):
     self.controlButtons = self.make_control_buttons(OL,fileArray, alarmLoop)

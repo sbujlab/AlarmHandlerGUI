@@ -269,11 +269,12 @@ class ACTIVE_ALARM_HANDLER(tk.Frame):
     self.select_button(OL,fileArray,but)
     # If the user has acknowledged the alarm then we will be in a cooldown state and this button is visible, now if the user clicks again they will force->"OK" the userNotifyStatus to skip the cooldown period # FIXME this may not be desired behavior...
     u.notify_acknowledge_filearray_menu(OL,fileArray,but)
-    OL.objectList[2][j].userNotifyStatus = "OK"
-    OL.objectList[2][j].alarm.userNotifySelfStatus = "OK"
-    OL.objectList[2][j].alarmStatus = "OK"
-    OL.objectList[2][j].alarm.alarmSelfStatus = "OK"
-    OL.objectList[2][j].parameterList["Alarm Status"] = "OK"
+    OL.objectList[2][j].userNotifyStatus = OL.objectList[2][j].alarmStatus #"OK"
+    OL.objectList[2][j].alarm.userNotifySelfStatus = OL.objectList[2][j].alarmStatus #"OK"
+    OL.objectList[2][j].parameterList["User Notify Status"] = OL.objectList[2][j].alarmStatus #"OK"
+    OL.objectList[2][j].alarmStatus = OL.objectList[2][j].alarmStatus #"OK"
+    OL.objectList[2][j].alarm.alarmSelfStatus = OL.objectList[2][j].alarmStatus #"OK"
+    OL.objectList[2][j].parameterList["Alarm Status"] = OL.objectList[2][j].alarmStatus #"OK"
     notStat = 0 # Always maintain buttons in activated state, just hide them
     but.config(value=notStat)
     self.update_displayFrame(OL,but)
@@ -343,11 +344,12 @@ class ACTIVE_ALARM_HANDLER(tk.Frame):
       u.notify_acknowledge_filearray_menu(OL,fileArray,butMenu)
     elif OL.objectList[2][j].userNotifyStatus.split(' ')[0] == "Cooldown":
       u.notify_acknowledge_filearray_menu(OL,fileArray,butMenu)
-      OL.objectList[2][j].userNotifyStatus = "OK"
-      OL.objectList[2][j].alarm.userNotifySelfStatus = "OK"
-      OL.objectList[2][j].alarmStatus = "OK"
-      OL.objectList[2][j].alarm.alarmSelfStatus = "OK"
-      OL.objectList[2][j].parameterList["Alarm Status"] = "OK"
+      OL.objectList[2][j].userNotifyStatus = OL.objectList[2][j].alarmStatus #"OK"
+      OL.objectList[2][j].alarm.userNotifySelfStatus = OL.objectList[2][j].alarmStatus #"OK"
+      OL.objectList[2][j].parameterList["User Notify Status"] = OL.objectList[2][j].alarmStatus #"OK"
+      OL.objectList[2][j].alarmStatus = OL.objectList[2][j].alarmStatus #"OK"
+      OL.objectList[2][j].alarm.alarmSelfStatus = OL.objectList[2][j].alarmStatus #"OK"
+      OL.objectList[2][j].parameterList["Alarm Status"] = OL.objectList[2][j].alarmStatus #"OK"
     self.update_displayFrame(OL,self.displayFrames[b].radioButGreen)
     self.select_button(OL,fileArray,self.displayFrames[b].butt)
     #self.update_GUI(OL,fileArray)

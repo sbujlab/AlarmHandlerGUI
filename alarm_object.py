@@ -83,7 +83,7 @@ class ALARM_LOOP():
         # Check if the alarm is alarming and has not been "OK"ed by the user acknowledge
         #print("Checking alarm {} alarm status = {}, silence status = {}, and user acknowledge = {}".format(i,self.alarmList[i].alarmSelfStatus,self.alarmList[i].userSilenceSelfStatus,self.ok_notify_check(self.alarmList[i].userNotifySelfStatus)))
         # If the userNotifyStatus is NULL (i.e. not set) then the alarm handler will just read it and move on with its life
-        if self.ok_notify_check(self.alarmList[i].userNotifySelfStatus) != "OK" and self.alarmList[i].userSilenceSelfStatus == "Alert":
+        if self.globalUserAlarmSilence == "Alert" and self.ok_notify_check(self.alarmList[i].userNotifySelfStatus) != "OK" and self.alarmList[i].userSilenceSelfStatus == "Alert":
           # Just let the method I wrote take care of determining global alarm status
           self.globalAlarmStatus = self.alarmList[i].userNotifySelfStatus # Update global alarm status
           u.append_historyList(alarmHandlerGUI.HL,alarmHandlerGUI.OL,i) # Update Alarm History
@@ -135,7 +135,22 @@ class USER_NOTIFY():
     #  alarmHandlerGUI.tabs["Grid Alarm Handler"].refresh_screen(alarmHandlerGUI.OL,alarmHandlerGUI.fileArray,alarmHandlerGUI.alarmLoop)
     #if alarmHandlerGUI.tabs.get("Expert Alarm Handler",u.defaultKey) != u.defaultKey:
     #  alarmHandlerGUI.tabs["Expert Alarm Handler"].refresh_screen(alarmHandlerGUI.OL,alarmHandlerGUI.fileArray,alarmHandlerGUI.alarmLoop)
-    if (alarmLoop.globalLoopStatus=="Looping"):
+    localStat = "OK"
+    for i in range (0,len(alarmLoop.alarmList)):
+      alarmLoop.alarmList[i].alarm_evaluate()
+      # Check if the alarm is alarming and has not been "OK"ed by the user acknowledge
+      #print("Checking alarm {} alarm status = {}, silence status = {}, and user acknowledge = {}".format(i,alarmLoop.alarmList[i].alarmSelfStatus,alarmLoop.alarmList[i].userSilenceSelfStatus,alarmLoop.ok_notify_check(alarmLoop.alarmList[i].userNotifySelfStatus)))
+      # If the userNotifyStatus is NULL (i.e. not set) then the alarm handler will just read it and move on with its life
+      if alarmLoop.globalUserAlarmSilence == "Alert" and alarmLoop.ok_notify_check(alarmLoop.alarmList[i].userNotifySelfStatus) != "OK" and alarmLoop.alarmList[i].userSilenceSelfStatus == "Alert":
+        # Just let the method I wrote take care of determining global alarm status
+        alarmLoop.globalAlarmStatus = alarmLoop.alarmList[i].userNotifySelfStatus # Update global alarm status
+        u.append_historyList(alarmHandlerGUI.HL,alarmHandlerGUI.OL,i) # Update Alarm History
+        localStat = alarmLoop.alarmList[i].userNotifySelfStatus
+    if localStat == "OK":
+      alarmLoop.globalAlarmStatus = "OK"
+    else:
+      print("Global Alarm Alarmed")
+    if (alarmLoop.globalLoopStatus=="Looping" and alarmLoop.globalUserAlarmSilence == "Alert"):
       self.update_user_notify_status(alarmLoop,OL,fileArray) # Assumes OK, checks each OL.objectList[2] entry for its notify status, continues
       if alarmHandlerGUI.alertTheUser == True and alarmLoop.globalAlarmStatus != "OK": # globalAlarmStatus determined by these set acknowledged stati
         try:
@@ -146,7 +161,7 @@ class USER_NOTIFY():
       alarmHandlerGUI.win.after(1000*OL.cooldownReduction,self.user_notify_loop, alarmLoop,OL,fileArray,alarmHandlerGUI) 
     else:                                                                                     
       # Recursion loop here - splits off a new instance of this function and finishes the one currently running (be careful) - Wait longer if paused, no need to overkill # FIXME Probably use the global cooldownReduction wait time for this
-      alarmHandlerGUI.win.after(1000*10*OL.cooldownReduction,self.user_notify_loop, alarmLoop,OL,fileArray,alarmHandlerGUI) 
+      alarmHandlerGUI.win.after(1000*OL.cooldownReduction,self.user_notify_loop, alarmLoop,OL,fileArray,alarmHandlerGUI) 
 
   def update_user_notify_status(self,alarmLoop,OL,fileArray):
     for e in range(0,len(OL.objectList[2])):

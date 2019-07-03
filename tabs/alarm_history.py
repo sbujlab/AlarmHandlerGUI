@@ -142,20 +142,21 @@ class ALARM_HISTORY(tk.Frame):
         disp = tk.LabelFrame(self.alarmCols[int(1.0*i/self.NperCol)], text=HL.historyList[i].get("Name",u.defaultKey), font=('Helvetica 10'), background=u.lightgrey_color)
         lgrid.append(disp)
 
-        disp.statbutt = tk.Button(lgrid[i], text="{}".format(HL.historyList[i].get("Alarm Status",u.defaultKey)), justify='center', background=u.white_color) # loop over displayFrames
+        disp.statbutt = tk.Button(lgrid[i], text="{}".format(HL.historyList[i].get("Alarm Status",u.defaultKey)), justify='center', background=u.orange_color) # loop over displayFrames
         disp.statbutt.indices = (0,i)
         disp.statbutt.config(command = lambda but=disp.statbutt: self.select_disp_button(OL,HL,but))
         disp.statbutt.grid(row=0,column=0,sticky='W')
 
-        disp.butt = tk.Button(lgrid[i], text="Value = {}".format(HL.historyList[i].get("Value",u.defaultKey)), justify='center', background=u.lightgrey_color) # loop over displayFrames
-        disp.butt.indices = (0,i)
-        disp.butt.config(command = lambda but=disp.butt: self.select_disp_button(OL,HL,but))
-        disp.butt.grid(row=0,column=1,sticky='EW')
-
         disp.timebutt = tk.Button(lgrid[i], text="Time = {}".format(strftime("%Y-%m-%d %H:%M:%S",HL.historyList[i].get("Time",u.defaultKey))), justify='center', background=u.white_color) # loop over displayFrames
         disp.timebutt.indices = (0,i)
         disp.timebutt.config(command = lambda but=disp.timebutt: self.select_disp_button(OL,HL,but))
-        disp.timebutt.grid(row=0,column=2,sticky='E')
+        disp.timebutt.grid(row=0,column=1,sticky='EW')
+
+        disp.butt = tk.Button(lgrid[i], text="Value = {}".format(HL.historyList[i].get("Value",u.defaultKey)), justify='center', background=u.lightgrey_color) # loop over displayFrames
+        disp.butt.indices = (0,i)
+        disp.butt.config(command = lambda but=disp.butt: self.select_disp_button(OL,HL,but))
+        disp.butt.grid(row=0,column=2,sticky='E')
+
     else:
       disp = tk.Label(self.alarmCols[0], text="No Alarms stored in History", font=('Helvetica 12'), background=u.lightgrey_color)
       disp.grid()
@@ -193,7 +194,7 @@ class ALARM_HISTORY(tk.Frame):
     self.displayFrames[HL.currentHist].grid_forget()
     self.displayFrames[HL.currentHist].butt.grid_forget()
     self.displayFrames[HL.currentHist].butt.config(background=u.lightgrey_color)
-    self.displayFrames[HL.currentHist].butt.grid(row=0,column=1,sticky='EW')
+    self.displayFrames[HL.currentHist].butt.grid(row=0,column=2,sticky='E')
     self.displayFrames[HL.currentHist].grid(column=int(1.0*HL.currentHist/self.NperCol),row=HL.currentHist%self.NperCol,columnspan=self.colsp,padx=0,pady=0,sticky='EW')
     HL.currentHist = j
     #for k in range (0, len(self.displayFrames)):
@@ -204,7 +205,7 @@ class ALARM_HISTORY(tk.Frame):
     self.displayFrames[j].grid_forget()
     self.displayFrames[j].butt.grid_forget()
     self.displayFrames[j].butt.config(background=u.grey_color)
-    self.displayFrames[j].butt.grid(row=0,column=1,sticky='EW')
+    self.displayFrames[j].butt.grid(row=0,column=2,sticky='E')
     self.displayFrames[j].grid(column=int(1.0*j/self.NperCol),row=j%self.NperCol,columnspan=self.colsp,padx=0,pady=0,sticky='EW')
     self.erase_pDataFrame()
     if HL.currentHist != -1 and HL.displayPList == 1:
