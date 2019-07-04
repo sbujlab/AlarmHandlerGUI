@@ -48,7 +48,7 @@ class AlarmHandler:
     self.timeWait = int(self.config.config['timeWaitHistory'])
     self.cooldownLength = int(self.config.config['alarmCooldownTime'])
     self.remoteName = self.config.config['remoteSoundServer']
-    self.alertTheUser = self.config.config['turnSoundOn']
+    self.alertTheUser = bool(strtobool(self.config.config['turnSoundOn']))
     self.includeExpert = bool(strtobool(self.config.config['includeExpertPage']))
 
     self.fileArray = alarm_object.FILE_ARRAY(self.filename,self.delim)
