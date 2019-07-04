@@ -44,12 +44,13 @@ class ALARM_HISTORY(tk.Frame):
 
 
     self.controlFrame = tk.LabelFrame(tab, text='Alarm Controls', background=u.grey_color)
-    self.alarmFrame = tk.LabelFrame(tab, text="Alarm History Viewer\nWait {} minutes before duplicating".format(HL.timeWait/60), background=u.lightgrey_color, font = ('Helvetica 14 bold'))
+    self.alarmFrame = tk.LabelFrame(tab, text="Alarm History Viewer\nWill wait {} minutes before duplicating an alarm".format(HL.timeWait/60), background=u.lightgrey_color, font = ('Helvetica 14 bold'))
     self.pDataFrame = tk.LabelFrame(tab, text='Alarm Parameter Display', background=u.white_color)
     self.pDataFrame.disp = []
     self.colTitles = {0:"Saved Alarms"}
     self.NperCol = 8
     HL.displayPList = 0
+    self.saveFileName = "No Alarms stored in History memory yet"
     self.colsp = 3
     self.controlButtonsText = ["Backup History","Alarm Info"]
     self.CBTextSuffix1 = ["\nClear Current","\nShow Parameters"]
@@ -84,7 +85,7 @@ class ALARM_HISTORY(tk.Frame):
     for k in range(0,len(self.controlButtons)):
       self.controlButtons[k].grid_forget()
     if but.cget('text')=="{}{}".format(self.controlButtonsText[0],self.CBTextSuffix1[0]): 
-      u.backup_clear_hist(HL)
+      self.saveFileName = u.backup_clear_hist(HL)
       HL.currentHist = -1
       HL.displayPList = 0
       for each in self.controlButtons:
@@ -158,7 +159,7 @@ class ALARM_HISTORY(tk.Frame):
         disp.butt.grid(row=0,column=2,sticky='E')
 
     else:
-      disp = tk.Label(self.alarmCols[0], text="No Alarms stored in History", font=('Helvetica 12'), background=u.lightgrey_color)
+      disp = tk.Label(self.alarmCols[0], text=self.saveFileName, font=('Helvetica 12'), background=u.lightgrey_color)
       disp.grid()
       lgrid.append(disp)
     return lgrid
@@ -166,7 +167,7 @@ class ALARM_HISTORY(tk.Frame):
   def initialize_menus(self,OL,HL):
     grid = []
     for i in range(0, len(self.displayFrames)):
-      if len(HL.historyList)>=i and self.displayFrames[i]['text'] != "No Alarms stored in History":
+      if len(HL.historyList)>=i and self.displayFrames[i]['text'] != self.saveFileName:
         buttMenu = tk.Menu(self.displayFrames[i].butt, tearoff=0) 
         buttMenu.indices = (0,i)
         buttMenu.moveN = 0
@@ -251,4 +252,7 @@ class ALARM_HISTORY(tk.Frame):
       each.destroy()
     self.controlButtons = self.make_control_buttons(OL,HL)
     self.update_GUI(OL,HL)
+    if HL.currentHist == -1 and self.displayFrames[0]['text'] != self.saveFileName: # Always default to the most recent alarm, to aid the user
+      HL.currentHist = len(self.displayFrames) - 1
+      self.select_disp_button(OL,HL,self.displayFrames[HL.currentHist].butt)
 

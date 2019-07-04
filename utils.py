@@ -105,6 +105,8 @@ def backup_clear_hist(HL):
   # Make a new unique name
   tmpFolderName = HL.filename[:HL.filename.rfind("/")+1] + "history_saves"
   HL.filename = tmpFolderName + HL.filename[HL.filename.rfind("/"):HL.filename.find(".csv")] + "_Save_{}.csv".format(mktime(localtime())) 
+  saveFileName = "Alarms Saved to {}".format(HL.filename)
+  print(saveFileName)
   # Save the backup
   write_historyFile(HL) 
 
@@ -112,6 +114,7 @@ def backup_clear_hist(HL):
   HL.filename = tmpFileStore 
   HL.historyList = []
   HL.filearray = []
+  return saveFileName
 
 def update_objectList(OL,fileArray,alarmList):
   # Loop through column 3 (i = 2) and for each parameterList entry check if all column=4 entries have column3[i] as its parent
