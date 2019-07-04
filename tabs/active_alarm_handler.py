@@ -20,7 +20,7 @@ class ACTIVE_ALARM_HANDLER(tk.Frame):
     self.pDataFrame = tk.LabelFrame(tab, text='Active Alarm Parameter Display', background=u.white_color)
     self.pDataFrame.disp = []
     self.colTitles = {0:"Alarms"}
-    self.NperCol = 8
+    self.NperCol = 9
     OL.currentlySelectedButton = -1
     OL.displayPList = 0
     self.colsp = 1
@@ -78,21 +78,22 @@ class ACTIVE_ALARM_HANDLER(tk.Frame):
     if OL.objectList[2][j].userNotifyStatus != "OK" and OL.objectList[2][j].userNotifyStatus.split(' ')[0] != "Cooldown" and OL.objectList[2][j].userSilenceStatus != "Silenced":
       # Then we are alarmed
       self.displayFrames[b].alarmStatus = 0
-      self.displayFrames[b].radioButRed.grid(row=0,column=0,sticky='W')
+      self.displayFrames[b].radioButRed.grid(row=0,column=0,padx=5,sticky='W')
       self.displayFrames[b].radioButRed.config(text=OL.objectList[2][j].alarmStatus, value = self.displayFrames[b].alarmStatus)
     if OL.objectList[2][j].userNotifyStatus.split(' ')[0] == "Cooldown" and OL.objectList[2][j].userSilenceStatus != "Silenced":
-      self.displayFrames[b].radioButOrange.grid(row=0,column=0,sticky='W')
+      self.displayFrames[b].radioButOrange.grid(row=0,column=0,padx=5,sticky='W')
       self.displayFrames[b].radioButOrange.config(text=OL.objectList[2][j].userNotifyStatus.split(' ')[1])
     ##### Silence takes precedent over alarm and over notify/acknowledge
     #if OL.objectList[2][j].alarmStatus == "OK" and OL.objectList[2][j].userSilenceStatus == "Silenced":
-    #  self.displayFrames[j].radioButYellow.grid(row=0,column=0,sticky='W')
+    #  self.displayFrames[j].radioButYellow.grid(row=0,column=0,padx=5,sticky='W')
     #  self.displayFrames[j].radioButYellow.config(text=OL.objectList[2][j].userSilenceStatus)
     if OL.objectList[2][j].alarmStatus != "OK" and OL.objectList[2][j].userSilenceStatus == "Silenced":
-      self.displayFrames[b].radioButYellow.grid(row=0,column=0,sticky='W')
-      self.displayFrames[b].radioButYellow.config(text=OL.objectList[2][j].alarmStatus)
+      self.displayFrames[b].radioButYellow.grid(row=0,column=0,padx=5,sticky='W')
+      self.displayFrames[b].radioButYellow.config(text=OL.objectList[2][j].userNotifyStatus)
+      #self.displayFrames[b].radioButYellow.config(text=OL.objectList[2][j].alarmStatus)
     #if OL.objectList[2][j].alarmStatus == "OK" and OL.objectList[2][j].userSilenceStatus != "Silenced" and OL.objectList[2][j].userNotifyStatus.split(' ')[0] == "OK":
     ####  # Add check on userNotifyStatus so that the user will keep seeing the alarm indicator on even after the alarm itself has disappeared
-    #  self.displayFrames[j].radioButGreen.grid(row=0,column=0,sticky='W')
+    #  self.displayFrames[j].radioButGreen.grid(row=0,column=0,padx=5,sticky='W')
     #  self.displayFrames[j].radioButGreen.config(text='   ')
     
 
@@ -160,21 +161,22 @@ class ACTIVE_ALARM_HANDLER(tk.Frame):
         #if (OL.objectList[2][i].alarmStatus != "OK" or (OL.objectList[2][i].userNotifyStatus.split(' ')[0] != "OK" and OL.objectList[2][i].userNotifyStatus.split(' ')[0] != "Cooldown")) and OL.objectList[2][i].userSilenceStatus != "Silenced":
         if OL.objectList[2][i].userNotifyStatus != "OK" and OL.objectList[2][i].userNotifyStatus.split(' ')[0] != "Cooldown" and OL.objectList[2][i].userSilenceStatus != "Silenced":
           disp.alarmStatus = 0
-          disp.radioButRed.grid(row=0,column=0,sticky='W')
+          disp.radioButRed.grid(row=0,column=0,padx=5,sticky='W')
           disp.radioButRed.config(text=OL.objectList[2][i].alarmStatus, value = disp.alarmStatus)
         if OL.objectList[2][i].userNotifyStatus.split(' ')[0] == "Cooldown" and OL.objectList[2][i].userSilenceStatus != "Silenced":
-          disp.radioButOrange.grid(row=0,column=0,sticky='W')
+          disp.radioButOrange.grid(row=0,column=0,padx=5,sticky='W')
           disp.radioButOrange.config(text=OL.objectList[2][i].userNotifyStatus.split(' ')[1])
         # Silence takes precedent over alarm and over notify/acknowledge
         #if OL.objectList[2][i].alarmStatus == "OK" and OL.objectList[2][i].userSilenceStatus == "Silenced":
-        #  disp.radioButYellow.grid(row=0,column=0,sticky='W')
+        #  disp.radioButYellow.grid(row=0,column=0,padx=5,sticky='W')
         #  disp.radioButYellow.config(text=OL.objectList[2][i].userSilenceStatus)
         if OL.objectList[2][i].alarmStatus != "OK" and OL.objectList[2][i].userSilenceStatus == "Silenced":
-          disp.radioButYellow.grid(row=0,column=0,sticky='W')
-          disp.radioButYellow.config(text=OL.objectList[2][i].alarmStatus)
+          disp.radioButYellow.grid(row=0,column=0,padx=5,sticky='W')
+          disp.radioButYellow.config(text=OL.objectList[2][i].userNotifyStatus)
+          #disp.radioButYellow.config(text=OL.objectList[2][i].alarmStatus)
         #if OL.objectList[2][i].alarmStatus == "OK" and OL.objectList[2][i].userSilenceStatus != "Silenced" and OL.objectList[2][i].userNotifyStatus.split(' ')[0] == "OK":
         ####  # Add check on userNotifyStatus so that the user will keep seeing the alarm indicator on even after the alarm itself has disappeared
-        #  disp.radioButGreen.grid(row=0,column=0,sticky='W')
+        #  disp.radioButGreen.grid(row=0,column=0,padx=5,sticky='W')
         #  disp.radioButGreen.config(text='   ')
         localActive += 1
     return lgrid
@@ -202,7 +204,7 @@ class ACTIVE_ALARM_HANDLER(tk.Frame):
 
   def layout_grid_all_col(self,OL,fileArray):
     for i in range(0,len(self.displayFrames)):
-      self.displayFrames[i].grid(column=int(1.0*i/self.NperCol),row=i%self.NperCol,columnspan=self.colsp,padx=0,pady=0,sticky='W')
+      self.displayFrames[i].grid(column=int(1.0*i/self.NperCol),row=i%self.NperCol,columnspan=self.colsp,padx=0,pady=0,sticky='EW')
     #self.buttonMenus = self.initialize_menus(OL,fileArray)
 
   def erase_grid_all_col(self):

@@ -48,7 +48,7 @@ class ALARM_HISTORY(tk.Frame):
     self.pDataFrame = tk.LabelFrame(tab, text='Alarm Parameter Display', background=u.white_color)
     self.pDataFrame.disp = []
     self.colTitles = {0:"Saved Alarms"}
-    self.NperCol = 8
+    self.NperCol = 10
     HL.displayPList = 0
     self.saveFileName = "No Alarms stored in History memory yet"
     self.colsp = 3
