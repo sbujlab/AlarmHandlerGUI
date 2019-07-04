@@ -17,6 +17,7 @@ import help_buttons
 import tabs.expert_alarm_handler as expert_alarm_handler
 import tabs.alarm_handler as alarm_handler
 import tabs.grid_alarm_handler as grid_alarm_handler
+import tabs.active_alarm_handler as active_alarm_handler
 import tabs.alarm_history as alarm_history
 import utils as u
 import bclient as bclient
@@ -100,14 +101,14 @@ class AlarmHandler:
     #tab_titles = [('Expert Alarm Handler', self.expert_alarm_handler_tab),('Alarm History', self.alarm_history_tab)]
     #tab_titles = [('Alarm Handler', alarm_handler.ALARM_HANDLER),('Grid Alarm Handler', grid_alarm_handler.GRID_ALARM_HANDLER),('Expert Alarm Handler', expert_alarm_handler.EXPERT_ALARM_HANDLER),('Alarm History', alarm_history.ALARM_HISTORY)]
     if self.includeExpert == True:
-      tab_titles = [('Expert Alarm Handler', expert_alarm_handler.EXPERT_ALARM_HANDLER),('Alarm History', alarm_history.ALARM_HISTORY)]
+      tab_titles = [('Expert Alarm Handler', expert_alarm_handler.EXPERT_ALARM_HANDLER),('Active Alarm Handler', active_alarm_handler.ACTIVE_ALARM_HANDLER),('Alarm History', alarm_history.ALARM_HISTORY)]
     else:
-      tab_titles = [('Alarm Handler', alarm_handler.ALARM_HANDLER),('Alarm History', alarm_history.ALARM_HISTORY)]
+      tab_titles = [('Alarm Handler', alarm_handler.ALARM_HANDLER),('Active Alarm Handler', active_alarm_handler.ACTIVE_ALARM_HANDLER),('Alarm History', alarm_history.ALARM_HISTORY)]
     tabs = {}
     for title, fn in tab_titles:
       tab = ttk.Frame(tab_control, width=10, height=20, style="My.TFrame")
       tab_control.add(tab, text=title)
-      tabs[title] = fn(self.win,tab,self.OL,self.fileArray,self.alarmLoop,self.OL)
+      tabs[title] = fn(self.win,tab,self.OL,self.fileArray,self.alarmLoop,self.HL)
     tab_control.grid(row=0, column=0, columnspan=3, sticky='NSEW')
     #self.masterAlarmButton = tk.Label(self.win, image=self.masterAlarmImage, cursor="hand2", bg=u.lightgrey_color)
     self.masterAlarmButton.image = self.masterAlarmImage

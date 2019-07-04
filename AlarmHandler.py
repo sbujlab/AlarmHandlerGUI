@@ -70,7 +70,7 @@ class AlarmHandler:
 
   def update_show_alarms(self, event):
     for key in self.tabs:
-      if (key != "Active Alarm Handler" and key != "Alarm History") and self.OL.currentlySelectedButton != -1:
+      if key != "Alarm History" and self.OL.currentlySelectedButton != -1:
         #self.OL.selectedButtonColumnIndicesList[2]=u.recentAlarmButtons[2] # Update the currently clicked button index to the alarming one
         self.tabs[key].select_control_buttons(self.OL,self.fileArray,self.alarmLoop,self.tabs[key].controlButtons[3])
       #webbrowser.open_new(r"https://en.wikipedia.org/wiki/Green_Monster")
