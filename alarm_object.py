@@ -68,10 +68,10 @@ class ALARM_LOOP():
   def alarm_loop(self,alarmHandlerGUI):
     if (self.globalLoopStatus=="Looping"):
       print("Waited 10 seconds, analyzing alarms")
-      if os.path.exists(alarmHandlerGUI.externalFilename) and self.checkExternalStatus == True and (time.time() - os.path.getmtime(alarmHandlerGUI.externalFilename)) < 300000: # 5 minute wait time for external to update FIXME paramter file
+      if os.path.exists(alarmHandlerGUI.externalFilename) and self.checkExternalStatus == True and (time.time() - os.path.getmtime(alarmHandlerGUI.externalFilename)) < alarmHandlerGUI.externalParameterFileStaleTime:
         #print("Adding External alarms from {}".format(alarmHandlerGUI.externalFileArray.filename))
         u.update_extra_filearray(alarmHandlerGUI.fileArray,alarmHandlerGUI.externalFileArray)
-        alarmHandlerGUI.OL.objectList = u.create_objects(alarmHandlerGUI.fileArray,alarmHandlerGUI.OL.cooldownLength)
+        alarmHandlerGUI.OL.objectList = u.create_objects(alarmHandlerGUI.fileArray,alarmHandlerGUI.OL.cooldownLength) # FIXME Necessary?
         self.reset_alarmList(alarmHandlerGUI.OL)
         u.write_textfile(alarmHandlerGUI.OL,alarmHandlerGUI.fileArray) #FIXME Do this here?
       else:
@@ -160,7 +160,7 @@ class USER_NOTIFY():
       # Recursion loop here - splits off a new instance of this function and finishes the one currently running (be careful)
       alarmHandlerGUI.win.after(1000*OL.cooldownReduction,self.user_notify_loop, alarmLoop,OL,fileArray,alarmHandlerGUI) 
     else:                                                                                     
-      # Recursion loop here - splits off a new instance of this function and finishes the one currently running (be careful) - Wait longer if paused, no need to overkill # FIXME Probably use the global cooldownReduction wait time for this
+      # Recursion loop here - splits off a new instance of this function and finishes the one currently running (be careful) - Wait longer if paused, no need to overkill 
       alarmHandlerGUI.win.after(1000*OL.cooldownReduction,self.user_notify_loop, alarmLoop,OL,fileArray,alarmHandlerGUI) 
 
   def update_user_notify_status(self,alarmLoop,OL,fileArray):
@@ -193,7 +193,7 @@ class ALARM():
     #self.runNumber = os.getenv($RUNNUM)
     self.pList = myAO.parameterList # FIXME FIXME FIXME test and prove that this is true!!! This parameterList is built out of the object's parameter list which is built out of the values of all objects, so editing them here edits them everywhere - be careful!! FIXME - to edit all of objectLists' values it may be necessary to make the constituent local objects into arrays so the pointer logic works
     #print("Initializing: pList = {}".format(self.pList))
-    self.alarmAnalysisReturn = None
+    self.alarmAnalysisReturn = None # For camguin outputs to stdout to catch
     self.alarmErrorReturn = None
     self.alarmSelfStatus = myAO.alarmStatus
     self.userNotifySelfStatus = myAO.userNotifyStatus
@@ -214,7 +214,7 @@ class ALARM():
       if self.pList.get("Variable Name"):
         cmds = ['caget', '-t', '-w 1', self.pList["Variable Name"]]
         cond_out = "NULL"
-        cond_out = subprocess.Popen(cmds, stdout=subprocess.PIPE).stdout.read().strip().decode('ascii') # Needs to be decoded... be careful #FIXME
+        cond_out = subprocess.Popen(cmds, stdout=subprocess.PIPE).stdout.read().strip().decode('ascii') # Needs to be decoded... be careful 
         #print("EPICS: Doing alarm analysis for object {} {}, name = {}".format(myAO.column,myAO.columnIndex,myAO.name+" "+myAO.value))
         #print("The epics output for variable {} is {}".format(self.pList["Variable Name"],cond_out))
         if "Invalid" in str(cond_out): # Then the epics variable was invalid
@@ -305,7 +305,7 @@ class ALARM():
       #print("Alarm OK")
       self.alarmSelfStatus = self.pList.get("Alarm Status",u.defaultKey)
       #self.userNotifySelfStatus = self.pList.get("User Notify Status",u.defaultKey)
-      # FIXME needed? # myAO.userNotifyStatus = self.pList.get("User Notify Status",u.defaultKey)
+      #myAO.userNotifyStatus = self.pList.get("User Notify Status",u.defaultKey)
       #myAO.userSilenceStatus = self.pList.get("User Silence Status",u.defaultKey)
       myAO.alarmStatus = "OK"
       myAO.color = u.lightgrey_color
@@ -315,6 +315,7 @@ class FILE_ARRAY():
   def __init__(self,filen,delimiter):
     self.filename = filen
     self.delim = delimiter
+    self.config = {}
     self.filearray = u.parse_textfile(self)
 
 class HISTORY_LIST():
@@ -370,7 +371,7 @@ class OBJECT_LIST():
         if self.objectList[ind][jNew].columnIndex==self.objectList[ind+1][k].parentIndices[ind]:
           self.activeObjectColumnIndicesList[ind+1]=self.objectList[ind+1][k].columnIndex  
           # loop until the end of children of this active click, then the inserting goes at the end of child lists
-          # FIXME is this why only last entry in a set of children will trigger parent's alarm status?
+          # FIXME is this why only last entry in a set of children will trigger parent's alarm status in expert mode?
           break
     # If i+1 then take last parentIndex==columnIndex columnIndex as activeObjectIndicesList[i+1]
     if i < 4:
@@ -410,7 +411,7 @@ class ALARM_OBJECT():
       self.color = u.grey_color
     #if (clickStat == 0 and self.alarmStatus == 1):
     if self.alarmStatus != "OK":
-      self.color = self.color #FIXME col #3 still == red problem?
+      self.color = self.color #FIXME col #3 still == red problem in expert mode? 
     #if self.alarmStatus != "OK" and self.userSilenceStatus == "Alert":
     #  self.color = u.red_color
     #if self.userSilenceStatus == "Silenced":

@@ -97,7 +97,6 @@ class EXPERT_ALARM_HANDLER(tk.Frame):
       but.config(text="{}{}".format(self.controlButtonsText[1],self.CBTextSuffix1[1]))
     if but.cget('text')=="{}{}".format(self.controlButtonsText[0],self.CBTextSuffix1[0]): 
       # Alarm Go To
-      #FIXME would be good to select the most recently activated red button and show its contents
       if alarmLoop.globalAlarmStatus != "OK" and alarmLoop.globalUserAlarmSilence != "Silenced":
         but.config(background=u.red_color)
       elif alarmLoop.globalAlarmStatus != "OK" and alarmLoop.globalUserAlarmSilence == "Silenced":
@@ -268,13 +267,13 @@ class EXPERT_ALARM_HANDLER(tk.Frame):
     i,j = but.indices
     OL.selectedButtonColumnIndicesList[i]=j # Update the currently clicked button index
     for k in range(0,i): 
-      OL.selectedButtonColumnIndicesList[k] = OL.objectList[k][OL.objectList[i][j].parentIndices[k]].columnIndex # FIXME this should fix the incorrect index updating on refresh
+      OL.selectedButtonColumnIndicesList[k] = OL.objectList[k][OL.objectList[i][j].parentIndices[k]].columnIndex 
     for k in range(i+1,len(OL.selectedButtonColumnIndicesList)): 
       #print("Erasing selectedButtonIndex at {}".format(k))
       OL.selectedButtonColumnIndicesList[k] = -1
     OL.set_clicked(i,j) # Update that object's color to dark grey
     self.set_button_clicked(OL,fileArray,i,j) # Re-organize the grid and change the non-clicked buttons back to regular light grey
-    #self.buttons[i][j].config(background=OL.objectList[i][j].color) # FIXME redundant? - Update that button to be the newly update object's new color (could just use but.config)
+    #self.buttons[i][j].config(background=OL.objectList[i][j].color) 
 
   def update_GUI(self,OL,fileArray):
     fileArray.filearray = u.write_filearray(fileArray)
@@ -321,7 +320,6 @@ class EXPERT_ALARM_HANDLER(tk.Frame):
   def button_move_menu(self,OL,fileArray,butMenu):
     i,j = butMenu.indices
     self.select_button(OL,fileArray,butMenu)
-    #OL.selectedButtonColumnIndicesList[i]=j # FIXME - try to get menus to persist screen
     butMenu.moveN = simpledialog.askinteger("Input", "Move amount (+ is down)",parent = butMenu, maxvalue=(len(self.buttons[i])-j-1), minvalue=-1*j) #FIXME - limits are for entire button array, not just currently shown one... 
     if butMenu.moveN != 0:
       fileArray.filearray = u.move_filearray_menu(OL,fileArray,butMenu)
@@ -333,7 +331,6 @@ class EXPERT_ALARM_HANDLER(tk.Frame):
   def button_copy_menu(self,OL,fileArray,butMenu):
     i,j = butMenu.indices
     self.select_button(OL,fileArray,butMenu)
-    #OL.selectedButtonColumnIndicesList[i]=j # FIXME - try to get menus to persist screen
     butMenu.copyName = simpledialog.askstring("Input", "New Entry Name",parent = butMenu) 
     if butMenu.moveN != None:
       fileArray.filearray = u.copy_filearray_menu(OL,fileArray,butMenu)
@@ -345,7 +342,6 @@ class EXPERT_ALARM_HANDLER(tk.Frame):
   def button_add_menu(self,OL,fileArray,butMenu):
     i,j = butMenu.indices
     self.select_button(OL,fileArray,butMenu)
-    #OL.selectedButtonColumnIndicesList[i]=j # FIXME - try to get menus to persist screen
     fileArray.filearray = u.add_filearray_menu(OL,fileArray,butMenu)
     self.update_GUI(OL,fileArray)
     for coli in range(0,i):
@@ -355,7 +351,6 @@ class EXPERT_ALARM_HANDLER(tk.Frame):
   def button_delete_menu(self,OL,fileArray,butMenu):
     i,j = butMenu.indices
     self.select_button(OL,fileArray,butMenu)
-    #OL.selectedButtonColumnIndicesList[i]=j # FIXME - try to get menus to persist screen
     fileArray.filearray = u.delete_filearray_menu(OL,fileArray,butMenu)
     self.update_GUI(OL,fileArray)
     for coli in range(i,len(OL.selectedButtonColumnIndicesList)):

@@ -50,6 +50,14 @@ def parse_textfile(fileArray):
     print("Error, no textfile {} found".format(fileArray.filename))
     return []
 
+def parse_config(fa):
+  for each in fa.filearray:
+    # Assume the config file is all single entries per line, '=' separated
+    if len(each)==2:
+      eachKey = each[0].replace(' ','')
+      eachVal = each[1].replace(' ','')
+      fa.config[eachKey] = eachVal
+
 def init_historyList(HL):
   tmpHistList = []
   for each in HL.filearray:
@@ -194,7 +202,7 @@ def notify_acknowledge_filearray_menu(OL,fileArray,butMenu):
   i,j = butMenu.indices
   tmpStat = OL.objectList[i][j].userNotifyStatus.split(' ')
   if tmpStat[0] == "Cooldown":
-    OL.objectList[i][j].userNotifyStatus = "OK" # The user is manually OKing this alarm... maybe this is not safe FIXME
+    OL.objectList[i][j].userNotifyStatus = "OK" # The user is manually OKing this alarm... 
     OL.objectList[i][j].parameterList["User Notify Status"] = "OK"
     OL.objectList[i][j].alarm.userNotifySelfStatus = "OK"
   else:
@@ -319,7 +327,7 @@ def create_objects(fileArray,cooldownLength):
         else:
           newObject.name = line[column-1]
         newObject.value = line[column]
-#####FIXME        newObject.add_parameter_history(newObject.value) # Commenting out then assumes you are only recording value history
+#       newObject.add_parameter_history(newObject.value) # Commenting out then assumes you are only recording value history
         newObject.alarmStatus = "OK"
         newObject.userSilenceStatus = "Alert"
         newObject.cooldownLength = cooldownLength
@@ -335,12 +343,7 @@ def create_objects(fileArray,cooldownLength):
         if (column==4 and isnew==1):
           localObjectList[2][localObjectList[column][colRow[3]-1].parentIndices[2]].add_parameter(localObjectList[3][colRow[3]-1],localObjectList[4][colRow[4]-1]) # FIXME Using colRow[4]-1 will always append the final entry of the values column [4] true for a parameter [3] to be the parameter list value.. consider first for history sake?
 
-
-
 ##### Silence Read
-
-
-
           if localObjectList[3][colRow[3]-1].value == "User Silence Status":
             localObjectList[2][localObjectList[column][colRow[3]-1].parentIndices[2]].userSilenceStatus = localObjectList[4][colRow[4]-1].value 
             localObjectList[2][localObjectList[column][colRow[3]-1].parentIndices[2]].alarm.userSilenceSelfStatus = localObjectList[4][colRow[4]-1].value 
@@ -349,8 +352,8 @@ def create_objects(fileArray,cooldownLength):
             # Editing the parameterList entry..... instead of the object value itself...
             localObjectList[2][localObjectList[column][colRow[3]-1].parentIndices[2]].add_parameter(localObjectList[3][colRow[3]-1],localObjectList[4][colRow[4]-1])
             # Also check each alarm status, in case the alarm status entry is earlier in fileArray than silence status
-            # FIXME FIXME FIXME This will loop through column3 and overwrite its prior entries for parent coloration.... this is bad.
-            for p in range(0,colRow[3]): # FIXME replace colRow[3]-1 with p to loop over priors too ... a bit redundant, but should work
+            # FIXME This will loop through column3 and overwrite its prior entries for parent coloration.... this is bad.
+            for p in range(0,colRow[3]): 
               if localObjectList[2][localObjectList[column][p].parentIndices[2]].alarmStatus != "OK" and localObjectList[2][localObjectList[column][p].parentIndices[2]].userSilenceStatus == "Alert":
                 for q1 in range(0,column):
                   localObjectList[q1][localObjectList[column][p].parentIndices[q1]].color = red_color

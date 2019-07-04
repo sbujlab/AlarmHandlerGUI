@@ -233,9 +233,9 @@ class ALARM_HISTORY(tk.Frame):
     k = 0
     for key in localPlist:
       if key == "Time":
-        self.pDataFrame.disp.append(tk.Label(self.pDataFrame, text="{} = {}".format(key,strftime("%Y-%m-%d %H:%M:%S",localPlist[key])), background=u.lightgrey_color)) # FIXME want red alarm full label frame?
+        self.pDataFrame.disp.append(tk.Label(self.pDataFrame, text="{} = {}".format(key,strftime("%Y-%m-%d %H:%M:%S",localPlist[key])), background=u.lightgrey_color)) 
       else:
-        self.pDataFrame.disp.append(tk.Label(self.pDataFrame, text="{} = {}".format(key, localPlist[key]), background=u.lightgrey_color)) # FIXME want red alarm full label frame?
+        self.pDataFrame.disp.append(tk.Label(self.pDataFrame, text="{} = {}".format(key, localPlist[key]), background=u.lightgrey_color)) 
       self.pDataFrame.disp[k].grid(row=k,column=0,padx=5,pady=5,sticky='W')
       k+=1
 

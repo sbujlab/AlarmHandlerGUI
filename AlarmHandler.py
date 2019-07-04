@@ -10,7 +10,7 @@ import tkinter as tk
 from tkinter import ttk
 import os
 import webbrowser
-
+from argparse import ArgumentParser
 import csv
 import alarm_object
 import help_buttons
@@ -31,27 +31,35 @@ class AlarmHandler:
     self.win.title("Continuous Aggregate Monitor: Alarm Handler")
     self.win.configure(background=u.lightgrey_color)
     self.get_alarm_handler_style()
-    self.filename = "/adaqfs/home/apar/alarms/alarm.csv" # FIXME this should eventually be pushed into the config file read by default main program at runtime
-    self.histfilename = "/adaqfs/home/apar/alarms/alarmHistory.csv" # FIXME this should eventually be pushed into the config file read by default main program at runtime
-    self.externalFilename = "/adaqfs/home/apar/alarms/japanAlarms.csv"
     self.delim = ','
     self.pdelim = '='
-    self.timeWait = 600 # 10 minute alarm wait time before we assume the alarm is fresh FIXME Parameter file
+
+    parser = ArgumentParser()
+    parser.add_argument("-f", "--file", dest="filename", help="Configuration File Location", metavar="FILE", default="/adaqfs/home/apar/alarms/alarmConfig.txt")
+    args = vars(parser.parse_args())
+    self.config = alarm_object.FILE_ARRAY(args['filename'],self.pdelim)
+
+    u.parse_config(self.config)
+    self.filename = self.config.config['alarmFilename']
+    self.histfilename = self.config.config['historyFilename']
+    self.externalFilename = self.config.config['externalFilename'] # FIXME: make this a list to iterate through
+    self.externalParameterFileStaleTime = float(self.config.config['staleExternalTime'])
+    self.timeWait = int(self.config.config['timeWaitHistory'])
+    self.cooldownLength = int(self.config.config['alarmCooldownTime'])
+    self.remoteName = self.config.config['remoteSoundServer']
+    self.alertTheUser = self.config.config['turnSoundOn']
+    self.includeExpert = self.config.config['includeExpertPage']
+
+
     self.fileArray = alarm_object.FILE_ARRAY(self.filename,self.delim)
     self.HL = alarm_object.HISTORY_LIST(self.histfilename,self.delim,self.pdelim,self.timeWait)
     if os.path.exists(self.externalFilename): # Special case for running in an external situation like Japan or camguin analysis
       self.externalFileArray = alarm_object.FILE_ARRAY(self.externalFilename,self.delim)
     else:
       self.externalFileArray = None
-    self.cooldownLength = 60
     self.OL = alarm_object.OBJECT_LIST(self.fileArray,self.cooldownLength)
     self.masterAlarmImage = tk.PhotoImage(file='ok.ppm').subsample(2)
     self.masterAlarmButton = tk.Label(self.win, image=self.masterAlarmImage, cursor="hand2", bg=u.lightgrey_color)
-    self.remoteName = 'hacweb7'
-    self.alertTheUser = True
-    #self.alertTheUser = False
-    self.includeExpert = False
-    #self.includeExpert = True
     self.alarmClient = bclient.sockClient(self.remoteName)
     self.alarmLoop = alarm_object.ALARM_LOOP(self)
     self.tabs = self.create_widgets()

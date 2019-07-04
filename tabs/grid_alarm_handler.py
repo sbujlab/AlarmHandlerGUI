@@ -101,7 +101,6 @@ class GRID_ALARM_HANDLER(tk.Frame):
       but.config(text="{}{}".format(self.controlButtonsText[1],self.CBTextSuffix1[1]))
     if but.cget('text')=="{}{}".format(self.controlButtonsText[0],self.CBTextSuffix1[0]): 
       # Alarm Go To
-      #FIXME would be good to select the most recently activated red button and show its contents
       if alarmLoop.globalAlarmStatus != "OK" and alarmLoop.globalUserAlarmSilence != "Silenced":
         but.config(background=u.red_color)
       elif alarmLoop.globalAlarmStatus != "OK" and alarmLoop.globalUserAlarmSilence == "Silenced":
@@ -154,7 +153,7 @@ class GRID_ALARM_HANDLER(tk.Frame):
     if len(OL.objectList)>(2) and len(OL.objectList[2])>0:
       for i in range(0,len(OL.objectList[2])):
         # Loop over the list of objects, creating displayFrames
-        disp = tk.LabelFrame(self.alarmRows[int(1.0*i/self.NperRow)], text="{}, {}\n{}".format(OL.objectList[0][OL.objectList[2][i].parentIndices[0]].value,OL.objectList[1][OL.objectList[2][i].parentIndices[1]].value,OL.objectList[2][i].value), background=u.lightgrey_color) # FIXME want red alarm full label frame?
+        disp = tk.LabelFrame(self.alarmRows[int(1.0*i/self.NperRow)], text="{}, {}\n{}".format(OL.objectList[0][OL.objectList[2][i].parentIndices[0]].value,OL.objectList[1][OL.objectList[2][i].parentIndices[1]].value,OL.objectList[2][i].value), background=u.lightgrey_color) 
         disp.redStat = tk.IntVar()
         disp.orangeStat = tk.IntVar()
         disp.yellowStat = tk.IntVar()
@@ -233,7 +232,6 @@ class GRID_ALARM_HANDLER(tk.Frame):
     #self.buttonMenus = self.initialize_menus(OL,fileArray)
 
   def erase_grid_all_row(self):
-    # FIXME rowID is not being parsed correctly here !!
     for i in range(0,len(self.displayFrames)):
       self.displayFrames[i].grid_forget()
 
@@ -289,7 +287,7 @@ class GRID_ALARM_HANDLER(tk.Frame):
   def select_orange_button(self,OL,fileArray,but):
     i,j = but.indices
     self.select_button(OL,fileArray,but)
-    # If the user has acknowledged the alarm then we will be in a cooldown state and this button is visible, now if the user clicks again they will force->"OK" the userNotifyStatus to skip the cooldown period # FIXME this may not be desired behavior...
+    # If the user has acknowledged the alarm then we will be in a cooldown state and this button is visible, now if the user clicks again they will force->"OK" the userNotifyStatus to skip the cooldown period 
     u.notify_acknowledge_filearray_menu(OL,fileArray,but)
     notStat = 1
     OL.objectList[2][j].userNotifyStatus = OL.objectList[2][j].alarmStatus #"OK"
@@ -336,7 +334,7 @@ class GRID_ALARM_HANDLER(tk.Frame):
     self.pDataFrame.grid(column=1,row=1,sticky='NW')
     k = 0
     for key in localPlist:
-      self.pDataFrame.disp.append(tk.Label(self.pDataFrame, text="{} = {}".format(key, localPlist[key]), background=u.lightgrey_color)) # FIXME want red alarm full label frame?
+      self.pDataFrame.disp.append(tk.Label(self.pDataFrame, text="{} = {}".format(key, localPlist[key]), background=u.lightgrey_color)) 
       self.pDataFrame.disp[k].grid(row=k,column=0,padx=10,pady=10,sticky='W')
       k+=1
 

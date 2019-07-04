@@ -68,7 +68,7 @@ class ALARM_HANDLER(tk.Frame):
           newButt.config(text="{}{}".format(self.controlButtonsText[i],self.CBTextSuffix2[i]))
       newButt.indices = (i,0)
       newButt.config(command = lambda newBut=newButt: self.select_control_buttons(OL,fileArray,alarmLoop,newBut))
-      newButt.grid(row = 0, column = i,columnspan=self.colsp,padx=10,pady=10,sticky='W')
+      newButt.grid(row = 0, column = i,columnspan=self.colsp,padx=5,pady=5,sticky='W')
       grid.append(newButt)
     self.controlFrame.grid(columnspan=2, column=0, row=0, sticky='NW')
     return grid
@@ -164,7 +164,7 @@ class ALARM_HANDLER(tk.Frame):
   def initialize_cols(self,OL):
     for i in range(0, int(1.0*len(OL.objectList[2])/self.NperCol)+1):
       self.alarmCols.append(tk.LabelFrame(self.alarmFrame, text=self.colTitles.get(i,"ctd."), background=u.lightgrey_color))
-      self.alarmCols[i].grid(column=i,row=0,pady=10,padx=10,sticky='N')
+      self.alarmCols[i].grid(column=i,row=0,padx=5,pady=5,sticky='N')
 
   def update_displayFrame(self,OL,localBut):
     i,j = localBut.indices
@@ -208,7 +208,7 @@ class ALARM_HANDLER(tk.Frame):
         localStr = "{}, {}, {}".format(OL.objectList[0][OL.objectList[2][i].parentIndices[0]].value,OL.objectList[1][OL.objectList[2][i].parentIndices[1]].value[:25],OL.objectList[2][i].value[:25])
         if len(localStr) > 30:
           localStr = "{}, {}\n{}".format(OL.objectList[0][OL.objectList[2][i].parentIndices[0]].value,OL.objectList[1][OL.objectList[2][i].parentIndices[1]].value[:25],OL.objectList[2][i].value[:35])
-        disp = tk.LabelFrame(self.alarmCols[int(1.0*i/self.NperCol)], text=localStr, font=('Helvetica 8'), background=u.lightgrey_color) # FIXME want red alarm full label frame?
+        disp = tk.LabelFrame(self.alarmCols[int(1.0*i/self.NperCol)], text=localStr, font=('Helvetica 8'), background=u.lightgrey_color) 
         disp.redStat = tk.IntVar()
         disp.orangeStat = tk.IntVar()
         disp.yellowStat = tk.IntVar()
@@ -291,7 +291,7 @@ class ALARM_HANDLER(tk.Frame):
 
   def layout_grid_all_col(self,OL,fileArray):
     for i in range(0,len(self.displayFrames)):
-      self.displayFrames[i].grid(column=int(1.0*i/self.NperCol),row=i%self.NperCol,columnspan=self.colsp,padx=10,pady=10,sticky='W')
+      self.displayFrames[i].grid(column=int(1.0*i/self.NperCol),row=i%self.NperCol,columnspan=self.colsp,padx=5,pady=5,sticky='W')
     #self.buttonMenus = self.initialize_menus(OL,fileArray)
 
   def erase_grid_all_col(self):
@@ -354,7 +354,7 @@ class ALARM_HANDLER(tk.Frame):
   def select_orange_button(self,OL,fileArray,but):
     i,j = but.indices
     self.select_button(OL,fileArray,but)
-    # If the user has acknowledged the alarm then we will be in a cooldown state and this button is visible, now if the user clicks again they will force->"OK" the userNotifyStatus to skip the cooldown period # FIXME this may not be desired behavior...
+    # If the user has acknowledged the alarm then we will be in a cooldown state and this button is visible, now if the user clicks again they will force->"OK" the userNotifyStatus to skip the cooldown period 
     u.notify_acknowledge_filearray_menu(OL,fileArray,but)
     OL.objectList[2][j].userNotifyStatus = OL.objectList[2][j].alarmStatus #"OK"
     OL.objectList[2][j].alarm.userNotifySelfStatus = OL.objectList[2][j].alarmStatus #"OK"
@@ -399,8 +399,8 @@ class ALARM_HANDLER(tk.Frame):
     self.pDataFrame.grid(column=1,row=1,sticky='NW')
     k = 0
     for key in localPlist:
-      self.pDataFrame.disp.append(tk.Label(self.pDataFrame, text="{} = {}".format(key, localPlist[key]), background=u.lightgrey_color)) # FIXME want red alarm full label frame?
-      self.pDataFrame.disp[k].grid(row=k,column=0,padx=10,pady=10,sticky='W')
+      self.pDataFrame.disp.append(tk.Label(self.pDataFrame, text="{} = {}".format(key, localPlist[key]), background=u.lightgrey_color)) 
+      self.pDataFrame.disp[k].grid(row=k,column=0,padx=5,pady=5,sticky='W')
       k+=1
 
 
