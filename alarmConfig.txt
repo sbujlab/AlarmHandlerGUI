@@ -6,4 +6,4 @@ timeWaitHistory   = 600
 alarmCooldownTime = 60
 remoteSoundServer = hacweb7
 turnSoundOn       = True
-includeExpertPage = True
+includeExpertPage = False
