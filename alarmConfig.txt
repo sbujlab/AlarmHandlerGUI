@@ -1,3 +1,4 @@
+alarmConfig       = /adaqfs/home/apar/alarms/alarmConfig.txt
 alarmFilename     = /adaqfs/home/apar/alarms/alarm.csv
 historyFilename   = /adaqfs/home/apar/alarms/alarmHistory.csv
 externalFilename  = /adaqfs/home/apar/alarms/japanAlarms.csv

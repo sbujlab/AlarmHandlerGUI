@@ -315,7 +315,7 @@ class FILE_ARRAY():
   def __init__(self,filen,delimiter):
     self.filename = filen
     self.delim = delimiter
-    self.config = {}
+    self.conf = {}
     self.filearray = u.parse_textfile(self)
 
 class HISTORY_LIST():

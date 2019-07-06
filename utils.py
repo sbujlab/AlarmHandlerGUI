@@ -52,11 +52,11 @@ def parse_textfile(fileArray):
 
 def parse_config(fa):
   for each in fa.filearray:
-    # Assume the config file is all single entries per line, '=' separated
+    # Assume the conf file is all single entries per line, '=' separated
     if len(each)==2:
       eachKey = each[0].replace(' ','')
       eachVal = each[1].replace(' ','')
-      fa.config[eachKey] = eachVal
+      fa.conf[eachKey] = eachVal
 
 def init_historyList(HL):
   tmpHistList = []

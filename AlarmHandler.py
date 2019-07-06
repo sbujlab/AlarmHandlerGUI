@@ -19,6 +19,7 @@ import tabs.alarm_handler as alarm_handler
 import tabs.grid_alarm_handler as grid_alarm_handler
 import tabs.active_alarm_handler as active_alarm_handler
 import tabs.alarm_history as alarm_history
+import tabs.settings as settings
 import utils as u
 import bclient as bclient
 from distutils.util import strtobool
@@ -38,18 +39,18 @@ class AlarmHandler:
     parser = ArgumentParser()
     parser.add_argument("-f", "--file", dest="filename", help="Configuration File Location", metavar="FILE", default="/adaqfs/home/apar/alarms/alarmConfig.txt")
     args = vars(parser.parse_args())
-    self.config = alarm_object.FILE_ARRAY(args['filename'],self.pdelim)
+    self.conf = alarm_object.FILE_ARRAY(args['filename'],self.pdelim)
 
-    u.parse_config(self.config)
-    self.filename = self.config.config['alarmFilename']
-    self.histfilename = self.config.config['historyFilename']
-    self.externalFilename = self.config.config['externalFilename'] # FIXME: make this a list to iterate through
-    self.externalParameterFileStaleTime = float(self.config.config['staleExternalTime'])
-    self.timeWait = int(self.config.config['timeWaitHistory'])
-    self.cooldownLength = int(self.config.config['alarmCooldownTime'])
-    self.remoteName = self.config.config['remoteSoundServer']
-    self.alertTheUser = bool(strtobool(self.config.config['turnSoundOn']))
-    self.includeExpert = bool(strtobool(self.config.config['includeExpertPage']))
+    u.parse_config(self.conf)
+    self.filename = self.conf.conf['alarmFilename']
+    self.histfilename = self.conf.conf['historyFilename']
+    self.externalFilename = self.conf.conf['externalFilename'] # FIXME: make this a list to iterate through
+    self.externalParameterFileStaleTime = float(self.conf.conf['staleExternalTime'])
+    self.timeWait = int(self.conf.conf['timeWaitHistory'])
+    self.cooldownLength = int(self.conf.conf['alarmCooldownTime'])
+    self.remoteName = self.conf.conf['remoteSoundServer']
+    self.alertTheUser = bool(strtobool(self.conf.conf['turnSoundOn']))
+    self.includeExpert = bool(strtobool(self.conf.conf['includeExpertPage']))
 
     self.fileArray = alarm_object.FILE_ARRAY(self.filename,self.delim)
     self.HL = alarm_object.HISTORY_LIST(self.histfilename,self.delim,self.pdelim,self.timeWait)
@@ -110,14 +111,14 @@ class AlarmHandler:
     #tab_titles = [('Expert Alarm Handler', self.expert_alarm_handler_tab),('Alarm History', self.alarm_history_tab)]
     #tab_titles = [('Alarm Handler', alarm_handler.ALARM_HANDLER),('Grid Alarm Handler', grid_alarm_handler.GRID_ALARM_HANDLER),('Expert Alarm Handler', expert_alarm_handler.EXPERT_ALARM_HANDLER),('Alarm History', alarm_history.ALARM_HISTORY)]
     if self.includeExpert == True:
-      tab_titles = [('Alarm Handler', alarm_handler.ALARM_HANDLER),('Active Alarm Handler', active_alarm_handler.ACTIVE_ALARM_HANDLER),('Expert Alarm Handler', expert_alarm_handler.EXPERT_ALARM_HANDLER),('Alarm History', alarm_history.ALARM_HISTORY)]
+      tab_titles = [('Alarm Handler', alarm_handler.ALARM_HANDLER),('Active Alarm Handler', active_alarm_handler.ACTIVE_ALARM_HANDLER),('Expert Alarm Handler', expert_alarm_handler.EXPERT_ALARM_HANDLER),('Alarm History', alarm_history.ALARM_HISTORY),('Settings',settings.SETTINGS)]
     else:
-      tab_titles = [('Alarm Handler', alarm_handler.ALARM_HANDLER),('Grid Alarm Handler', grid_alarm_handler.GRID_ALARM_HANDLER),('Active Alarm Handler', active_alarm_handler.ACTIVE_ALARM_HANDLER),('Alarm History', alarm_history.ALARM_HISTORY)]
+      tab_titles = [('Alarm Handler', alarm_handler.ALARM_HANDLER),('Grid Alarm Handler', grid_alarm_handler.GRID_ALARM_HANDLER),('Active Alarm Handler', active_alarm_handler.ACTIVE_ALARM_HANDLER),('Alarm History', alarm_history.ALARM_HISTORY),('Settings',settings.SETTINGS)]
     tabs = {}
     for title, fn in tab_titles:
       tab = ttk.Frame(tab_control, width=10, height=20, style="My.TFrame")
       tab_control.add(tab, text=title)
-      tabs[title] = fn(self.win,tab,self.OL,self.fileArray,self.alarmLoop,self.HL)
+      tabs[title] = fn(self,tab,self.OL,self.fileArray,self.alarmLoop,self.HL)
     tab_control.grid(row=0, column=0, columnspan=3, sticky='NSEW')
     #self.masterAlarmButton = tk.Label(self.win, image=self.masterAlarmImage, cursor="hand2", bg=u.lightgrey_color)
     self.masterAlarmButton.image = self.masterAlarmImage

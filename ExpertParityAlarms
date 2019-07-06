@@ -1,3 +1,0 @@
-#!/bin/tcsh
-cd /adaqfs/home/apar/alarms/ExpertAlarmHandlerGUI
-python3 AlarmHandler.py
