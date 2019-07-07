@@ -21,7 +21,7 @@ class ALARM_HANDLER(tk.Frame):
     self.pDataFrame = tk.LabelFrame(tab, text='Alarm Parameter Display', background=u.white_color)
     self.pDataFrame.disp = []
     self.colTitles = {0:"Alarms"}
-    self.NperCol = 9
+    self.NperCol = 10
     OL.currentlySelectedButton = -1
     OL.displayPList = 0
     self.colsp = 2

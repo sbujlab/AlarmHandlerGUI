@@ -49,6 +49,7 @@ class AlarmHandler:
     self.timeWait = int(self.conf.conf['timeWaitHistory'])
     self.cooldownLength = int(self.conf.conf['alarmCooldownTime'])
     self.remoteName = self.conf.conf['remoteSoundServer']
+    self.showGrid = bool(strtobool(self.conf.conf['showGrid']))
     self.alertTheUser = bool(strtobool(self.conf.conf['turnSoundOn']))
     self.includeExpert = bool(strtobool(self.conf.conf['includeExpertPage']))
 
@@ -112,8 +113,10 @@ class AlarmHandler:
     #tab_titles = [('Alarm Handler', alarm_handler.ALARM_HANDLER),('Grid Alarm Handler', grid_alarm_handler.GRID_ALARM_HANDLER),('Expert Alarm Handler', expert_alarm_handler.EXPERT_ALARM_HANDLER),('Alarm History', alarm_history.ALARM_HISTORY)]
     if self.includeExpert == True:
       tab_titles = [('Alarm Handler', alarm_handler.ALARM_HANDLER),('Active Alarm Handler', active_alarm_handler.ACTIVE_ALARM_HANDLER),('Expert Alarm Handler', expert_alarm_handler.EXPERT_ALARM_HANDLER),('Alarm History', alarm_history.ALARM_HISTORY),('Settings',settings.SETTINGS)]
-    else:
+    elif self.showGrid == True:
       tab_titles = [('Alarm Handler', alarm_handler.ALARM_HANDLER),('Grid Alarm Handler', grid_alarm_handler.GRID_ALARM_HANDLER),('Active Alarm Handler', active_alarm_handler.ACTIVE_ALARM_HANDLER),('Alarm History', alarm_history.ALARM_HISTORY),('Settings',settings.SETTINGS)]
+    else:
+      tab_titles = [('Alarm Handler', alarm_handler.ALARM_HANDLER),('Active Alarm Handler', active_alarm_handler.ACTIVE_ALARM_HANDLER),('Alarm History', alarm_history.ALARM_HISTORY),('Settings',settings.SETTINGS)]
     tabs = {}
     for title, fn in tab_titles:
       tab = ttk.Frame(tab_control, width=10, height=20, style="My.TFrame")
