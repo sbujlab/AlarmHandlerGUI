@@ -106,6 +106,8 @@ class ALARM_LOOP():
         alarmHandlerGUI.tabs["Active Alarm Handler"].refresh_screen(alarmHandlerGUI.OL,alarmHandlerGUI.fileArray,alarmHandlerGUI.alarmLoop,alarmHandlerGUI.HL)
       if alarmHandlerGUI.tabs.get("Alarm History",u.defaultKey) != u.defaultKey:
         alarmHandlerGUI.tabs["Alarm History"].refresh_screen(alarmHandlerGUI.OL,alarmHandlerGUI.fileArray,alarmHandlerGUI.alarmLoop,alarmHandlerGUI.HL)
+      if alarmHandlerGUI.tabs.get("Settings",u.defaultKey) != u.defaultKey:
+        alarmHandlerGUI.tabs["Settings"].refresh_screen(alarmHandlerGUI)
       alarmHandlerGUI.masterAlarmButton.destroy()
       if alarmHandlerGUI.alarmLoop.globalAlarmStatus == "OK":
         alarmHandlerGUI.masterAlarmImage = tk.PhotoImage(file='ok.ppm').subsample(2)
@@ -195,6 +197,7 @@ class ALARM():
     #print("Initializing: pList = {}".format(self.pList))
     self.alarmAnalysisReturn = None # For camguin outputs to stdout to catch
     self.alarmErrorReturn = None
+    self.runNumber = 0
     self.alarmSelfStatus = myAO.alarmStatus
     self.userNotifySelfStatus = myAO.userNotifyStatus
     self.userSilenceSelfStatus = myAO.userSilenceStatus
@@ -209,6 +212,35 @@ class ALARM():
     #print("Trying alarm analysis for object {} {}, name = {}, = {}".format(myAO.column,myAO.columnIndex,myAO.name+" "+myAO.value,self.pList))
     if "Camguin" in self.alarmType: # Alarm Type is the parameter (level 4 object) which keeps track of what analysis to do
       subprocess("root -L camguin_C.so({},{},{},{},{},{},{},{},{},{},{})".format(self.pList["Analysis"],self.pList["Tree"],self.pList["Branch"],self.pList["Leaf"],self.pList["Cuts"],int(self.pList["Ignore Event Cuts"]),self.pList["Hist Rebinning"],int(self.pList["Stability Ring Length"]),self.runNumber,1,0.0), stdout=self.alarmAnalysisReturn, stderr=self.alarmErrorReturn, timeout=30)
+
+    if "CODA" in self.alarmType:
+      runNumber = 0
+      if self.pList.get("Run Number",u.defaultKey) != 0 and self.pList.get("Run Number",u.defaultKey) != "NULL":
+        runNumber = self.pList.get("Run Number")
+      else:
+        runNumber = self.get_run_number()
+      new_runNumber = self.get_run_number()
+      if runNumber != new_runNumber: # Then this is a new run, update new run type alarms
+        print("Original run number = {}, New Run number = {}".format(self.runNumber,new_runNumber))
+        if self.pList.get("Variable Name",u.defaultKey) == "Run Number":
+          self.pList["Low"] = self.runNumber
+          self.pList["Value"] = new_runNumber # Update the run number
+        if self.pList.get("Variable Name",u.defaultKey) == "Run Start Time":
+          self.pList["Value"] = int(time.time()) # Update the time value
+          self.pList["High"] = int(time.time()) + 80*60
+        self.runNumber = new_runNumber
+        self.pList["Run Number"] = new_runNumber
+      else:
+        if self.pList.get("Variable Name",u.defaultKey) == "Run Start Time":
+          self.pList["Value"] = int(time.time()) # Update the time value
+        
+      if self.pList.get("Variable Name",u.defaultKey) != "Run Start Time" and self.pList.get("Variable Name",u.defaultKey) != "Run Number": # Else update other alarms
+        cmds = ['rcnd',self.runNumber,self.pList["Variable BName"]]
+        cond_out = "NULL"
+        cond_out = subprocess.Popen(cmds, stdout=subprocess.PIPE).stdout.read().strip().decode('ascii') # Decoding...
+        self.pList["Value"] = cond_out
+
+      print(self.runNumber)
 
     if "EPICS" in self.alarmType:
       if self.pList.get("Variable Name"):
@@ -229,6 +261,21 @@ class ALARM():
     if "External" in self.alarmType: # Alarm Type is the parameter (level 4 object) which keeps track of what analysis to do
       # Read the external output text file, parse each line, compare with current alarm object's dictionaries, update object's values, evaluate status, continue
       pass
+
+  def get_run_number(self):
+    cmds = ['rcnd']
+    cond_out = "NULL"
+    cond_out = subprocess.Popen(cmds, stdout=subprocess.PIPE).stdout.read().strip().decode('ascii') # Needs to be decoded... be careful 
+    lines = cond_out.split('\n')
+    runNumber = 0
+    for linei in lines:
+      if ":" not in linei:
+        continue
+      if len(linei.split(':')) < 2:
+        continue
+      if linei.split(':')[0].replace(' ','') == "Lastrun":
+        runNumber = linei.split(':')[1].replace(' ','')
+    return runNumber
 
   def do_alarm_evaluate(self,myAO):
     # Consider making a candidate list of possible key words, but for now stick to hard-coded names... 

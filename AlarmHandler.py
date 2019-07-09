@@ -22,6 +22,7 @@ import tabs.alarm_history as alarm_history
 import tabs.settings as settings
 import utils as u
 import bclient as bclient
+import rcdb as rcdb
 from distutils.util import strtobool
 
 
@@ -42,16 +43,7 @@ class AlarmHandler:
     self.conf = alarm_object.FILE_ARRAY(args['filename'],self.pdelim)
 
     u.parse_config(self.conf)
-    self.filename = self.conf.conf['alarmFilename']
-    self.histfilename = self.conf.conf['historyFilename']
-    self.externalFilename = self.conf.conf['externalFilename'] # FIXME: make this a list to iterate through
-    self.externalParameterFileStaleTime = float(self.conf.conf['staleExternalTime'])
-    self.timeWait = int(self.conf.conf['timeWaitHistory'])
-    self.cooldownLength = int(self.conf.conf['alarmCooldownTime'])
-    self.remoteName = self.conf.conf['remoteSoundServer']
-    self.showGrid = bool(strtobool(self.conf.conf['showGrid']))
-    self.alertTheUser = bool(strtobool(self.conf.conf['turnSoundOn']))
-    self.includeExpert = bool(strtobool(self.conf.conf['includeExpertPage']))
+    u.update_config(self)
 
     self.fileArray = alarm_object.FILE_ARRAY(self.filename,self.delim)
     self.HL = alarm_object.HISTORY_LIST(self.histfilename,self.delim,self.pdelim,self.timeWait)

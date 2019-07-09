@@ -414,7 +414,7 @@ class ALARM_HANDLER(tk.Frame):
     self.display_parameter_list(OL,fileArray,i,j)
     self.controlButtons[3].grid_forget()
     self.controlButtons[3].config(text="{}{}".format(self.controlButtonsText[3],self.CBTextSuffix2[3]))
-    self.controlButtons[3].grid(row = 0, column = 3,columnspan=1,padx=10,pady=10,sticky='W')
+    self.controlButtons[3].grid(row = 0, column = 3,columnspan=1,padx=5,pady=5,sticky='W')
     #self.update_GUI(OL,fileArray)
 
   def button_silence_menu(self,OL,fileArray,butMenu):

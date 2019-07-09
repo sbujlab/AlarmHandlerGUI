@@ -6,5 +6,6 @@ staleExternalTime = 300
 timeWaitHistory   = 600
 alarmCooldownTime = 60
 remoteSoundServer = hacweb7
+showGrid          = False
 turnSoundOn       = True
 includeExpertPage = False

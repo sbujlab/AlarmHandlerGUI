@@ -11,6 +11,7 @@ import subprocess, os
 import csv
 import alarm_object
 from time import gmtime, strftime, localtime, strptime, mktime
+from distutils.util import strtobool
 
 green_color = '#3C8373'
 lightgrey_color = '#E0E0E0'
@@ -57,6 +58,34 @@ def parse_config(fa):
       eachKey = each[0].replace(' ','')
       eachVal = each[1].replace(' ','')
       fa.conf[eachKey] = eachVal
+
+
+def update_config(alarmHandlerGUI):
+  alarmHandlerGUI.filename = alarmHandlerGUI.conf.conf.get('alarmFilename',defaultKey)
+  alarmHandlerGUI.histfilename = alarmHandlerGUI.conf.conf.get('historyFilename',defaultKey)
+  alarmHandlerGUI.externalFilename = alarmHandlerGUI.conf.conf.get('externalFilename',defaultKey) # FIXME: make this a list to iterate through
+  alarmHandlerGUI.externalParameterFileStaleTime = float(alarmHandlerGUI.conf.conf.get('staleExternalTime',defaultKey))
+  alarmHandlerGUI.timeWait = int(alarmHandlerGUI.conf.conf.get('timeWaitHistory',defaultKey))
+  alarmHandlerGUI.cooldownLength = int(alarmHandlerGUI.conf.conf.get('alarmCooldownTime',defaultKey))
+  alarmHandlerGUI.remoteName = alarmHandlerGUI.conf.conf.get('remoteSoundServer',defaultKey)
+  alarmHandlerGUI.showGrid = bool(strtobool(alarmHandlerGUI.conf.conf.get('showGrid',defaultKey)))
+  alarmHandlerGUI.alertTheUser = bool(strtobool(alarmHandlerGUI.conf.conf.get('turnSoundOn',defaultKey)))
+  alarmHandlerGUI.includeExpert = bool(strtobool(alarmHandlerGUI.conf.conf.get('includeExpertPage',defaultKey)))
+
+def write_conf(conf):
+  outFile = open(conf.get("alarmConfig",defaultKey) ,'w+')
+  wr = csv.writer(outFile,delimiter='=')
+  outArray = []
+  for key, each in conf.items():
+    localAr = []
+    key = key + "                          "
+    key = key[:20]
+    localAr.append(key)
+    localAr.append(" "+each)
+    outArray.append(localAr)
+  if len(conf)!=0:
+    filearrayrows=zip(*conf)
+    wr.writerows(outArray)
 
 def init_historyList(HL):
   tmpHistList = []
