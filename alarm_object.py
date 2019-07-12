@@ -258,7 +258,7 @@ class ALARM():
         self.pList["Variable Name"] = "NULL"
         self.pList["Value"] = "NULL"
       if self.pList.get("Difference Reference Variable Name",u.defaultKey) != "NULL":
-        print("Checking EPICs variable = {}".format(self.pList.get("Difference Reference Variable Name",u.defaultKey)))
+        #print("Checking EPICs variable = {}".format(self.pList.get("Difference Reference Variable Name",u.defaultKey)))
         cmds = ['caget', '-t', '-w 1', self.pList["Difference Reference Variable Name"]]
         cond_out = "NULL"
         cond_out = subprocess.Popen(cmds, stdout=subprocess.PIPE).stdout.read().strip().decode('ascii') # Needs to be decoded... be careful 
