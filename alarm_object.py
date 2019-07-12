@@ -213,7 +213,7 @@ class ALARM():
     if "Camguin" in self.alarmType: # Alarm Type is the parameter (level 4 object) which keeps track of what analysis to do
       subprocess("root -L camguin_C.so({},{},{},{},{},{},{},{},{},{},{})".format(self.pList["Analysis"],self.pList["Tree"],self.pList["Branch"],self.pList["Leaf"],self.pList["Cuts"],int(self.pList["Ignore Event Cuts"]),self.pList["Hist Rebinning"],int(self.pList["Stability Ring Length"]),self.runNumber,1,0.0), stdout=self.alarmAnalysisReturn, stderr=self.alarmErrorReturn, timeout=30)
 
-    if "CODA" in self.alarmType:
+    if "CODA" in self.alarmType or "RCND" in self.alarmType or "RCDB" in self.alarmType or "PVDB" in self.alarmType:
       runNumber = 0
       if self.pList.get("Run Number",u.defaultKey) != 0 and self.pList.get("Run Number",u.defaultKey) != "NULL":
         runNumber = self.pList.get("Run Number")
