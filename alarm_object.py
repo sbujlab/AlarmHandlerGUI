@@ -244,11 +244,11 @@ class ALARM():
 
     if "EPICS" in self.alarmType:
       if self.pList.get("Variable Name",u.defaultKey) != "NULL":
-        print("Checking EPICs variable = {}".format(self.pList.get("Variable Name",u.defaultKey)))
+        #print("Checking EPICs variable = {}".format(self.pList.get("Variable Name",u.defaultKey)))
         cmds = ['caget', '-t', '-w 1', self.pList["Variable Name"]]
         cond_out = "NULL"
         cond_out = subprocess.Popen(cmds, stdout=subprocess.PIPE).stdout.read().strip().decode('ascii') # Needs to be decoded... be careful 
-        print("EPICS: Doing alarm analysis for object {} {}, name = {}".format(myAO.column,myAO.columnIndex,myAO.name+" "+myAO.value))
+        #print("EPICS: Doing alarm analysis for object {} {}, name = {}".format(myAO.column,myAO.columnIndex,myAO.name+" "+myAO.value))
         #print("The epics output for variable {} is {}".format(self.pList["Variable Name"],cond_out))
         if "Invalid" in str(cond_out): # Then the epics variable was invalid
           print("ERROR Invalid epics channel, check with caget again:\t {}".format(self.pList["Variable Name"]))
@@ -257,28 +257,41 @@ class ALARM():
       else: # User didn't have "Value" in their parameter list, add it and make it init to NULL
         self.pList["Variable Name"] = "NULL"
         self.pList["Value"] = "NULL"
+      if self.pList.get("Difference Reference Variable Name",u.defaultKey) != "NULL":
+        print("Checking EPICs variable = {}".format(self.pList.get("Difference Reference Variable Name",u.defaultKey)))
+        cmds = ['caget', '-t', '-w 1', self.pList["Difference Reference Variable Name"]]
+        cond_out = "NULL"
+        cond_out = subprocess.Popen(cmds, stdout=subprocess.PIPE).stdout.read().strip().decode('ascii') # Needs to be decoded... be careful 
+        #print("The epics output for variable {} is {}".format(self.pList["Variable Name"],cond_out))
+        if "Invalid" in str(cond_out): # Then the epics variable was invalid
+          print("ERROR Invalid epics channel, check with caget again:\t {}".format(self.pList["Difference Reference Variable Name"]))
+          cond_out = "NULL"
+        self.pList["Difference Reference Value"] = cond_out
+      #else: # User didn't have "Value" in their parameter list, add it and make it init to NULL
+      #  self.pList["Difference Reference Variable Name"] = "NULL"
+      #  self.pList["Difference Reference Value"] = "NULL"
       if self.pList.get("Case Variable Name",u.defaultKey) != "NULL":
         cmds = ['caget', '-t', '-w 1', self.pList["Case Variable Name"]]
         cond_out = "NULL"
         cond_out = subprocess.Popen(cmds, stdout=subprocess.PIPE).stdout.read().strip().decode('ascii') # Needs to be decoded... be careful 
         if "Invalid" in str(cond_out): # Then the epics variable was invalid
-          print("ERROR Invalid epics channel, check with caget again:\t {}".format(self.pList["Variable Name"]))
+          print("ERROR Invalid epics channel, check with caget again:\t {}".format(self.pList["Case Variable Name"]))
           cond_out = "NULL"
         self.pList["Case Value"] = cond_out
-      else: # User didn't have "Value" in their parameter list, add it and make it init to NULL
-        self.pList["Case Variable Name"] = "NULL"
-        self.pList["Case Value"] = "NULL"
+      #else: # User didn't have "Value" in their parameter list, add it and make it init to NULL
+      #  self.pList["Case Variable Name"] = "NULL"
+      #  self.pList["Case Value"] = "NULL"
       if self.pList.get("Double Case Variable Name",u.defaultKey) != "NULL":
         cmds = ['caget', '-t', '-w 1', self.pList["Double Case Variable Name"]]
         cond_out = "NULL"
         cond_out = subprocess.Popen(cmds, stdout=subprocess.PIPE).stdout.read().strip().decode('ascii') # Needs to be decoded... be careful 
         if "Invalid" in str(cond_out): # Then the epics variable was invalid
-          print("ERROR Invalid epics channel, check with caget again:\t {}".format(self.pList["Variable Name"]))
+          print("ERROR Invalid epics channel, check with caget again:\t {}".format(self.pList["Double Case Variable Name"]))
           cond_out = "NULL"
         self.pList["Double Case Value"] = cond_out
-      else: # User didn't have "Value" in their parameter list, add it and make it init to NULL
-        self.pList["Double Case Variable Name"] = "NULL"
-        self.pList["Double Case Value"] = "NULL"
+      #else: # User didn't have "Value" in their parameter list, add it and make it init to NULL
+      #  self.pList["Double Case Variable Name"] = "NULL"
+      #  self.pList["Double Case Value"] = "NULL"
 
       #print("Parameter list value for \"Value\" updated to be {}".format(self.pList["Value"]))
 
@@ -304,22 +317,28 @@ class ALARM():
   def do_alarm_evaluate(self,myAO):
     # Consider making a candidate list of possible key words, but for now stick to hard-coded names... 
     #print("Updating: pList = {}".format(self.pList))
+    val = self.pList.get("Value",u.defaultKey)
     case = self.pList.get("Case Variable Name",u.defaultKey)
     caseValue = self.pList.get("Case Value",u.defaultKey)
     case2nd = self.pList.get("Double Case Variable Name",u.defaultKey)
     case2ndValue = self.pList.get("Double Case Value",u.defaultKey)
-    val = self.pList.get("Value",u.defaultKey)
+    differenceReference = self.pList.get("Difference Reference Variable Name",u.defaultKey)
+    differenceReferenceValue = self.pList.get("Difference Reference Value",u.defaultKey)
 
     lowlowStr = "Low Low"
     lowStr = "Low"
     highStr = "High"
     highhighStr = "High High"
     exactlyStr = "Exactly"
+    differenceLowStr = "Difference Low"
+    differenceHighStr = "Difference High"
     lowlow = u.defaultKey
     low = u.defaultKey
     high = u.defaultKey
     highhigh = u.defaultKey
     exactly = u.defaultKey
+    differenceLow = u.defaultKey
+    differenceHigh = u.defaultKey
     # Done initializing
 
     if case2nd != u.defaultKey and case2ndValue != u.defaultKey and case != u.defaultKey and caseValue != u.defaultKey: # Then we have a double case determining which set of limits to use
@@ -328,11 +347,15 @@ class ALARM():
       highStr = "High "+caseValue+" "+case2ndValue
       highhighStr = "High High "+caseValue+" "+case2ndValue
       exactlyStr = "Exactly "+caseValue+" "+case2ndValue
+      differenceLowStr = "Difference Low "+caseValue+" "+case2ndValue
+      differenceHighStr = "Difference High "+caseValue+" "+case2ndValue
       lowlow = self.pList.get("Low Low "+caseValue+" "+case2ndValue,u.defaultKey) # Assume the user knows what the case's return values can be and names their cased limits as such
       low = self.pList.get("Low "+caseValue+" "+case2ndValue,u.defaultKey) 
       high = self.pList.get("High "+caseValue+" "+case2ndValue,u.defaultKey) 
       highhigh = self.pList.get("High High "+caseValue+" "+case2ndValue,u.defaultKey) 
       exactly = self.pList.get("Exactly "+caseValue+" "+case2ndValue,u.defaultKey) 
+      differenceLow = self.pList.get("Difference Low "+caseValue+" "+case2ndValue,u.defaultKey) 
+      differenceHigh = self.pList.get("Difference High "+caseValue+" "+case2ndValue,u.defaultKey) 
       # Now get the default, non-cased values and catch any general case free values too
       if lowlow == u.defaultKey: 
         lowlow = self.pList.get("Low Low",u.defaultKey)
@@ -344,17 +367,25 @@ class ALARM():
         highhigh = self.pList.get("High High",u.defaultKey)
       if exactly == u.defaultKey:  
         exactly = self.pList.get("Exactly",u.defaultKey)
+      if differenceLow == u.defaultKey:  
+        differenceLow = self.pList.get("Difference Low",u.defaultKey)
+      if differenceHigh == u.defaultKey:  
+        differenceHigh = self.pList.get("Difference High",u.defaultKey)
     elif case != u.defaultKey and caseValue != u.defaultKey: # Then we have a single case determining which set of limits to use
       lowlowStr = "Low Low "+caseValue
       lowStr = "Low "+caseValue
       highStr = "High "+caseValue
       highhighStr = "High High "+caseValue
       exactlyStr = "Exactly "+caseValue
+      differenceLowStr = "Difference Low "+caseValue
+      differenceHighStr = "Difference High "+caseValue
       lowlow = self.pList.get("Low Low "+caseValue,u.defaultKey) # Assume the user knows what the case's return values can be and names their cased limits as such
       low = self.pList.get("Low "+caseValue,u.defaultKey) 
       high = self.pList.get("High "+caseValue,u.defaultKey) 
       highhigh = self.pList.get("High High "+caseValue,u.defaultKey) 
       exactly = self.pList.get("Exactly "+caseValue,u.defaultKey) 
+      differenceLow = self.pList.get("Difference Low "+caseValue,u.defaultKey) 
+      differenceHigh = self.pList.get("Difference High "+caseValue,u.defaultKey) 
     # Now get the default, non-cased values and catch any general case free values too
     if lowlow == u.defaultKey: 
       lowlow = self.pList.get("Low Low",u.defaultKey)
@@ -366,6 +397,10 @@ class ALARM():
       highhigh = self.pList.get("High High",u.defaultKey)
     if exactly == u.defaultKey:  
       exactly = self.pList.get("Exactly",u.defaultKey)
+    if differenceLow == u.defaultKey:  
+      differenceLow = self.pList.get("Difference Low",u.defaultKey)
+    if differenceHigh == u.defaultKey:  
+      differenceHigh = self.pList.get("Difference High",u.defaultKey)
     #print("Value = {}, high = {}".format(val, high))
     #valD = Decimal(val)
     #highD = Decimal(high)
@@ -382,6 +417,8 @@ class ALARM():
     else:
       if u.is_number(str(val)):
         val = Decimal(self.pList.get("Value",u.defaultKey))
+      if u.is_number(str(differenceReferenceValue)) and differenceReferenceValue != u.defaultKey:
+        differenceReferenceValue = Decimal(self.pList.get("Difference Reference Value",u.defaultKey))
       if u.is_number(str(lowlow)): # And now check the other ones too
         lowlow = Decimal(self.pList.get(lowlowStr,u.defaultKey))
       if u.is_number(str(low)):
@@ -390,6 +427,10 @@ class ALARM():
         high = Decimal(self.pList.get(highStr,u.defaultKey))
       if u.is_number(str(highhigh)):
         highhigh = Decimal(self.pList.get(highhighStr,u.defaultKey))
+      if u.is_number(str(differenceLow)):
+        differenceLow = Decimal(self.pList.get(differenceLowStr,u.defaultKey))
+      if u.is_number(str(differenceHigh)):
+        differenceHigh = Decimal(self.pList.get(differenceHighStr,u.defaultKey))
     if val != "NULL":
       if low != "NULL" and val < low:
         self.pList["Alarm Status"] = lowStr
@@ -400,6 +441,10 @@ class ALARM():
         self.pList["Alarm Status"] = highStr
       elif highhigh != "NULL" and val > highhigh:
         self.pList["Alarm Status"] = highhighStr
+      elif differenceLow != "NULL" and differenceReferenceValue != "NULL" and ((val - differenceReferenceValue) < differenceLow):
+        self.pList["Alarm Status"] = differenceLowStr
+      elif differenceHigh != "NULL" and differenceReferenceValue != "NULL" and ((val - differenceReferenceValue) > differenceHigh):
+        self.pList["Alarm Status"] = differenceHighStr
       elif exactly != "NULL" and val != exactly:
         self.pList["Alarm Status"] = exactlyStr
       else:
