@@ -226,13 +226,14 @@ class ALARM():
           self.pList["Low"] = self.runNumber
           self.pList["Value"] = new_runNumber # Update the run number
         if self.pList.get("Variable Name",u.defaultKey) == "Run Start Time":
-          self.pList["Value"] = int(time.time()) # Update the time value
-          self.pList["High"] = int(time.time()) + 80*60
+          self.pList["Start Time"] = int(time.time())
+          self.pList["Value"] = 0# int(time.time()) # Update the time value
+          self.pList["High"] = 80*60 #int(time.time()) + 80*60
         self.runNumber = new_runNumber
         self.pList["Run Number"] = new_runNumber
       else:
-        if self.pList.get("Variable Name",u.defaultKey) == "Run Start Time":
-          self.pList["Value"] = int(time.time()) # Update the time value
+        if self.pList.get("Variable Name",u.defaultKey) == "Run Start Time" and self.pList.get("Start Time",u.defaultKey) != "NULL":
+          self.pList["Value"] = int(time.time()) - int(self.pList.get("Start Time",u.defaultKey)) # Update the time value
         
       if self.pList.get("Variable Name",u.defaultKey) != "Run Start Time" and self.pList.get("Variable Name",u.defaultKey) != "Run Number": # Else update other alarms
         cmds = ['rcnd',self.runNumber,self.pList["Variable BName"]]
