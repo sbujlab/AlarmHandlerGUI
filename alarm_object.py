@@ -455,18 +455,18 @@ class ALARM():
       else:
         self.pList["Alarm Status"] = "OK"
       if tripCounter != "NULL" and tripLimit != "NULL" and tripCounter < tripLimit and self.pList.get("Alarm Status",u.defaultKey) != "OK":
-        print("Not OK: Less than, Trip counter = {}, trip limit = {}".format(tripCounter, tripLimit))
+        #print("Not OK: Less than, Trip counter = {}, trip limit = {}".format(tripCounter, tripLimit))
         # The alarm has not surpassed the limit
         self.pList["Alarm Status"] = "OK"
         self.pList["Trip Counter"] = str(tripCounter + 1)
         myAO.parameterList["Trip Counter"] = str(tripCounter + 1)
       elif tripCounter != "NULL" and tripLimit != "NULL" and tripCounter >= tripLimit and self.pList.get("Alarm Status",u.defaultKey) != "OK":
-        print("Not OK: Greater than, Trip counter = {}, trip limit = {}".format(tripCounter, tripLimit))
+        #print("Not OK: Greater than, Trip counter = {}, trip limit = {}".format(tripCounter, tripLimit))
         # The alarm has surpassed the limit
         self.pList["Trip Counter"] = str(tripCounter + 1)
         myAO.parameterList["Trip Counter"] = str(tripCounter + 1)
       elif tripCounter != "NULL" and tripLimit != "NULL":
-        print("OK: Trip counter = {}, trip limit = {}".format(tripCounter, tripLimit))
+        #print("OK: Trip counter = {}, trip limit = {}".format(tripCounter, tripLimit))
         # We have an OK alarm status and should reset the counter
         self.pList["Trip Counter"] = "0"
         myAO.parameterList["Trip Counter"] = "0"
