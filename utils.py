@@ -230,6 +230,8 @@ def silence_filearray_menu(OL,fileArray,butMenu):
 def notify_acknowledge_filearray_menu(OL,fileArray,butMenu):
   i,j = butMenu.indices
   tmpStat = OL.objectList[i][j].userNotifyStatus.split(' ')
+  if OL.objectList[i][j].parameterList.get("Trip Counter",defaultKey) != "NULL":
+    OL.objectList[i][j].parameterList["Trip Counter"] = "0"
   if tmpStat[0] == "Cooldown":
     OL.objectList[i][j].userNotifyStatus = "OK" # The user is manually OKing this alarm... 
     OL.objectList[i][j].parameterList["User Notify Status"] = "OK"

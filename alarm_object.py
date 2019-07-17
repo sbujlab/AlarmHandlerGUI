@@ -241,8 +241,6 @@ class ALARM():
         cond_out = subprocess.Popen(cmds, stdout=subprocess.PIPE).stdout.read().strip().decode('ascii') # Decoding...
         self.pList["Value"] = cond_out
 
-      print(self.runNumber)
-
     if "EPICS" in self.alarmType:
       if self.pList.get("Variable Name",u.defaultKey) != "NULL":
         #print("Checking EPICs variable = {}".format(self.pList.get("Variable Name",u.defaultKey)))
@@ -325,6 +323,12 @@ class ALARM():
     case2ndValue = self.pList.get("Double Case Value",u.defaultKey)
     differenceReference = self.pList.get("Difference Reference Variable Name",u.defaultKey)
     differenceReferenceValue = self.pList.get("Difference Reference Value",u.defaultKey)
+    tripLimit = self.pList.get("Trip Limit",u.defaultKey)
+    if u.is_number(tripLimit):
+      tripLimit = int(tripLimit)
+    tripCounter = self.pList.get("Trip Counter",u.defaultKey)
+    if u.is_number(tripCounter):
+      tripCounter = int(tripCounter)
 
     lowlowStr = "Low Low"
     lowStr = "Low"
@@ -450,6 +454,22 @@ class ALARM():
         self.pList["Alarm Status"] = exactlyStr
       else:
         self.pList["Alarm Status"] = "OK"
+      if tripCounter != "NULL" and tripLimit != "NULL" and tripCounter < tripLimit and self.pList.get("Alarm Status",u.defaultKey) != "OK":
+        print("Not OK: Less than, Trip counter = {}, trip limit = {}".format(tripCounter, tripLimit))
+        # The alarm has not surpassed the limit
+        self.pList["Alarm Status"] = "OK"
+        self.pList["Trip Counter"] = str(tripCounter + 1)
+        myAO.parameterList["Trip Counter"] = str(tripCounter + 1)
+      elif tripCounter != "NULL" and tripLimit != "NULL" and tripCounter >= tripLimit and self.pList.get("Alarm Status",u.defaultKey) != "OK":
+        print("Not OK: Greater than, Trip counter = {}, trip limit = {}".format(tripCounter, tripLimit))
+        # The alarm has surpassed the limit
+        self.pList["Trip Counter"] = str(tripCounter + 1)
+        myAO.parameterList["Trip Counter"] = str(tripCounter + 1)
+      elif tripCounter != "NULL" and tripLimit != "NULL":
+        print("OK: Trip counter = {}, trip limit = {}".format(tripCounter, tripLimit))
+        # We have an OK alarm status and should reset the counter
+        self.pList["Trip Counter"] = "0"
+        myAO.parameterList["Trip Counter"] = "0"
     else:
       val = "NULL"
       self.pList["Alarm Status"] = "OK"
