@@ -214,6 +214,10 @@ class ALARM():
       subprocess("root -L camguin_C.so({},{},{},{},{},{},{},{},{},{},{})".format(self.pList["Analysis"],self.pList["Tree"],self.pList["Branch"],self.pList["Leaf"],self.pList["Cuts"],int(self.pList["Ignore Event Cuts"]),self.pList["Hist Rebinning"],int(self.pList["Stability Ring Length"]),self.runNumber,1,0.0), stdout=self.alarmAnalysisReturn, stderr=self.alarmErrorReturn, timeout=30)
 
     if "CODA" in self.alarmType or "RCND" in self.alarmType or "RCDB" in self.alarmType or "PVDB" in self.alarmType:
+      # TEMP FIXME Do the CODA on/taking good data (split = 0, EB alive) here... why not?
+      #CODAonAlarm = "NULL"
+      #CODAonAlarmReturn = "NULL"
+      #subprocess("./checkIfRun", shell=True, stdout=CODAonAlarm, stderr=CODAonAlarmReturn, timeout=10)
       runNumber = 0
       if self.pList.get("Run Number",u.defaultKey) != 0 and self.pList.get("Run Number",u.defaultKey) != "NULL":
         runNumber = self.pList.get("Run Number")
@@ -249,6 +253,21 @@ class ALARM():
         cond_out = subprocess.Popen(cmds, stdout=subprocess.PIPE).stdout.read().strip().decode('ascii') # Needs to be decoded... be careful 
         #print("EPICS: Doing alarm analysis for object {} {}, name = {}".format(myAO.column,myAO.columnIndex,myAO.name+" "+myAO.value))
         #print("The epics output for variable {} is {}".format(self.pList["Variable Name"],cond_out))
+        if "Invalid" in str(cond_out): # Then the epics variable was invalid
+          print("ERROR Invalid epics channel, check with caget again:\t {}".format(self.pList["Variable Name"]))
+          cond_out = "NULL"
+        self.pList["Value"] = cond_out
+      elif self.pList.get("IOC Alarm List Name",u.defaultKey) != "NULL":
+        #print("Checking EPICs variable = {}".format(self.pList.get("Variable Name",u.defaultKey)))
+        listNames = ['.B1','.B2','.B3','.B4','.B5','.B6','.B7','.B8','.B9','.BA']
+        cond_out = "NULL"
+        for eachName in listNames:
+          cmds = ['caget', '-t', '-w 1', self.pList["IOC Alarm List Name"]+eachName]
+          cond_out = subprocess.Popen(cmds, stdout=subprocess.PIPE).stdout.read().strip().decode('ascii') # Needs to be decoded... be careful 
+          if cond_out == "1":
+            self.pList["Value"] = cond_out;
+          #print("EPICS: Doing alarm analysis for object {} {}, name = {}".format(myAO.column,myAO.columnIndex,myAO.name+" "+myAO.value))
+          #print("The epics output for variable {} is {}".format(self.pList["Variable Name"],cond_out))
         if "Invalid" in str(cond_out): # Then the epics variable was invalid
           print("ERROR Invalid epics channel, check with caget again:\t {}".format(self.pList["Variable Name"]))
           cond_out = "NULL"
