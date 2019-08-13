@@ -456,18 +456,19 @@ class ALARM():
       if u.is_number(str(differenceHigh)):
         differenceHigh = Decimal(self.pList.get(differenceHighStr,u.defaultKey))
     if val != "NULL":
-      if low != "NULL" and val < low:
+      if low != "NULL" and u.is_number(val) and val < low:
         self.pList["Alarm Status"] = lowStr
-      elif lowlow != "NULL" and val < lowlow:
+        #print("Alarm {} Low".format(val))
+      elif lowlow != "NULL" and u.is_number(val) and val < lowlow:
         self.pList["Alarm Status"] = lowlowStr
-      elif high != "NULL" and val > high:
+      elif high != "NULL" and u.is_number(val) and val > high:
         #print("Updating status to high")
         self.pList["Alarm Status"] = highStr
-      elif highhigh != "NULL" and val > highhigh:
+      elif highhigh != "NULL" and u.is_number(val) and val > highhigh:
         self.pList["Alarm Status"] = highhighStr
-      elif differenceLow != "NULL" and differenceReferenceValue != "NULL" and ((val - differenceReferenceValue) < differenceLow):
+      elif differenceLow != "NULL" and u.is_number(val) and differenceReferenceValue != "NULL" and u.is_number(differenceReferenceValue) and ((val - differenceReferenceValue) < differenceLow):
         self.pList["Alarm Status"] = differenceLowStr
-      elif differenceHigh != "NULL" and differenceReferenceValue != "NULL" and ((val - differenceReferenceValue) > differenceHigh):
+      elif differenceHigh != "NULL" and differenceReferenceValue != "NULL" and u.is_number(differenceReferenceValue) and u.is_number(val) and ((val - differenceReferenceValue) > differenceHigh):
         self.pList["Alarm Status"] = differenceHighStr
       elif exactly != "NULL" and val != exactly:
         self.pList["Alarm Status"] = exactlyStr
