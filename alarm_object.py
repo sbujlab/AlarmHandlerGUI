@@ -269,7 +269,7 @@ class ALARM():
           #print("EPICS: Doing alarm analysis for object {} {}, name = {}".format(myAO.column,myAO.columnIndex,myAO.name+" "+myAO.value))
           #print("The epics output for variable {} is {}".format(self.pList["Variable Name"],cond_out))
         if "Invalid" in str(cond_out): # Then the epics variable was invalid
-          print("ERROR Invalid epics channel, check with caget again:\t {}".format(self.pList["Variable Name"]))
+          print("ERROR Invalid epics channel, check with caget again:\t {}".format(self.pList.get("Variable Name",u.defaultKey)))
           cond_out = "NULL"
         self.pList["Value"] = cond_out
       else: # User didn't have "Value" in their parameter list, add it and make it init to NULL
