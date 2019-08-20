@@ -294,7 +294,7 @@ class ALARM():
         cond_out = subprocess.Popen(cmds, stdout=subprocess.PIPE).stdout.read().strip().decode('ascii') # Needs to be decoded... be careful 
         if "Invalid" in str(cond_out): # Then the epics variable was invalid
           print("ERROR Invalid epics channel, check with caget again:\t {}".format(self.pList["Case Variable Name"]))
-          cond_out = "NULL"
+          cond_out = "BAD"
         self.pList["Case Value"] = cond_out
       #else: # User didn't have "Value" in their parameter list, add it and make it init to NULL
       #  self.pList["Case Variable Name"] = "NULL"
@@ -305,7 +305,7 @@ class ALARM():
         cond_out = subprocess.Popen(cmds, stdout=subprocess.PIPE).stdout.read().strip().decode('ascii') # Needs to be decoded... be careful 
         if "Invalid" in str(cond_out): # Then the epics variable was invalid
           print("ERROR Invalid epics channel, check with caget again:\t {}".format(self.pList["Double Case Variable Name"]))
-          cond_out = "NULL"
+          cond_out = "BAD"
         self.pList["Double Case Value"] = cond_out
       #else: # User didn't have "Value" in their parameter list, add it and make it init to NULL
       #  self.pList["Double Case Variable Name"] = "NULL"
@@ -337,9 +337,9 @@ class ALARM():
     #print("Updating: pList = {}".format(self.pList))
     val = self.pList.get("Value",u.defaultKey)
     case = self.pList.get("Case Variable Name",u.defaultKey)
-    caseValue = self.pList.get("Case Value",u.defaultKey)
+    caseValue = self.pList.get("Case Value","BAD")
     case2nd = self.pList.get("Double Case Variable Name",u.defaultKey)
-    case2ndValue = self.pList.get("Double Case Value",u.defaultKey)
+    case2ndValue = self.pList.get("Double Case Value","BAD")
     differenceReference = self.pList.get("Difference Reference Variable Name",u.defaultKey)
     differenceReferenceValue = self.pList.get("Difference Reference Value",u.defaultKey)
     tripLimit = self.pList.get("Trip Limit",u.defaultKey)
@@ -466,9 +466,9 @@ class ALARM():
         self.pList["Alarm Status"] = highStr
       elif highhigh != "NULL" and u.is_number(highhigh) and u.is_number(val) and val > highhigh:
         self.pList["Alarm Status"] = highhighStr
-      elif differenceLow != "NULL" and u.is_number(val) and differenceReferenceValue != "NULL" and u.is_number(differenceReferenceValue) and ((val - differenceReferenceValue) < differenceLow):
+      elif differenceLow != "NULL" and differenceReferenceValue != "NULL" and val != "NULL" and u.is_number(differenceLow) and u.is_number(val) and u.is_number(differenceReferenceValue) and ((val - differenceReferenceValue) < differenceLow):
         self.pList["Alarm Status"] = differenceLowStr
-      elif differenceHigh != "NULL" and differenceReferenceValue != "NULL" and u.is_number(differenceReferenceValue) and u.is_number(val) and ((val - differenceReferenceValue) > differenceHigh):
+      elif differenceHigh != "NULL" and differenceReferenceValue != "NULL" and val != "NULL" and u.is_number(differenceHigh) and u.is_number(differenceReferenceValue) and u.is_number(val) and ((val - differenceReferenceValue) > differenceHigh):
         self.pList["Alarm Status"] = differenceHighStr
       elif exactly != "NULL" and val != exactly:
         self.pList["Alarm Status"] = exactlyStr
