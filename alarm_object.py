@@ -213,6 +213,34 @@ class ALARM():
     if "Camguin" in self.alarmType: # Alarm Type is the parameter (level 4 object) which keeps track of what analysis to do
       subprocess("root -L camguin_C.so({},{},{},{},{},{},{},{},{},{},{})".format(self.pList["Analysis"],self.pList["Tree"],self.pList["Branch"],self.pList["Leaf"],self.pList["Cuts"],int(self.pList["Ignore Event Cuts"]),self.pList["Hist Rebinning"],int(self.pList["Stability Ring Length"]),self.runNumber,1,0.0), stdout=self.alarmAnalysisReturn, stderr=self.alarmErrorReturn, timeout=30)
 
+    if "BASH" in self.alarmType: # Alarm Type parameter (level 4) for indicating that the return value is some special bash script
+      if self.pList.get("Script Name",u.defaultKey) != "NULL":
+        #print("Checking Script = {}".format(self.pList.get("Script Name",u.defaultKey)))
+        cmds = [self.pList.get("Script Name",u.defaultKey)]
+        cond_out = "NULL"
+        cond_out = subprocess.Popen(cmds, stdout=subprocess.PIPE).stdout.read().strip().decode('ascii') # Needs to be decoded... be careful 
+        if "Command not found." in str(cond_out): # Then the Script was invalid
+          print("Error: command {} not found".format(self.pList.get("Script Name",u.defaultKey)))
+          cond_out = "NULL"
+        self.pList["Value"] = cond_out
+      if self.pList.get("Case Variable Name",u.defaultKey) != "NULL":
+        cmds = [self.pList.get("Script Name",u.defaultKey),self.pList.get("Case Variable Name",u.defaultKey)]
+        cond_out = "NULL"
+        cond_out = subprocess.Popen(cmds, stdout=subprocess.PIPE).stdout.read().strip().decode('ascii') # Needs to be decoded... be careful 
+        if "Command not found." in str(cond_out): # Then the Script was invalid
+          print("Error: command {} not found".format(self.pList.get("Script Name",u.defaultKey)))
+          cond_out = "BAD"
+          
+        self.pList["Case Value"] = cond_out
+      if self.pList.get("Double Case Variable Name",u.defaultKey) != "NULL":
+        cmds = [self.pList.get("Script Name",u.defaultKey),self.pList.get("Double Case Variable Name",u.defaultKey)]
+        cond_out = "NULL"
+        cond_out = subprocess.Popen(cmds, stdout=subprocess.PIPE).stdout.read().strip().decode('ascii') # Needs to be decoded... be careful 
+        if "Command not found." in str(cond_out): # Then the epics Script was invalid
+          print("Error: command {} not found".format(self.pList.get("Script Name",u.defaultKey)))
+          cond_out = "BAD"
+        self.pList["Double Case Value"] = cond_out
+
     if "CODA" in self.alarmType or "RCND" in self.alarmType or "RCDB" in self.alarmType or "PVDB" in self.alarmType:
       # TEMP FIXME Do the CODA on/taking good data (split = 0, EB alive) here... why not?
       #CODAonAlarm = "NULL"
