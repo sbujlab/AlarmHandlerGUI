@@ -19,12 +19,22 @@ from datetime import datetime
 from decimal import Decimal
 
 parser = ArgumentParser()
+#parser.add_argument("EPICSvar", nargs='?', type=str, help="EPICS variable to use to check the current", default="NULL")
+#args = vars(parser.parse_args())
 parser.add_argument("arg", nargs='?', type=str, help="Input Flag", default="NULL")
 args = vars(parser.parse_args())
 
 
-
 #Aq="`tail -1000 /adaqfs/home/apar/PREX/japan_feedback/feedbacklog | grep -w \"Hall A Aq\" | tail -1`"
+#if args['EPICSvar'] != "NULL":
+#  cmds = ['caget', '-t', '-w 1', args['EPICSvar']]
+#  cond_out = "NULL"
+#  cond_out = subprocess.Popen(cmds, stdout=subprocess.PIPE).stdout.read().strip().decode('ascii') # Needs to be decoded... be careful 
+#  if "Invalid" in str(cond_out):
+#    print("Current-Readback-Invalid")
+#  else:
+#    print("{}".format(cond_out))
+
 if args['arg'] != "NULL":
   cmds = ['sh','/adaqfs/home/apar/scripts/printRunStatus','EB1']
   cond_out = "NULL"
@@ -36,14 +46,7 @@ if args['arg'] != "NULL":
     print("Invalid")
 
 else: 
-  cmds = ['caget', '-t', '-w 1', 'IGL0I00C1068_DAC06']
-  cond_out = "NULL"
-  cond_out = subprocess.Popen(cmds, stdout=subprocess.PIPE).stdout.read().strip().decode('ascii') # Needs to be decoded... be careful 
-  if "Invalid" in str(cond_out):
-    print("Readback-Invalid")
-  else:
-    print("{}".format(cond_out))
-  #if os.path.exists("/adaqfs/home/apar/PREX/japan_feedback/feedbacklog") and (time.time() - os.path.getmtime("/adaqfs/home/apar/PREX/japan_feedback/feedbacklog")) < 30:
-  #  print("Feedback-On")
-  #if os.path.exists("/adaqfs/home/apar/PREX/japan_feedback/feedbacklog") and (time.time() - os.path.getmtime("/adaqfs/home/apar/PREX/japan_feedback/feedbacklog")) > 30:
-  #  print("Feedback-Off")
+  if os.path.exists("/adaqfs/home/apar/PREX/japan_feedback/feedbacklog") and (time.time() - os.path.getmtime("/adaqfs/home/apar/PREX/japan_feedback/feedbacklog")) < 30:
+    print("Feedback-On")
+  if os.path.exists("/adaqfs/home/apar/PREX/japan_feedback/feedbacklog") and (time.time() - os.path.getmtime("/adaqfs/home/apar/PREX/japan_feedback/feedbacklog")) > 30:
+    print("Feedback-Off")

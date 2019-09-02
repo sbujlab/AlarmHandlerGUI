@@ -223,7 +223,7 @@ class ALARM():
           print("Error: command {} not found".format(self.pList.get("Script Name",u.defaultKey)))
           cond_out = "NULL"
         self.pList["Value"] = cond_out
-      if self.pList.get("Case Variable Name",u.defaultKey) != "NULL":
+      if self.pList.get("Case Variable Name",u.defaultKey) != "NULL" and self.pList.get("Script Name",u.defaultKey) != "NULL":
         cmds = [self.pList.get("Script Name",u.defaultKey),self.pList.get("Case Variable Name",u.defaultKey)]
         cond_out = "NULL"
         cond_out = subprocess.Popen(cmds, stdout=subprocess.PIPE).stdout.read().strip().decode('ascii') # Needs to be decoded... be careful 
@@ -232,7 +232,7 @@ class ALARM():
           cond_out = "BAD"
           
         self.pList["Case Value"] = cond_out
-      if self.pList.get("Double Case Variable Name",u.defaultKey) != "NULL":
+      if self.pList.get("Double Case Variable Name",u.defaultKey) != "NULL" and self.pList.get("Script Name",u.defaultKey) != "NULL":
         cmds = [self.pList.get("Script Name",u.defaultKey),self.pList.get("Double Case Variable Name",u.defaultKey)]
         cond_out = "NULL"
         cond_out = subprocess.Popen(cmds, stdout=subprocess.PIPE).stdout.read().strip().decode('ascii') # Needs to be decoded... be careful 
@@ -240,6 +240,20 @@ class ALARM():
           print("Error: command {} not found".format(self.pList.get("Script Name",u.defaultKey)))
           cond_out = "BAD"
         self.pList["Double Case Value"] = cond_out
+      if (self.pList.get("Same Value Comparator",u.defaultKey) != "NULL" or self.pList.get("Same Value Comparator {}".format(self.pList.get("Case Value",u.defaultKey)),u.defaultKey) != "NULL" or self.pList.get("Same Value Comparator {}".format(self.pList.get("Double Case Value",u.defaultKey)),u.defaultKey) != "NULL") and self.pList.get("Script Name",u.defaultKey) != "NULL":
+        cmds = [self.pList.get("Script Name",u.defaultKey)]
+        cond_out = "NULL"
+        cond_out = subprocess.Popen(cmds, stdout=subprocess.PIPE).stdout.read().strip().decode('ascii') # Needs to be decoded... be careful 
+        if "Command not found." in str(cond_out): # Then the Script was invalid
+          print("Error: command {} not found".format(self.pList.get("Script Name",u.defaultKey)))
+          cond_out = "BAD"
+          
+        if self.pList.get("Same Value Comparator",u.defaultKey) != "NULL":
+          self.pList["Same Value Comparator"] = cond_out
+        if self.pList.get("Same Value Comparator {}".format(self.pList.get("Case Value",u.defaultKey)),u.defaultKey) != "NULL":
+          self.pList["Same Value Comparator {}".format(self.pList.get("Case Value",u.defaultKey))] = cond_out
+        if self.pList.get("Same Value Comparator {}".format(self.pList.get("Double Case Value",u.defaultKey)),u.defaultKey) != "NULL":
+          self.pList["Same Value Comparator {}".format(self.pList.get("Double Case Value",u.defaultKey))] = cond_out
 
     if "CODA" in self.alarmType or "RCND" in self.alarmType or "RCDB" in self.alarmType or "PVDB" in self.alarmType:
       # TEMP FIXME Do the CODA on/taking good data (split = 0, EB alive) here... why not?
@@ -382,6 +396,7 @@ class ALARM():
     highStr = "High"
     highhighStr = "High High"
     exactlyStr = "Exactly"
+    comparatorStr = "Same Value Comparator"
     differenceLowStr = "Difference Low"
     differenceHighStr = "Difference High"
     lowlow = u.defaultKey
@@ -389,6 +404,7 @@ class ALARM():
     high = u.defaultKey
     highhigh = u.defaultKey
     exactly = u.defaultKey
+    comparator = u.defaultKey
     differenceLow = u.defaultKey
     differenceHigh = u.defaultKey
     # Done initializing
@@ -399,6 +415,7 @@ class ALARM():
       highStr = "High "+caseValue+" "+case2ndValue
       highhighStr = "High High "+caseValue+" "+case2ndValue
       exactlyStr = "Exactly "+caseValue+" "+case2ndValue
+      comparatorStr = "Same Value Comparator"+caseValue+" "+case2ndValue
       differenceLowStr = "Difference Low "+caseValue+" "+case2ndValue
       differenceHighStr = "Difference High "+caseValue+" "+case2ndValue
       lowlow = self.pList.get("Low Low "+caseValue+" "+case2ndValue,u.defaultKey) # Assume the user knows what the case's return values can be and names their cased limits as such
@@ -406,6 +423,7 @@ class ALARM():
       high = self.pList.get("High "+caseValue+" "+case2ndValue,u.defaultKey) 
       highhigh = self.pList.get("High High "+caseValue+" "+case2ndValue,u.defaultKey) 
       exactly = self.pList.get("Exactly "+caseValue+" "+case2ndValue,u.defaultKey) 
+      comparator = self.pList.get("Same Value Comparator "+caseValue+" "+case2ndValue,u.defaultKey) 
       differenceLow = self.pList.get("Difference Low "+caseValue+" "+case2ndValue,u.defaultKey) 
       differenceHigh = self.pList.get("Difference High "+caseValue+" "+case2ndValue,u.defaultKey) 
       # Now get the default, non-cased values and catch any general case free values too
@@ -419,6 +437,8 @@ class ALARM():
         highhigh = self.pList.get("High High",u.defaultKey)
       if exactly == u.defaultKey:  
         exactly = self.pList.get("Exactly",u.defaultKey)
+      if comparator == u.defaultKey:  
+        comparator = self.pList.get("Same Value Comparator",u.defaultKey)
       if differenceLow == u.defaultKey:  
         differenceLow = self.pList.get("Difference Low",u.defaultKey)
       if differenceHigh == u.defaultKey:  
@@ -429,6 +449,7 @@ class ALARM():
       highStr = "High "+caseValue
       highhighStr = "High High "+caseValue
       exactlyStr = "Exactly "+caseValue
+      comparatorStr = "Same Value Comparator "+caseValue
       differenceLowStr = "Difference Low "+caseValue
       differenceHighStr = "Difference High "+caseValue
       lowlow = self.pList.get("Low Low "+caseValue,u.defaultKey) # Assume the user knows what the case's return values can be and names their cased limits as such
@@ -436,6 +457,7 @@ class ALARM():
       high = self.pList.get("High "+caseValue,u.defaultKey) 
       highhigh = self.pList.get("High High "+caseValue,u.defaultKey) 
       exactly = self.pList.get("Exactly "+caseValue,u.defaultKey) 
+      comparator = self.pList.get("Same Value Comparator "+caseValue,u.defaultKey) 
       differenceLow = self.pList.get("Difference Low "+caseValue,u.defaultKey) 
       differenceHigh = self.pList.get("Difference High "+caseValue,u.defaultKey) 
     # Now get the default, non-cased values and catch any general case free values too
@@ -449,6 +471,8 @@ class ALARM():
       highhigh = self.pList.get("High High",u.defaultKey)
     if exactly == u.defaultKey:  
       exactly = self.pList.get("Exactly",u.defaultKey)
+    if comparator == u.defaultKey:  
+      comparator = self.pList.get("Same Value Comparator",u.defaultKey)
     if differenceLow == u.defaultKey:  
       differenceLow = self.pList.get("Difference Low",u.defaultKey)
     if differenceHigh == u.defaultKey:  
@@ -461,11 +485,13 @@ class ALARM():
     #if not u.is_number(str(val)): # Then we are not dealing with a number alarm - for now just return false
     if self.pList.get(exactlyStr,u.defaultKey) != u.defaultKey: # Then we are not dealing with a number alarm - for now just return false
       #print("ERROR: Assume alarms values can only be numbers for now")
-      pass
       #if exactly != "NULL" and val != exactly:
       #  self.pList["Alarm Status"] = "Exactly"
       #else:
       #  self.pList["Alarm Status"] = "OK"
+      pass
+    elif self.pList.get(comparatorStr,u.defaultKey) != u.defaultKey: # Then we are not dealing with a number alarm - for now just return false
+      pass
     else:
       if u.is_number(str(val)):
         val = Decimal(self.pList.get("Value",u.defaultKey))
@@ -500,6 +526,8 @@ class ALARM():
         self.pList["Alarm Status"] = differenceHighStr
       elif exactly != "NULL" and val != exactly:
         self.pList["Alarm Status"] = exactlyStr
+      elif comparator != "NULL" and val == comparator: # Comparator wants to check if its not exactly
+        self.pList["Alarm Status"] = comparatorStr
       else:
         self.pList["Alarm Status"] = "OK"
       if tripCounter != "NULL" and tripLimit != "NULL" and tripCounter < tripLimit and self.pList.get("Alarm Status",u.defaultKey) != "OK":
