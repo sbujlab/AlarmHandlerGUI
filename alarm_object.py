@@ -306,17 +306,27 @@ class ALARM():
         #print("Checking EPICs variable = {}".format(self.pList.get("Variable Name",u.defaultKey)))
         listNames = ['.B1','.B2','.B3','.B4','.B5','.B6','.B7','.B8','.B9','.BA']
         cond_out = "NULL"
-        for eachName in listNames:
-          cmds = ['caget', '-t', '-w 1', self.pList["IOC Alarm List Name"]+eachName]
+        cmds = ["NULL"]
+        if self.pList.get("Current Variable",u.defaultKey) != "NULL":
+          cmds = ['caget', '-t', '-w 1', self.pList["Current Variable"]]
           cond_out = subprocess.Popen(cmds, stdout=subprocess.PIPE).stdout.read().strip().decode('ascii') # Needs to be decoded... be careful 
-          if cond_out == "1":
-            self.pList["Value"] = cond_out;
-          #print("EPICS: Doing alarm analysis for object {} {}, name = {}".format(myAO.column,myAO.columnIndex,myAO.name+" "+myAO.value))
-          #print("The epics output for variable {} is {}".format(self.pList["Variable Name"],cond_out))
         if "Invalid" in str(cond_out): # Then the epics variable was invalid
           print("ERROR Invalid epics channel, check with caget again:\t {}".format(self.pList.get("Variable Name",u.defaultKey)))
           cond_out = "NULL"
-        self.pList["Value"] = cond_out
+        elif u.is_number(cond_out) and Decimal(cond_out) > 35.0:
+          for eachName in listNames:
+            cmds = ['caget', '-t', '-w 1', self.pList["IOC Alarm List Name"]+eachName]
+            cond_out = subprocess.Popen(cmds, stdout=subprocess.PIPE).stdout.read().strip().decode('ascii') # Needs to be decoded... be careful 
+            if cond_out == "1":
+              self.pList["Value"] = cond_out;
+            #print("EPICS: Doing alarm analysis for object {} {}, name = {}".format(myAO.column,myAO.columnIndex,myAO.name+" "+myAO.value))
+            #print("The epics output for variable {} is {}".format(self.pList["Variable Name"],cond_out))
+          if "Invalid" in str(cond_out): # Then the epics variable was invalid
+            print("ERROR Invalid epics channel, check with caget again:\t {}".format(self.pList.get("Variable Name",u.defaultKey)))
+            cond_out = "NULL"
+          self.pList["Value"] = cond_out
+        else: 
+          self.pList["Value"] = "0"
       else: # User didn't have "Value" in their parameter list, add it and make it init to NULL
         self.pList["Variable Name"] = "NULL"
         self.pList["Value"] = "NULL"
