@@ -249,10 +249,13 @@ class ALARM():
           cond_out = "BAD"
           
         if self.pList.get("Same Value Comparator",u.defaultKey) != "NULL":
+          self.pList["Same Value Comparator 2"] = self.pList["Same Value Comparator"]
           self.pList["Same Value Comparator"] = cond_out
         if self.pList.get("Same Value Comparator {}".format(self.pList.get("Case Value",u.defaultKey)),u.defaultKey) != "NULL":
+          self.pList["Same Value Comparator 2 {}".format(self.pList.get("Case Value",u.defaultKey))] = self.pList["Same Value Comparator {}".format(self.pList.get("Case Value",u.defaultKey))]
           self.pList["Same Value Comparator {}".format(self.pList.get("Case Value",u.defaultKey))] = cond_out
         if self.pList.get("Same Value Comparator {}".format(self.pList.get("Double Case Value",u.defaultKey)),u.defaultKey) != "NULL":
+          self.pList["Same Value Comparator 2 {}".format(self.pList.get("Double Case Value",u.defaultKey))] = self.pList["Same Value Comparator {}".format(self.pList.get("Double Case Value",u.defaultKey))]
           self.pList["Same Value Comparator {}".format(self.pList.get("Double Case Value",u.defaultKey))] = cond_out
 
     if "CODA" in self.alarmType or "RCND" in self.alarmType or "RCDB" in self.alarmType or "PVDB" in self.alarmType:
@@ -397,6 +400,7 @@ class ALARM():
     highhighStr = "High High"
     exactlyStr = "Exactly"
     comparatorStr = "Same Value Comparator"
+    comparatorStr2 = "Same Value Comparator 2"
     differenceLowStr = "Difference Low"
     differenceHighStr = "Difference High"
     lowlow = u.defaultKey
@@ -405,6 +409,7 @@ class ALARM():
     highhigh = u.defaultKey
     exactly = u.defaultKey
     comparator = u.defaultKey
+    comparator2 = u.defaultKey
     differenceLow = u.defaultKey
     differenceHigh = u.defaultKey
     # Done initializing
@@ -416,6 +421,7 @@ class ALARM():
       highhighStr = "High High "+caseValue+" "+case2ndValue
       exactlyStr = "Exactly "+caseValue+" "+case2ndValue
       comparatorStr = "Same Value Comparator"+caseValue+" "+case2ndValue
+      comparatorStr2 = "Same Value Comparator 2 "+caseValue+" "+case2ndValue
       differenceLowStr = "Difference Low "+caseValue+" "+case2ndValue
       differenceHighStr = "Difference High "+caseValue+" "+case2ndValue
       lowlow = self.pList.get("Low Low "+caseValue+" "+case2ndValue,u.defaultKey) # Assume the user knows what the case's return values can be and names their cased limits as such
@@ -424,6 +430,7 @@ class ALARM():
       highhigh = self.pList.get("High High "+caseValue+" "+case2ndValue,u.defaultKey) 
       exactly = self.pList.get("Exactly "+caseValue+" "+case2ndValue,u.defaultKey) 
       comparator = self.pList.get("Same Value Comparator "+caseValue+" "+case2ndValue,u.defaultKey) 
+      comparator2 = self.pList.get("Same Value Comparator 2 "+caseValue+" "+case2ndValue,u.defaultKey) 
       differenceLow = self.pList.get("Difference Low "+caseValue+" "+case2ndValue,u.defaultKey) 
       differenceHigh = self.pList.get("Difference High "+caseValue+" "+case2ndValue,u.defaultKey) 
       # Now get the default, non-cased values and catch any general case free values too
@@ -439,6 +446,8 @@ class ALARM():
         exactly = self.pList.get("Exactly",u.defaultKey)
       if comparator == u.defaultKey:  
         comparator = self.pList.get("Same Value Comparator",u.defaultKey)
+      if comparator2 == u.defaultKey:  
+        comparator2 = self.pList.get("Same Value Comparator 2",u.defaultKey)
       if differenceLow == u.defaultKey:  
         differenceLow = self.pList.get("Difference Low",u.defaultKey)
       if differenceHigh == u.defaultKey:  
@@ -450,6 +459,7 @@ class ALARM():
       highhighStr = "High High "+caseValue
       exactlyStr = "Exactly "+caseValue
       comparatorStr = "Same Value Comparator "+caseValue
+      comparatorStr2 = "Same Value Comparator 2 "+caseValue
       differenceLowStr = "Difference Low "+caseValue
       differenceHighStr = "Difference High "+caseValue
       lowlow = self.pList.get("Low Low "+caseValue,u.defaultKey) # Assume the user knows what the case's return values can be and names their cased limits as such
@@ -458,6 +468,7 @@ class ALARM():
       highhigh = self.pList.get("High High "+caseValue,u.defaultKey) 
       exactly = self.pList.get("Exactly "+caseValue,u.defaultKey) 
       comparator = self.pList.get("Same Value Comparator "+caseValue,u.defaultKey) 
+      comparator2 = self.pList.get("Same Value Comparator 2 "+caseValue,u.defaultKey) 
       differenceLow = self.pList.get("Difference Low "+caseValue,u.defaultKey) 
       differenceHigh = self.pList.get("Difference High "+caseValue,u.defaultKey) 
     # Now get the default, non-cased values and catch any general case free values too
@@ -473,6 +484,8 @@ class ALARM():
       exactly = self.pList.get("Exactly",u.defaultKey)
     if comparator == u.defaultKey:  
       comparator = self.pList.get("Same Value Comparator",u.defaultKey)
+    if comparator2 == u.defaultKey:  
+      comparator2 = self.pList.get("Same Value Comparator 2",u.defaultKey)
     if differenceLow == u.defaultKey:  
       differenceLow = self.pList.get("Difference Low",u.defaultKey)
     if differenceHigh == u.defaultKey:  
@@ -491,6 +504,8 @@ class ALARM():
       #  self.pList["Alarm Status"] = "OK"
       pass
     elif self.pList.get(comparatorStr,u.defaultKey) != u.defaultKey: # Then we are not dealing with a number alarm - for now just return false
+      pass
+    elif self.pList.get(comparatorStr2,u.defaultKey) != u.defaultKey: # Then we are not dealing with a number alarm - for now just return false
       pass
     else:
       if u.is_number(str(val)):
@@ -526,8 +541,8 @@ class ALARM():
         self.pList["Alarm Status"] = differenceHighStr
       elif exactly != "NULL" and val != exactly:
         self.pList["Alarm Status"] = exactlyStr
-      elif comparator != "NULL" and val == comparator: # Comparator wants to check if its not exactly
-        self.pList["Alarm Status"] = comparatorStr
+      elif comparator != "NULL" and comparator2 != "NULL" and (val == comparator and val == comparator2): # Comparator wants to check if its not exactly
+        self.pList["Alarm Status"] = "Aq Feedback Is Off"
       else:
         self.pList["Alarm Status"] = "OK"
       if tripCounter != "NULL" and tripLimit != "NULL" and tripCounter < tripLimit and self.pList.get("Alarm Status",u.defaultKey) != "OK":
