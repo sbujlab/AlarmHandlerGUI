@@ -340,6 +340,8 @@ class ALARM():
           print("ERROR Invalid epics channel, check with caget again:\t {}".format(self.pList["Difference Reference Variable Name"]))
           cond_out = "NULL"
         self.pList["Difference Reference Value"] = cond_out
+        if self.pList.get("Value",u.defaultKey) != "NULL":
+          self.pList["Value"] = str(Decimal(self.pList["Value"]) - Decimal(self.pList["Difference Reference Value"]))
       #else: # User didn't have "Value" in their parameter list, add it and make it init to NULL
       #  self.pList["Difference Reference Variable Name"] = "NULL"
       #  self.pList["Difference Reference Value"] = "NULL"
@@ -520,8 +522,8 @@ class ALARM():
     else:
       if u.is_number(str(val)):
         val = Decimal(self.pList.get("Value",u.defaultKey))
-      if u.is_number(str(differenceReferenceValue)) and differenceReferenceValue != u.defaultKey:
-        differenceReferenceValue = Decimal(self.pList.get("Difference Reference Value",u.defaultKey))
+      #if u.is_number(str(differenceReferenceValue)) and differenceReferenceValue != u.defaultKey:
+      #  differenceReferenceValue = Decimal(self.pList.get("Difference Reference Value",u.defaultKey))
       if u.is_number(str(lowlow)): # And now check the other ones too
         lowlow = Decimal(self.pList.get(lowlowStr,u.defaultKey))
       if u.is_number(str(low)):
@@ -545,10 +547,10 @@ class ALARM():
         self.pList["Alarm Status"] = highStr
       elif highhigh != "NULL" and u.is_number(highhigh) and u.is_number(val) and val > highhigh:
         self.pList["Alarm Status"] = highhighStr
-      elif differenceLow != "NULL" and differenceReferenceValue != "NULL" and val != "NULL" and u.is_number(differenceLow) and u.is_number(val) and u.is_number(differenceReferenceValue) and ((val - differenceReferenceValue) < differenceLow):
-        self.pList["Alarm Status"] = differenceLowStr
-      elif differenceHigh != "NULL" and differenceReferenceValue != "NULL" and val != "NULL" and u.is_number(differenceHigh) and u.is_number(differenceReferenceValue) and u.is_number(val) and ((val - differenceReferenceValue) > differenceHigh):
-        self.pList["Alarm Status"] = differenceHighStr
+      #elif differenceLow != "NULL" and differenceReferenceValue != "NULL" and val != "NULL" and u.is_number(differenceLow) and u.is_number(val) and u.is_number(differenceReferenceValue) and ((val - differenceReferenceValue) < differenceLow):
+      #  self.pList["Alarm Status"] = differenceLowStr
+      #elif differenceHigh != "NULL" and differenceReferenceValue != "NULL" and val != "NULL" and u.is_number(differenceHigh) and u.is_number(differenceReferenceValue) and u.is_number(val) and ((val - differenceReferenceValue) > differenceHigh):
+      #  self.pList["Alarm Status"] = differenceHighStr
       elif exactly != "NULL" and val != exactly:
         self.pList["Alarm Status"] = exactlyStr
       elif comparator != "NULL" and comparator2 != "NULL" and (val == comparator and val == comparator2): # Comparator wants to check if its not exactly
