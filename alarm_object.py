@@ -340,7 +340,7 @@ class ALARM():
           print("ERROR Invalid epics channel, check with caget again:\t {}".format(self.pList["Difference Reference Variable Name"]))
           cond_out = "NULL"
         self.pList["Difference Reference Value"] = cond_out
-        if self.pList.get("Value",u.defaultKey) != "NULL":
+        if self.pList.get("Value",u.defaultKey) != "NULL" and self.pList.get("Difference Reference Value") != "NULL":
           self.pList["Value"] = str(Decimal(self.pList["Value"]) - Decimal(self.pList["Difference Reference Value"]))
       #else: # User didn't have "Value" in their parameter list, add it and make it init to NULL
       #  self.pList["Difference Reference Variable Name"] = "NULL"
