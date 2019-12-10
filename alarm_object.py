@@ -223,6 +223,15 @@ class ALARM():
           print("Error: command {} not found".format(self.pList.get("Script Name",u.defaultKey)))
           cond_out = "NULL"
         self.pList["Value"] = cond_out
+      if self.pList.get("Threshold Variable Name",u.defaultKey) != "NULL" and self.pList.get("Script Name",u.defaultKey) != "NULL":
+        cmds = [self.pList.get("Script Name",u.defaultKey),self.pList.get("Threshold Variable Name",u.defaultKey)]
+        cond_out = "NULL"
+        cond_out = subprocess.Popen(cmds, stdout=subprocess.PIPE).stdout.read().strip().decode('ascii') # Needs to be decoded... be careful 
+        if "Command not found." in str(cond_out): # Then the Script was invalid
+          print("Error: command {} not found".format(self.pList.get("Script Name",u.defaultKey)))
+          cond_out = "BAD"
+          
+        self.pList["Threshold Value"] = cond_out
       if self.pList.get("Case Variable Name",u.defaultKey) != "NULL" and self.pList.get("Script Name",u.defaultKey) != "NULL":
         cmds = [self.pList.get("Script Name",u.defaultKey),self.pList.get("Case Variable Name",u.defaultKey)]
         cond_out = "NULL"
@@ -341,10 +350,19 @@ class ALARM():
           cond_out = "NULL"
         self.pList["Difference Reference Value"] = cond_out
         if self.pList.get("Value",u.defaultKey) != "NULL" and self.pList.get("Difference Reference Value") != "NULL":
+          # FIXME HACKED this to just go ahead and take the difference here. Reference value is now only stored in file for user knowledge
           self.pList["Value"] = str(Decimal(self.pList["Value"]) - Decimal(self.pList["Difference Reference Value"]))
       #else: # User didn't have "Value" in their parameter list, add it and make it init to NULL
       #  self.pList["Difference Reference Variable Name"] = "NULL"
       #  self.pList["Difference Reference Value"] = "NULL"
+      if self.pList.get("Threshold Variable Name",u.defaultKey) != "NULL":
+        cmds = ['caget', '-t', '-w 1', self.pList["Threshold Variable Name"]]
+        cond_out = "NULL"
+        cond_out = subprocess.Popen(cmds, stdout=subprocess.PIPE).stdout.read().strip().decode('ascii') # Needs to be decoded... be careful 
+        if "Invalid" in str(cond_out): # Then the epics variable was invalid
+          print("ERROR Invalid epics channel, check with caget again:\t {}".format(self.pList["Threshold Variable Name"]))
+          cond_out = "BAD"
+        self.pList["Threshold Value"] = cond_out
       if self.pList.get("Case Variable Name",u.defaultKey) != "NULL":
         cmds = ['caget', '-t', '-w 1', self.pList["Case Variable Name"]]
         cond_out = "NULL"
@@ -393,12 +411,16 @@ class ALARM():
     # Consider making a candidate list of possible key words, but for now stick to hard-coded names... 
     #print("Updating: pList = {}".format(self.pList))
     val = self.pList.get("Value",u.defaultKey)
+    threshold = self.pList.get("Threshold Variable Name",u.defaultKey)
+    thresholdValue = self.pList.get("Threshold Value","BAD")
+    thresholdLow = self.pList.get("Threshold Low",u.defaultKey)
     case = self.pList.get("Case Variable Name",u.defaultKey)
     caseValue = self.pList.get("Case Value","BAD")
     case2nd = self.pList.get("Double Case Variable Name",u.defaultKey)
     case2ndValue = self.pList.get("Double Case Value","BAD")
     differenceReference = self.pList.get("Difference Reference Variable Name",u.defaultKey)
     differenceReferenceValue = self.pList.get("Difference Reference Value",u.defaultKey)
+
     tripLimit = self.pList.get("Trip Limit",u.defaultKey)
     if u.is_number(tripLimit):
       tripLimit = int(tripLimit)
@@ -426,7 +448,7 @@ class ALARM():
     differenceHigh = u.defaultKey
     # Done initializing
 
-    if case2nd != u.defaultKey and case2ndValue != u.defaultKey and case != u.defaultKey and caseValue != u.defaultKey: # Then we have a double case determining which set of limits to use
+    if case2nd != u.defaultKey and case2ndValue != "BAD" and case != u.defaultKey and caseValue != "BAD": # Then we have a double case determining which set of limits to use
       lowlowStr = "Low Low "+caseValue+" "+case2ndValue
       lowStr = "Low "+caseValue+" "+case2ndValue
       highStr = "High "+caseValue+" "+case2ndValue
@@ -464,7 +486,7 @@ class ALARM():
         differenceLow = self.pList.get("Difference Low",u.defaultKey)
       if differenceHigh == u.defaultKey:  
         differenceHigh = self.pList.get("Difference High",u.defaultKey)
-    elif case != u.defaultKey and caseValue != u.defaultKey: # Then we have a single case determining which set of limits to use
+    elif case != u.defaultKey and caseValue != "BAD": # Then we have a single case determining which set of limits to use
       lowlowStr = "Low Low "+caseValue
       lowStr = "Low "+caseValue
       highStr = "High "+caseValue
@@ -516,12 +538,18 @@ class ALARM():
       #  self.pList["Alarm Status"] = "OK"
       pass
     elif self.pList.get(comparatorStr,u.defaultKey) != u.defaultKey: # Then we are not dealing with a number alarm - for now just return false
+      #print("ERROR: Assume alarms values can only be numbers for now")
       pass
     elif self.pList.get(comparatorStr2,u.defaultKey) != u.defaultKey: # Then we are not dealing with a number alarm - for now just return false
+      #print("ERROR: Assume alarms values can only be numbers for now")
       pass
     else:
       if u.is_number(str(val)):
         val = Decimal(self.pList.get("Value",u.defaultKey))
+      if u.is_number(str(thresholdValue)):
+        thresholdValue = Decimal(self.pList.get("Threshold Value",u.defaultKey))
+      if u.is_number(str(thresholdLow)):
+        thresholdLow = Decimal(self.pList.get("Threshold Low",u.defaultKey))
       #if u.is_number(str(differenceReferenceValue)) and differenceReferenceValue != u.defaultKey:
       #  differenceReferenceValue = Decimal(self.pList.get("Difference Reference Value",u.defaultKey))
       if u.is_number(str(lowlow)): # And now check the other ones too
@@ -554,9 +582,13 @@ class ALARM():
       elif exactly != "NULL" and val != exactly:
         self.pList["Alarm Status"] = exactlyStr
       elif comparator != "NULL" and comparator2 != "NULL" and (val == comparator and val == comparator2): # Comparator wants to check if its not exactly
+        # FIXME This assumes the comparator is only ever used for Aq feedback
         self.pList["Alarm Status"] = "Aq Feedback Is Off"
       else:
         self.pList["Alarm Status"] = "OK"
+      if threshold != u.defaultKey and thresholdValue != "BAD" and thresholdValue < thresholdLow:
+        self.pList["Alarm Status"] = "OK"
+        print("Alarm {} OK, checked against {} = {}. Is < {} threshold, therefore alarm is OK".format(val,threshold,thresholdValue,thresholdLow))
       if tripCounter != "NULL" and tripLimit != "NULL" and tripCounter < tripLimit and self.pList.get("Alarm Status",u.defaultKey) != "OK":
         #print("Not OK: Less than, Trip counter = {}, trip limit = {}".format(tripCounter, tripLimit))
         # The alarm has not surpassed the limit
