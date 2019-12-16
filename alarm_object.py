@@ -232,6 +232,15 @@ class ALARM():
           cond_out = "BAD"
           
         self.pList["Threshold Value"] = cond_out
+      if self.pList.get("Threshold 2 Variable Name",u.defaultKey) != "NULL" and self.pList.get("Script Name",u.defaultKey) != "NULL":
+        cmds = [self.pList.get("Script Name",u.defaultKey),self.pList.get("Threshold 2 Variable Name",u.defaultKey)]
+        cond_out = "NULL"
+        cond_out = subprocess.Popen(cmds, stdout=subprocess.PIPE).stdout.read().strip().decode('ascii') # Needs to be decoded... be careful 
+        if "Command not found." in str(cond_out): # Then the Script was invalid
+          print("Error: command {} not found".format(self.pList.get("Script Name",u.defaultKey)))
+          cond_out = "BAD"
+          
+        self.pList["Threshold 2 Value"] = cond_out
       if self.pList.get("Case Variable Name",u.defaultKey) != "NULL" and self.pList.get("Script Name",u.defaultKey) != "NULL":
         cmds = [self.pList.get("Script Name",u.defaultKey),self.pList.get("Case Variable Name",u.defaultKey)]
         cond_out = "NULL"
@@ -363,6 +372,14 @@ class ALARM():
           print("ERROR Invalid epics channel, check with caget again:\t {}".format(self.pList["Threshold Variable Name"]))
           cond_out = "BAD"
         self.pList["Threshold Value"] = cond_out
+      if self.pList.get("Threshold 2 Variable Name",u.defaultKey) != "NULL":
+        cmds = ['caget', '-t', '-w 1', self.pList["Threshold 2 Variable Name"]]
+        cond_out = "NULL"
+        cond_out = subprocess.Popen(cmds, stdout=subprocess.PIPE).stdout.read().strip().decode('ascii') # Needs to be decoded... be careful 
+        if "Invalid" in str(cond_out): # Then the epics variable was invalid
+          print("ERROR Invalid epics channel, check with caget again:\t {}".format(self.pList["Threshold 2 Variable Name"]))
+          cond_out = "BAD"
+        self.pList["Threshold 2 Value"] = cond_out
       if self.pList.get("Case Variable Name",u.defaultKey) != "NULL":
         cmds = ['caget', '-t', '-w 1', self.pList["Case Variable Name"]]
         cond_out = "NULL"
@@ -414,6 +431,9 @@ class ALARM():
     threshold = self.pList.get("Threshold Variable Name",u.defaultKey)
     thresholdValue = self.pList.get("Threshold Value","BAD")
     thresholdLow = self.pList.get("Threshold Low",u.defaultKey)
+    threshold2 = self.pList.get("Threshold 2 Variable Name",u.defaultKey)
+    threshold2Value = self.pList.get("Threshold 2 Value","BAD")
+    threshold2Low = self.pList.get("Threshold 2 Low",u.defaultKey)
     case = self.pList.get("Case Variable Name",u.defaultKey)
     caseValue = self.pList.get("Case Value","BAD")
     case2nd = self.pList.get("Double Case Variable Name",u.defaultKey)
@@ -550,6 +570,10 @@ class ALARM():
         thresholdValue = Decimal(self.pList.get("Threshold Value",u.defaultKey))
       if u.is_number(str(thresholdLow)):
         thresholdLow = Decimal(self.pList.get("Threshold Low",u.defaultKey))
+      if u.is_number(str(threshold2Value)):
+        threshold2Value = Decimal(self.pList.get("Threshold 2 Value",u.defaultKey))
+      if u.is_number(str(threshold2Low)):
+        threshold2Low = Decimal(self.pList.get("Threshold 2 Low",u.defaultKey))
       #if u.is_number(str(differenceReferenceValue)) and differenceReferenceValue != u.defaultKey:
       #  differenceReferenceValue = Decimal(self.pList.get("Difference Reference Value",u.defaultKey))
       if u.is_number(str(lowlow)): # And now check the other ones too
@@ -588,7 +612,10 @@ class ALARM():
         self.pList["Alarm Status"] = "OK"
       if threshold != u.defaultKey and thresholdValue != "BAD" and thresholdValue < thresholdLow:
         self.pList["Alarm Status"] = "OK"
-        print("Alarm {} OK, checked against {} = {}. Is < {} threshold, therefore alarm is OK".format(val,threshold,thresholdValue,thresholdLow))
+        #print("Alarm {} OK, checked against {} = {}. Is < {} threshold, therefore alarm is OK".format(val,threshold,thresholdValue,thresholdLow))
+      if threshold2 != u.defaultKey and threshold2Value != "BAD" and threshold2Value < threshold2Low:
+        self.pList["Alarm Status"] = "OK"
+        #print("Alarm {} OK, checked against {} = {}. Is < {} threshold2, therefore alarm is OK".format(val,threshold2,threshold2Value,threshold2Low))
       if tripCounter != "NULL" and tripLimit != "NULL" and tripCounter < tripLimit and self.pList.get("Alarm Status",u.defaultKey) != "OK":
         #print("Not OK: Less than, Trip counter = {}, trip limit = {}".format(tripCounter, tripLimit))
         # The alarm has not surpassed the limit
