@@ -47,7 +47,7 @@ if args['arg'] != "NULL":
 
 else: 
   #cmds = ['caget', '-t', '-w 1', 'IGL0I00C1068_DAC06']
-  cmds = ['caget', '-t', '-w 1', 'BCM1H01_AsymMean']
+  cmds = ['caget', '-t', '-w 1', 'ComptonDSbg1']
   cond_out = "NULL"
   cond_out = subprocess.Popen(cmds, stdout=subprocess.PIPE).stdout.read().strip().decode('ascii') # Needs to be decoded... be careful 
   if "Invalid" in str(cond_out):
