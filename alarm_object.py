@@ -589,12 +589,12 @@ class ALARM():
       if u.is_number(str(differenceHigh)):
         differenceHigh = Decimal(self.pList.get(differenceHighStr,u.defaultKey))
     if val != "NULL":
-      #if low != "NULL" and u.is_number(low) and u.is_number(val) and val < low:
-      if low != "NULL":
-        if u.is_number(low):
-          if u.is_number(val):
-            if val < low:
-              self.pList["Alarm Status"] = lowStr
+      if low != "NULL" and u.is_number(low) and u.is_number(val) and val < low:
+      #if low != "NULL":
+      #  if u.is_number(low):
+      #    if u.is_number(val):
+      #      if val < low:
+        self.pList["Alarm Status"] = lowStr
               #print("Alarm {} Low".format(val))
       elif lowlow != "NULL" and u.is_number(lowlow) and u.is_number(val) and val < lowlow:
         self.pList["Alarm Status"] = lowlowStr

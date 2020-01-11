@@ -280,7 +280,7 @@ endif
 if (`echo $OKstatus` != 'FFB:') then
   set Foo=`caget -t IBC1H04CRCUR2`
   set Bar=`printf "%d" $Foo`
-  if ($Bar > 50) then
+  if ($Bar > 80) then
     echo "$OKstatus Not OK"
   else
     echo "OK"
