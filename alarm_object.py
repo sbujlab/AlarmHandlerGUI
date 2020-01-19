@@ -22,6 +22,30 @@ import subprocess
 import socket
 from datetime import datetime
 
+class ALARM_LOOP_MONITOR():
+  def __init__(self,alarmHandlerGUI):
+    self.nLoops = 1
+    self.Monitor = True
+    #self.alarm_loop_monitor(alarmHandlerGUI)
+
+  def alarm_loop_monitor(self,alarmHandlerGUI):
+    if (alarmHandlerGUI.alarmLoop.globalLoopStatus=="Looping"):
+      #if self.Monitor:
+      #  self.Monitor = False
+      #else:
+      #  self.Monitor = True
+      # Recursion loop here - splits off a new instance of this function and finishes the one currently running (be careful) - 30 second loop
+      if alarmHandlerGUI.alarmLoop.userNotifyLoop.nLoops <= self.nLoops and self.nLoops>10 and self.Monitor:
+        print("\n\nALERT ALERT: Alarm handler notification loop has been stale for 1 minute\n\nRebooting alarm loops - Probably you should just reboot the alarm handler entirely now\n\n")
+        self.nLoops = alarmHandlerGUI.alarmLoop.userNotifyLoop.nLoops
+        alarmHandlerGUI.win.after(1000*alarmHandlerGUI.OL.cooldownReduction,alarmHandlerGUI.alarmLoop.userNotifyLoop.user_notify_loop, alarmHandlerGUI.alarmLoop,alarmHandlerGUI.OL,alarmHandlerGUI.fileArray,alarmHandlerGUI) 
+        alarmHandlerGUI.win.after(10000,alarmHandlerGUI.alarmLoop.alarm_loop,alarmHandlerGUI) # Recursion loop here - splits off a new instance of this function and finishes the one currently running (be careful)
+      else: 
+        if self.Monitor:
+          print("\n\nAlarm Handler Health Check passed: 60 second loop's Notify Counter # = {}, notify loop's counter # = {}, should not be the same\n\n".format(self.nLoops,alarmHandlerGUI.alarmLoop.userNotifyLoop.nLoops))
+          self.nLoops = alarmHandlerGUI.alarmLoop.userNotifyLoop.nLoops
+      alarmHandlerGUI.win.after(30000*alarmHandlerGUI.OL.cooldownReduction,self.alarm_loop_monitor,alarmHandlerGUI) 
+
 class ALARM_LOOP():
   def __init__(self,alarmHandlerGUI):
     self.alarmList = []
@@ -128,9 +152,10 @@ class ALARM_LOOP():
 
 class USER_NOTIFY():
   def __init__(self,alarmLoop):
-    pass
+    self.nLoops = 0
 
   def user_notify_loop(self,alarmLoop,OL,fileArray,alarmHandlerGUI):
+    self.nLoops = self.nLoops + 1
     #if alarmHandlerGUI.tabs.get("Alarm Handler",u.defaultKey) != u.defaultKey:
     #  alarmHandlerGUI.tabs["Alarm Handler"].refresh_screen(alarmHandlerGUI.OL,alarmHandlerGUI.fileArray,alarmHandlerGUI.alarmLoop)
     #if alarmHandlerGUI.tabs.get("Grid Alarm Handler",u.defaultKey) != u.defaultKey:
@@ -590,6 +615,7 @@ class ALARM():
         differenceHigh = Decimal(self.pList.get(differenceHighStr,u.defaultKey))
     if val != "NULL":
       if low != "NULL" and u.is_number(low) and u.is_number(val) and val < low:
+      #if low != "NULL" and u.is_number(low) and u.is_number(val) and val < "TEST":
       #if low != "NULL":
       #  if u.is_number(low):
       #    if u.is_number(val):

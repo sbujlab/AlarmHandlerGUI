@@ -56,6 +56,7 @@ class AlarmHandler:
     self.masterAlarmButton = tk.Label(self.win, image=self.masterAlarmImage, cursor="hand2", bg=u.lightgrey_color)
     self.alarmClient = bclient.sockClient(self.remoteName)
     self.alarmLoop = alarm_object.ALARM_LOOP(self)
+    self.alarmLoopMonitor = alarm_object.ALARM_LOOP_MONITOR(self)
     self.tabs = self.create_widgets()
   
   def get_alarm_handler_style(self):
@@ -130,5 +131,6 @@ class AlarmHandler:
     return tabs
 
 alarm_handler_GUI = AlarmHandler()
+alarm_handler_GUI.alarmLoopMonitor.alarm_loop_monitor(alarm_handler_GUI)
 alarm_handler_GUI.alarmLoop.alarm_loop(alarm_handler_GUI)
 alarm_handler_GUI.win.mainloop()
