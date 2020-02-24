@@ -163,6 +163,7 @@ class USER_NOTIFY():
     #if alarmHandlerGUI.tabs.get("Expert Alarm Handler",u.defaultKey) != u.defaultKey:
     #  alarmHandlerGUI.tabs["Expert Alarm Handler"].refresh_screen(alarmHandlerGUI.OL,alarmHandlerGUI.fileArray,alarmHandlerGUI.alarmLoop)
     localStat = "OK"
+    alarmHandlerGUI.alertTheUserSoundNow = alarmHandlerGUI.alertTheUserSound # Default = 7 every restart of loop
     for i in range (0,len(alarmLoop.alarmList)):
       alarmLoop.alarmList[i].alarm_evaluate()
       # Check if the alarm is alarming and has not been "OK"ed by the user acknowledge
@@ -170,9 +171,10 @@ class USER_NOTIFY():
       # If the userNotifyStatus is NULL (i.e. not set) then the alarm handler will just read it and move on with its life
       if alarmLoop.globalUserAlarmSilence == "Alert" and alarmLoop.ok_notify_check(alarmLoop.alarmList[i].userNotifySelfStatus) != "OK" and alarmLoop.alarmList[i].userSilenceSelfStatus == "Alert":
         # Just let the method I wrote take care of determining global alarm status
+        print("Alert status = {}".format(alarmLoop.alarmList[i].alertSound))
         alarmLoop.globalAlarmStatus = alarmLoop.alarmList[i].userNotifySelfStatus # Update global alarm status
-        if alarmLoop.alarmList[i].alertSound != "7":
-          alarmHandlerGUI.userNotifySound = alarmLoop.alarmList[i].alertSound # Update global alarm sound
+        if alarmLoop.alarmList[i].alertSound != alarmHandlerGUI.alertTheUserSound:
+          alarmHandlerGUI.alertTheUserSoundNow = alarmLoop.alarmList[i].alertSound # Update global alarm sound
         u.append_historyList(alarmHandlerGUI.HL,alarmHandlerGUI.OL,i) # Update Alarm History
         localStat = alarmLoop.alarmList[i].userNotifySelfStatus
     if localStat == "OK":
@@ -183,10 +185,10 @@ class USER_NOTIFY():
       self.update_user_notify_status(alarmLoop,OL,fileArray) # Assumes OK, checks each OL.objectList[2] entry for its notify status, continues
       if alarmHandlerGUI.alertTheUser == True and alarmLoop.globalAlarmStatus != "OK": # globalAlarmStatus determined by these set acknowledged stati
         try:
-          if alarmHandlerGUI.alertTheUserSound != "7":
-            alarmHandlerGUI.alarmClient.sendPacket(alarmHandlerGUI.alertTheUserSound) 
+          if alarmHandlerGUI.alertTheUserSoundNow != alarmHandlerGUI.alertTheUserSound:
+            alarmHandlerGUI.alarmClient.sendPacket(alarmHandlerGUI.alertTheUserSoundNow) 
           else:
-            alarmHandlerGUI.alarmClient.sendPacket("7")
+            alarmHandlerGUI.alarmClient.sendPacket(alarmHandlerGUI.alertTheUserSound)
         except:
           print("Alarm Sound Server not running\nPlease Launch an instance on the EPICS computer\nssh hacuser@hacweb7, cd parity-alarms, ./bserver&")
       # Recursion loop here - splits off a new instance of this function and finishes the one currently running (be careful)
@@ -230,6 +232,7 @@ class ALARM():
     self.runNumber = 0
     self.alarmSelfStatus = myAO.alarmStatus
     self.userNotifySelfStatus = myAO.userNotifyStatus
+    self.alertSound = myAO.alertSound
     self.userSilenceSelfStatus = myAO.userSilenceStatus
     self.alarmType = self.pList.get("Alarm Type",u.defaultKey)
     self.alarmEvaluateType = "Exactly" # Default alarm criteria is whether the value is not-null and otherwise is defined on context from given parameterList entries
@@ -466,7 +469,6 @@ class ALARM():
     threshold2Value = self.pList.get("Threshold 2 Value","BAD")
     threshold2Low = self.pList.get("Threshold 2 Low",u.defaultKey)
     threshold2High = self.pList.get("Threshold 2 High",u.defaultKey)
-    alertSound = self.pList.get("Alert Sound","7")
     case = self.pList.get("Case Variable Name",u.defaultKey)
     caseValue = self.pList.get("Case Value","BAD")
     case2nd = self.pList.get("Double Case Variable Name",u.defaultKey)
@@ -680,6 +682,8 @@ class ALARM():
       self.pList["Alarm Status"] = "OK"
     #print("Updated: pList = {}".format(self.pList))
     if self.pList.get("Alarm Status",u.defaultKey) != "OK" and self.pList.get("Alarm Status",u.defaultKey) != "Invalid" and self.pList.get("Alarm Status",u.defaultKey) != "NULL": # Update global alarm status unless NULL or invalid
+      self.alertSound = self.pList.get("Alert Sound","7")
+      myAO.alertSound = self.pList.get("Alert Sound","7")
       self.alarmSelfStatus = self.pList.get("Alarm Status",u.defaultKey)
       myAO.alarmStatus = self.pList.get("Alarm Status",u.defaultKey)
       #print("Alarm status updated to be {}".format(myAO.alarmStatus))
@@ -796,6 +800,7 @@ class ALARM_OBJECT():
     self.alarmStatus = "OK"
     self.userSilenceStatus = "Alert"
     self.userNotifyStatus = "OK"
+    self.alertSound = "7"
     self.cooldownLength = 60 # Default initialize, will be overwritten later
     #self.parameterList["User Silence Status"] = self.userSilenceStatus
     self.alarm = lambda: ALARM(self);

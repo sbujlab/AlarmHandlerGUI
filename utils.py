@@ -71,6 +71,7 @@ def update_config(alarmHandlerGUI):
   alarmHandlerGUI.showGrid = bool(strtobool(alarmHandlerGUI.conf.conf.get('showGrid',defaultKey)))
   alarmHandlerGUI.alertTheUser = bool(strtobool(alarmHandlerGUI.conf.conf.get('turnSoundOn',defaultKey)))
   alarmHandlerGUI.alertTheUserSound = alarmHandlerGUI.conf.conf.get('defaultAlertSound',defaultKey)
+  alarmHandlerGUI.alertTheUserSoundNow = alarmHandlerGUI.conf.conf.get('defaultAlertSound',defaultKey)
   alarmHandlerGUI.includeExpert = bool(strtobool(alarmHandlerGUI.conf.conf.get('includeExpertPage',defaultKey)))
 
 def write_conf(conf):
