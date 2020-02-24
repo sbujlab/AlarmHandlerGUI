@@ -171,6 +171,8 @@ class USER_NOTIFY():
       if alarmLoop.globalUserAlarmSilence == "Alert" and alarmLoop.ok_notify_check(alarmLoop.alarmList[i].userNotifySelfStatus) != "OK" and alarmLoop.alarmList[i].userSilenceSelfStatus == "Alert":
         # Just let the method I wrote take care of determining global alarm status
         alarmLoop.globalAlarmStatus = alarmLoop.alarmList[i].userNotifySelfStatus # Update global alarm status
+        if alarmLoop.alarmList[i].alertSound != "7":
+          alarmHandlerGUI.userNotifySound = alarmLoop.alarmList[i].alertSound # Update global alarm sound
         u.append_historyList(alarmHandlerGUI.HL,alarmHandlerGUI.OL,i) # Update Alarm History
         localStat = alarmLoop.alarmList[i].userNotifySelfStatus
     if localStat == "OK":
@@ -181,7 +183,10 @@ class USER_NOTIFY():
       self.update_user_notify_status(alarmLoop,OL,fileArray) # Assumes OK, checks each OL.objectList[2] entry for its notify status, continues
       if alarmHandlerGUI.alertTheUser == True and alarmLoop.globalAlarmStatus != "OK": # globalAlarmStatus determined by these set acknowledged stati
         try:
-          alarmHandlerGUI.alarmClient.sendPacket("7") # Have a case series here for passing different packets based on different alarm stati
+          if alarmHandlerGUI.alertTheUserSound != "7":
+            alarmHandlerGUI.alarmClient.sendPacket(alarmHandlerGUI.alertTheUserSound) 
+          else:
+            alarmHandlerGUI.alarmClient.sendPacket("7")
         except:
           print("Alarm Sound Server not running\nPlease Launch an instance on the EPICS computer\nssh hacuser@hacweb7, cd parity-alarms, ./bserver&")
       # Recursion loop here - splits off a new instance of this function and finishes the one currently running (be careful)
@@ -456,9 +461,12 @@ class ALARM():
     threshold = self.pList.get("Threshold Variable Name",u.defaultKey)
     thresholdValue = self.pList.get("Threshold Value","BAD")
     thresholdLow = self.pList.get("Threshold Low",u.defaultKey)
+    thresholdHigh = self.pList.get("Threshold High",u.defaultKey)
     threshold2 = self.pList.get("Threshold 2 Variable Name",u.defaultKey)
     threshold2Value = self.pList.get("Threshold 2 Value","BAD")
     threshold2Low = self.pList.get("Threshold 2 Low",u.defaultKey)
+    threshold2High = self.pList.get("Threshold 2 High",u.defaultKey)
+    alertSound = self.pList.get("Alert Sound","7")
     case = self.pList.get("Case Variable Name",u.defaultKey)
     caseValue = self.pList.get("Case Value","BAD")
     case2nd = self.pList.get("Double Case Variable Name",u.defaultKey)
@@ -595,10 +603,14 @@ class ALARM():
         thresholdValue = Decimal(self.pList.get("Threshold Value",u.defaultKey))
       if u.is_number(str(thresholdLow)):
         thresholdLow = Decimal(self.pList.get("Threshold Low",u.defaultKey))
+      if u.is_number(str(thresholdHigh)):
+        thresholdHigh = Decimal(self.pList.get("Threshold High",u.defaultKey))
       if u.is_number(str(threshold2Value)):
         threshold2Value = Decimal(self.pList.get("Threshold 2 Value",u.defaultKey))
       if u.is_number(str(threshold2Low)):
         threshold2Low = Decimal(self.pList.get("Threshold 2 Low",u.defaultKey))
+      if u.is_number(str(threshold2High)):
+        threshold2High = Decimal(self.pList.get("Threshold 2 High",u.defaultKey))
       #if u.is_number(str(differenceReferenceValue)) and differenceReferenceValue != u.defaultKey:
       #  differenceReferenceValue = Decimal(self.pList.get("Difference Reference Value",u.defaultKey))
       if u.is_number(str(lowlow)): # And now check the other ones too
@@ -640,10 +652,11 @@ class ALARM():
         self.pList["Alarm Status"] = "Aq Feedback Is Off"
       else:
         self.pList["Alarm Status"] = "OK"
-      if threshold != u.defaultKey and thresholdValue != "BAD" and thresholdValue < thresholdLow:
+      # If the thresholds conditions are NOT met then erase prior alarm status, else let that Alert status propagate forward
+      if threshold != u.defaultKey and thresholdValue != "BAD" and ((thresholdLow != u.defaultKey and thresholdValue < thresholdLow) or (thresholdHigh != u.defaultKey and thresholdValue > thresholdHigh)):
         self.pList["Alarm Status"] = "OK"
         #print("Alarm {} OK, checked against {} = {}. Is < {} threshold, therefore alarm is OK".format(val,threshold,thresholdValue,thresholdLow))
-      if threshold2 != u.defaultKey and threshold2Value != "BAD" and threshold2Value < threshold2Low:
+      if threshold2 != u.defaultKey and threshold2Value != "BAD" and ((threshold2Low != u.defaultKey and threshold2Value < threshold2Low) or (threshold2High != u.defaultKey and threshold2Value > threshold2High)):
         self.pList["Alarm Status"] = "OK"
         #print("Alarm {} OK, checked against {} = {}. Is < {} threshold2, therefore alarm is OK".format(val,threshold2,threshold2Value,threshold2Low))
       if tripCounter != "NULL" and tripLimit != "NULL" and tripCounter < tripLimit and self.pList.get("Alarm Status",u.defaultKey) != "OK":

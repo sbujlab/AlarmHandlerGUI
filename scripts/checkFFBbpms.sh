@@ -1,9 +1,9 @@
 #!/bin/tcsh
 set OKstatus="FFB:"
-if (`caget -t FB_A:use_RF` != 'RF On') then
-  set tmp=`caget FB_A:use_RF`
-  set OKstatus="$OKstatus $tmp Not OK, Should read RF On\n"
-endif
+#if (`caget -t FB_A:use_RF` != 'RF On') then
+  #set tmp=`caget FB_A:use_RF`
+  #set OKstatus="$OKstatus $tmp Not OK, Should read RF On\n"
+#endif
 if (`caget -t FB_A:isolate_en` != 'On') then
   set tmp=`caget FB_A:isolate_en`
   set OKstatus="$OKstatus $tmp Not OK, Should read On\n"
@@ -141,9 +141,13 @@ if (`caget -t FB_A:BPM:use_energy:y_8` != 'unused') then
   set OKstatus="$OKstatus $tmp Not OK, Should read unused\n"
 endif
 
-if (`caget -t FB_A:use_RF` != 'RF On') then
-  set tmp=`caget FB_A:use_RF`
-  set OKstatus="$OKstatus $tmp Not OK, Should read RF On\n"
+if (`caget -t FB_C:use_RF` != 'RF Off') then
+  set tmp=`caget FB_C:use_RF`
+  set OKstatus="$OKstatus $tmp Not OK, Should read RF Off\n"
+endif
+if (`caget -t FB_C:FF_mode` != 'Off') then
+  set tmp=`caget FB_C:FF_mode`
+  set OKstatus="$OKstatus $tmp Not OK, Should read Off\n"
 endif
 if (`caget -t FB_A:disp_optics` != 'Standard') then
   set tmp=`caget FB_A:disp_optics`
