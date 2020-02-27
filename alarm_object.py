@@ -262,7 +262,7 @@ class ALARM():
         cond_out = subprocess.Popen(cmds, stdout=subprocess.PIPE).stdout.read().strip().decode('ascii') # Needs to be decoded... be careful 
         if "Command not found." in str(cond_out): # Then the Script was invalid
           print("Error: command {} not found".format(self.pList.get("Script Name",u.defaultKey)))
-          cond_out = "BAD"
+          cond_out = u.defaultKey
           
         self.pList["Threshold Value"] = cond_out
       if self.pList.get("Threshold 2 Variable Name",u.defaultKey) != "NULL" and self.pList.get("Script Name",u.defaultKey) != "NULL":
@@ -271,7 +271,7 @@ class ALARM():
         cond_out = subprocess.Popen(cmds, stdout=subprocess.PIPE).stdout.read().strip().decode('ascii') # Needs to be decoded... be careful 
         if "Command not found." in str(cond_out): # Then the Script was invalid
           print("Error: command {} not found".format(self.pList.get("Script Name",u.defaultKey)))
-          cond_out = "BAD"
+          cond_out = u.defaultKey
           
         self.pList["Threshold 2 Value"] = cond_out
       if self.pList.get("Case Variable Name",u.defaultKey) != "NULL" and self.pList.get("Script Name",u.defaultKey) != "NULL":
@@ -403,7 +403,7 @@ class ALARM():
         cond_out = subprocess.Popen(cmds, stdout=subprocess.PIPE).stdout.read().strip().decode('ascii') # Needs to be decoded... be careful 
         if "Invalid" in str(cond_out): # Then the epics variable was invalid
           print("ERROR Invalid epics channel, check with caget again:\t {}".format(self.pList["Threshold Variable Name"]))
-          cond_out = "BAD"
+          cond_out = u.defaultKey
         self.pList["Threshold Value"] = cond_out
       if self.pList.get("Threshold 2 Variable Name",u.defaultKey) != "NULL":
         cmds = ['caget', '-t', '-w 1', self.pList["Threshold 2 Variable Name"]]
@@ -411,7 +411,7 @@ class ALARM():
         cond_out = subprocess.Popen(cmds, stdout=subprocess.PIPE).stdout.read().strip().decode('ascii') # Needs to be decoded... be careful 
         if "Invalid" in str(cond_out): # Then the epics variable was invalid
           print("ERROR Invalid epics channel, check with caget again:\t {}".format(self.pList["Threshold 2 Variable Name"]))
-          cond_out = "BAD"
+          cond_out = u.defaultKey
         self.pList["Threshold 2 Value"] = cond_out
       if self.pList.get("Case Variable Name",u.defaultKey) != "NULL":
         cmds = ['caget', '-t', '-w 1', self.pList["Case Variable Name"]]
@@ -462,11 +462,11 @@ class ALARM():
     #print("Updating: pList = {}".format(self.pList))
     val = self.pList.get("Value",u.defaultKey)
     threshold = self.pList.get("Threshold Variable Name",u.defaultKey)
-    thresholdValue = self.pList.get("Threshold Value","BAD")
+    thresholdValue = self.pList.get("Threshold Value",u.defaultKey)
     thresholdLow = self.pList.get("Threshold Low",u.defaultKey)
     thresholdHigh = self.pList.get("Threshold High",u.defaultKey)
     threshold2 = self.pList.get("Threshold 2 Variable Name",u.defaultKey)
-    threshold2Value = self.pList.get("Threshold 2 Value","BAD")
+    threshold2Value = self.pList.get("Threshold 2 Value",u.defaultKey)
     threshold2Low = self.pList.get("Threshold 2 Low",u.defaultKey)
     threshold2High = self.pList.get("Threshold 2 High",u.defaultKey)
     case = self.pList.get("Case Variable Name",u.defaultKey)
@@ -655,10 +655,10 @@ class ALARM():
       else:
         self.pList["Alarm Status"] = "OK"
       # If the thresholds conditions are NOT met then erase prior alarm status, else let that Alert status propagate forward
-      if threshold != u.defaultKey and thresholdValue != "BAD" and ((thresholdLow != u.defaultKey and thresholdValue < thresholdLow) or (thresholdHigh != u.defaultKey and thresholdValue > thresholdHigh)):
+      if threshold != u.defaultKey and thresholdValue != u.defaultKey and ((thresholdLow != u.defaultKey and thresholdValue < thresholdLow) or (thresholdHigh != u.defaultKey and thresholdValue > thresholdHigh)):
         self.pList["Alarm Status"] = "OK"
         #print("Alarm {} OK, checked against {} = {}. Is < {} threshold, therefore alarm is OK".format(val,threshold,thresholdValue,thresholdLow))
-      if threshold2 != u.defaultKey and threshold2Value != "BAD" and ((threshold2Low != u.defaultKey and threshold2Value < threshold2Low) or (threshold2High != u.defaultKey and threshold2Value > threshold2High)):
+      if threshold2 != u.defaultKey and threshold2Value != u.defaultKey and ((threshold2Low != u.defaultKey and threshold2Value < threshold2Low) or (threshold2High != u.defaultKey and threshold2Value > threshold2High)):
         self.pList["Alarm Status"] = "OK"
         #print("Alarm {} OK, checked against {} = {}. Is < {} threshold2, therefore alarm is OK".format(val,threshold2,threshold2Value,threshold2Low))
       if tripCounter != "NULL" and tripLimit != "NULL" and tripCounter < tripLimit and self.pList.get("Alarm Status",u.defaultKey) != "OK":
