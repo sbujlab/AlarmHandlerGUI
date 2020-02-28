@@ -24,7 +24,7 @@ import utils as u
 import bclient as bclient
 import rcdb as rcdb
 from distutils.util import strtobool
-from threading import Thread
+from threading import Thread, Lock
 
 
 class AlarmHandler:

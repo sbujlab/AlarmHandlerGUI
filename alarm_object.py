@@ -14,7 +14,7 @@ import bclient as bclient
 import os
 import time
 from decimal import Decimal
-from threading import Thread
+from threading import Thread, Lock
 
 # EPICS
 import logging
@@ -46,6 +46,43 @@ class ALARM_LOOP_MONITOR():
           print("\n\nAlarm Handler Health Check passed: 60 second loop's Notify Counter # = {}, notify loop's counter # = {}, should not be the same\n\n".format(self.nLoops,alarmHandlerGUI.alarmLoop.userNotifyLoop.nLoops))
           self.nLoops = alarmHandlerGUI.alarmLoop.userNotifyLoop.nLoops
       alarmHandlerGUI.win.after(30000*alarmHandlerGUI.OL.cooldownReduction,self.alarm_loop_monitor,alarmHandlerGUI)
+
+class ALARM_LOOP_GUI():
+  def __init__(self,alarmHandlerGUI):
+    pass
+
+  def GUI_loop(self,alarmHandlerGUI):
+    if (alarmHandlerGUI.alarmLoop.globalLoopStatus=="Looping"):
+      print("Waited 5 seconds, refreshing GUI")
+      u.update_objectList(alarmHandlerGUI.OL,alarmHandlerGUI.fileArray,alarmHandlerGUI.alarmLoop.alarmList)
+      u.write_textfile(alarmHandlerGUI.OL,alarmHandlerGUI.fileArray) #FIXME Do this here?
+      if alarmHandlerGUI.tabs.get("Alarm Handler",u.defaultKey) != u.defaultKey:
+        alarmHandlerGUI.tabs["Alarm Handler"].refresh_screen(alarmHandlerGUI.OL,alarmHandlerGUI.fileArray,alarmHandlerGUI.alarmLoop,alarmHandlerGUI.HL)
+      if alarmHandlerGUI.tabs.get("Grid Alarm Handler",u.defaultKey) != u.defaultKey:
+        alarmHandlerGUI.tabs["Grid Alarm Handler"].refresh_screen(alarmHandlerGUI.OL,alarmHandlerGUI.fileArray,alarmHandlerGUI.alarmLoop,alarmHandlerGUI.HL)
+      if alarmHandlerGUI.tabs.get("Expert Alarm Handler",u.defaultKey) != u.defaultKey:
+        alarmHandlerGUI.tabs["Expert Alarm Handler"].refresh_screen(alarmHandlerGUI.OL,alarmHandlerGUI.fileArray,alarmHandlerGUI.alarmLoop,alarmHandlerGUI.HL)
+      if alarmHandlerGUI.tabs.get("Active Alarm Handler",u.defaultKey) != u.defaultKey:
+        alarmHandlerGUI.tabs["Active Alarm Handler"].refresh_screen(alarmHandlerGUI.OL,alarmHandlerGUI.fileArray,alarmHandlerGUI.alarmLoop,alarmHandlerGUI.HL)
+      if alarmHandlerGUI.tabs.get("Alarm History",u.defaultKey) != u.defaultKey:
+        alarmHandlerGUI.tabs["Alarm History"].refresh_screen(alarmHandlerGUI.OL,alarmHandlerGUI.fileArray,alarmHandlerGUI.alarmLoop,alarmHandlerGUI.HL)
+      if alarmHandlerGUI.tabs.get("Settings",u.defaultKey) != u.defaultKey:
+        alarmHandlerGUI.tabs["Settings"].refresh_screen(alarmHandlerGUI)
+      alarmHandlerGUI.masterAlarmButton.destroy()
+      if alarmHandlerGUI.alarmLoop.globalAlarmStatus == "OK":
+        alarmHandlerGUI.masterAlarmImage = tk.PhotoImage(file='ok.ppm').subsample(2)
+        alarmHandlerGUI.masterAlarmButton = tk.Label(alarmHandlerGUI.win, image=alarmHandlerGUI.masterAlarmImage, cursor="hand2", bg=u.lightgrey_color)
+        alarmHandlerGUI.masterAlarmButton.image = tk.PhotoImage(file='ok.ppm').subsample(2)
+      if alarmHandlerGUI.alarmLoop.globalAlarmStatus != "OK":
+        alarmHandlerGUI.masterAlarmImage = tk.PhotoImage(file='alarm.ppm').subsample(2)
+        alarmHandlerGUI.masterAlarmButton = tk.Label(alarmHandlerGUI.win, image=alarmHandlerGUI.masterAlarmImage, cursor="hand2", bg=u.lightgrey_color)
+        alarmHandlerGUI.masterAlarmButton.image = tk.PhotoImage(file='alarm.ppm').subsample(2)
+      alarmHandlerGUI.masterAlarmButton.grid(rowspan=3, row=1, column=0, padx=5, pady=10, sticky='NESW')
+      alarmHandlerGUI.masterAlarmButton.bind("<Button-1>", alarmHandlerGUI.update_show_alarms)
+      alarmHandlerGUI.win.after(5000,self.GUI_loop, alarmHandlerGUI) # Recursion loop here - splits off a new instance of this function and finishes the one currently running (be careful)
+    if (alarmHandlerGUI.alarmLoop.globalLoopStatus=="Paused"):
+      alarmHandlerGUI.win.after(5000,self.GUI_loop, alarmHandlerGUI) # Recursion loop here - splits off a new instance of this function and finishes the one currently running (be careful)
+      print("In sleep mode: waited 5 seconds to refresh GUI again")
 
 class ALARM_LOOP():
   def __init__(self,alarmHandlerGUI):
@@ -100,10 +137,10 @@ class ALARM_LOOP():
     else:
       print("No extra alarm files found")
 
-  def doAlarmChecking(self):
+  def doAlarmChecking(self,alarmHandlerGUI):
     for i in range (0,len(self.alarmList)):
       Thread(target=self.alarmList[i].alarm_analysis).start()
-      print(" -- Alarm done: {}, {} = {}".format(self.alarmList[i].name,self.alarmList[i].value,self.alarmList[i].pList["Value"]))
+      print(" -- Alarm {}: {}, {} = {}".format(self.alarmList[i].pList["Alarm Status"],self.alarmList[i].name,self.alarmList[i].value,self.alarmList[i].pList["Value"]))
       Thread(target=self.alarmList[i].alarm_evaluate).start()
       # Check if the alarm is alarming and has not been "OK"ed by the user acknowledge
       #print("Checking alarm {} alarm status = {}, silence status = {}, and user acknowledge = {}".format(i,self.alarmList[i].alarmSelfStatus,self.alarmList[i].userSilenceSelfStatus,self.ok_notify_check(self.alarmList[i].userNotifySelfStatus)))
@@ -119,15 +156,15 @@ class ALARM_LOOP():
       print("Waited 10 seconds, analyzing alarms")
       Thread(self.doExternal(alarmHandlerGUI)).start()
       localStat = "OK"
-      Thread(target=self.doAlarmChecking).start()
+      self.doAlarmChecking(alarmHandlerGUI)
       if localStat == "OK":
         self.globalAlarmStatus = "OK"
       else:
         print("Global Alarm Alarmed")
         #print("After: Parameter list value for \"Value\" updated to be {}".format(self.alarmList[i].pList.get("Value",u.defaultKey)))
       u.update_objectList(alarmHandlerGUI.OL,alarmHandlerGUI.fileArray,self.alarmList)
-      u.write_textfile(alarmHandlerGUI.OL,alarmHandlerGUI.fileArray) #FIXME Do this here?
       u.write_historyFile(alarmHandlerGUI.HL)
+      #u.write_textfile(alarmHandlerGUI.OL,alarmHandlerGUI.fileArray) #FIXME Do this here?
       #if alarmHandlerGUI.tabs.get("Alarm Handler",u.defaultKey) != u.defaultKey:
       #  alarmHandlerGUI.tabs["Alarm Handler"].refresh_screen(alarmHandlerGUI.OL,alarmHandlerGUI.fileArray,alarmHandlerGUI.alarmLoop,alarmHandlerGUI.HL)
       #if alarmHandlerGUI.tabs.get("Grid Alarm Handler",u.defaultKey) != u.defaultKey:
@@ -157,43 +194,6 @@ class ALARM_LOOP():
     if (self.globalLoopStatus=="Paused"):
       alarmHandlerGUI.win.after(10000,self.alarm_loop, alarmHandlerGUI) # Recursion loop here - splits off a new instance of this function and finishes the one currently running (be careful)
       print("In sleep mode: waited 10 seconds to try to check alarm status again")
-
-class ALARM_LOOP_GUI():
-  def __init__(self,alarmHandlerGUI):
-    pass
-    
-  def GUI_loop(self,alarmHandlerGUI):
-    if (alarmHandlerGUI.alarmLoop.globalLoopStatus=="Looping"):
-      print("Waited 5 seconds, refreshing GUI")
-      if alarmHandlerGUI.tabs.get("Alarm Handler",u.defaultKey) != u.defaultKey:
-        alarmHandlerGUI.tabs["Alarm Handler"].refresh_screen(alarmHandlerGUI.OL,alarmHandlerGUI.fileArray,alarmHandlerGUI.alarmLoop,alarmHandlerGUI.HL)
-      if alarmHandlerGUI.tabs.get("Grid Alarm Handler",u.defaultKey) != u.defaultKey:
-        alarmHandlerGUI.tabs["Grid Alarm Handler"].refresh_screen(alarmHandlerGUI.OL,alarmHandlerGUI.fileArray,alarmHandlerGUI.alarmLoop,alarmHandlerGUI.HL)
-      if alarmHandlerGUI.tabs.get("Expert Alarm Handler",u.defaultKey) != u.defaultKey:
-        alarmHandlerGUI.tabs["Expert Alarm Handler"].refresh_screen(alarmHandlerGUI.OL,alarmHandlerGUI.fileArray,alarmHandlerGUI.alarmLoop,alarmHandlerGUI.HL)
-      if alarmHandlerGUI.tabs.get("Active Alarm Handler",u.defaultKey) != u.defaultKey:
-        alarmHandlerGUI.tabs["Active Alarm Handler"].refresh_screen(alarmHandlerGUI.OL,alarmHandlerGUI.fileArray,alarmHandlerGUI.alarmLoop,alarmHandlerGUI.HL)
-      if alarmHandlerGUI.tabs.get("Alarm History",u.defaultKey) != u.defaultKey:
-        alarmHandlerGUI.tabs["Alarm History"].refresh_screen(alarmHandlerGUI.OL,alarmHandlerGUI.fileArray,alarmHandlerGUI.alarmLoop,alarmHandlerGUI.HL)
-      if alarmHandlerGUI.tabs.get("Settings",u.defaultKey) != u.defaultKey:
-        alarmHandlerGUI.tabs["Settings"].refresh_screen(alarmHandlerGUI)
-      alarmHandlerGUI.masterAlarmButton.destroy()
-      if alarmHandlerGUI.alarmLoop.globalAlarmStatus == "OK":
-        alarmHandlerGUI.masterAlarmImage = tk.PhotoImage(file='ok.ppm').subsample(2)
-        alarmHandlerGUI.masterAlarmButton = tk.Label(alarmHandlerGUI.win, image=alarmHandlerGUI.masterAlarmImage, cursor="hand2", bg=u.lightgrey_color)
-        alarmHandlerGUI.masterAlarmButton.image = tk.PhotoImage(file='ok.ppm').subsample(2)
-      if alarmHandlerGUI.alarmLoop.globalAlarmStatus != "OK":
-        #alarmHandlerGUI.alarmClient.sendPacket("2")
-        #self.userNotifyLoop.update_user_notify_status(alarmHandlerGUI.OL)
-        alarmHandlerGUI.masterAlarmImage = tk.PhotoImage(file='alarm.ppm').subsample(2)
-        alarmHandlerGUI.masterAlarmButton = tk.Label(alarmHandlerGUI.win, image=alarmHandlerGUI.masterAlarmImage, cursor="hand2", bg=u.lightgrey_color)
-        alarmHandlerGUI.masterAlarmButton.image = tk.PhotoImage(file='alarm.ppm').subsample(2)
-      alarmHandlerGUI.masterAlarmButton.grid(rowspan=3, row=1, column=0, padx=5, pady=10, sticky='NESW')
-      alarmHandlerGUI.masterAlarmButton.bind("<Button-1>", alarmHandlerGUI.update_show_alarms)
-      alarmHandlerGUI.win.after(5000,self.GUI_loop, alarmHandlerGUI) # Recursion loop here - splits off a new instance of this function and finishes the one currently running (be careful)
-    if (alarmHandlerGUI.alarmLoop.globalLoopStatus=="Paused"):
-      alarmHandlerGUI.win.after(5000,self.GUI_loop, alarmHandlerGUI) # Recursion loop here - splits off a new instance of this function and finishes the one currently running (be careful)
-      print("In sleep mode: waited 5 seconds to redraw again")
 
 class USER_NOTIFY():
   def __init__(self,alarmLoop):
@@ -762,6 +762,7 @@ class ALARM():
 
 class FILE_ARRAY():
   def __init__(self,filen,delimiter):
+    self.mutex = Lock()
     self.filename = filen
     self.delim = delimiter
     self.conf = {}
@@ -769,6 +770,7 @@ class FILE_ARRAY():
 
 class HISTORY_LIST():
   def __init__(self,filen,delimiter,pdelimiter,time):
+    self.mutex = Lock()
     self.currentHist = -1
     self.displayPList = 0
     self.timeWait = time
