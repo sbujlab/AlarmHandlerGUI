@@ -1,3 +1,3 @@
 #!/bin/tcsh
-cd /adaqfs/home/apar/alarms/AlarmHandlerGUI
+cd /adaqfs/home/apar/alarms/TestAlarmHandlerGUI
 python3 AlarmHandler.py $argv

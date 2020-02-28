@@ -14,6 +14,7 @@ import bclient as bclient
 import os
 import time
 from decimal import Decimal
+from threading import Thread, Lock
 
 # EPICS
 import logging
@@ -38,13 +39,50 @@ class ALARM_LOOP_MONITOR():
       if alarmHandlerGUI.alarmLoop.userNotifyLoop.nLoops <= self.nLoops and self.nLoops>10 and self.Monitor:
         print("\n\nALERT ALERT: Alarm handler notification loop has been stale for 1 minute\n\nRebooting alarm loops - Probably you should just reboot the alarm handler entirely now\n\n")
         self.nLoops = alarmHandlerGUI.alarmLoop.userNotifyLoop.nLoops
-        alarmHandlerGUI.win.after(1000*alarmHandlerGUI.OL.cooldownReduction,alarmHandlerGUI.alarmLoop.userNotifyLoop.user_notify_loop, alarmHandlerGUI.alarmLoop,alarmHandlerGUI.OL,alarmHandlerGUI.fileArray,alarmHandlerGUI) 
+        alarmHandlerGUI.win.after(1000*alarmHandlerGUI.OL.cooldownReduction,alarmHandlerGUI.alarmLoop.userNotifyLoop.user_notify_loop, alarmHandlerGUI.alarmLoop,alarmHandlerGUI.OL,alarmHandlerGUI.fileArray,alarmHandlerGUI)
         alarmHandlerGUI.win.after(10000,alarmHandlerGUI.alarmLoop.alarm_loop,alarmHandlerGUI) # Recursion loop here - splits off a new instance of this function and finishes the one currently running (be careful)
       else: 
         if self.Monitor:
           print("\n\nAlarm Handler Health Check passed: 60 second loop's Notify Counter # = {}, notify loop's counter # = {}, should not be the same\n\n".format(self.nLoops,alarmHandlerGUI.alarmLoop.userNotifyLoop.nLoops))
           self.nLoops = alarmHandlerGUI.alarmLoop.userNotifyLoop.nLoops
-      alarmHandlerGUI.win.after(30000*alarmHandlerGUI.OL.cooldownReduction,self.alarm_loop_monitor,alarmHandlerGUI) 
+      alarmHandlerGUI.win.after(30000*alarmHandlerGUI.OL.cooldownReduction,self.alarm_loop_monitor,alarmHandlerGUI)
+
+class ALARM_LOOP_GUI():
+  def __init__(self,alarmHandlerGUI):
+    pass
+
+  def GUI_loop(self,alarmHandlerGUI):
+    if (alarmHandlerGUI.alarmLoop.globalLoopStatus=="Looping"):
+      print("Waited 5 seconds, refreshing GUI")
+      u.update_objectList(alarmHandlerGUI.OL,alarmHandlerGUI.fileArray,alarmHandlerGUI.alarmLoop.alarmList)
+      u.write_textfile(alarmHandlerGUI.OL,alarmHandlerGUI.fileArray) #FIXME Do this here?
+      if alarmHandlerGUI.tabs.get("Alarm Handler",u.defaultKey) != u.defaultKey:
+        alarmHandlerGUI.tabs["Alarm Handler"].refresh_screen(alarmHandlerGUI.OL,alarmHandlerGUI.fileArray,alarmHandlerGUI.alarmLoop,alarmHandlerGUI.HL)
+      if alarmHandlerGUI.tabs.get("Grid Alarm Handler",u.defaultKey) != u.defaultKey:
+        alarmHandlerGUI.tabs["Grid Alarm Handler"].refresh_screen(alarmHandlerGUI.OL,alarmHandlerGUI.fileArray,alarmHandlerGUI.alarmLoop,alarmHandlerGUI.HL)
+      if alarmHandlerGUI.tabs.get("Expert Alarm Handler",u.defaultKey) != u.defaultKey:
+        alarmHandlerGUI.tabs["Expert Alarm Handler"].refresh_screen(alarmHandlerGUI.OL,alarmHandlerGUI.fileArray,alarmHandlerGUI.alarmLoop,alarmHandlerGUI.HL)
+      if alarmHandlerGUI.tabs.get("Active Alarm Handler",u.defaultKey) != u.defaultKey:
+        alarmHandlerGUI.tabs["Active Alarm Handler"].refresh_screen(alarmHandlerGUI.OL,alarmHandlerGUI.fileArray,alarmHandlerGUI.alarmLoop,alarmHandlerGUI.HL)
+      if alarmHandlerGUI.tabs.get("Alarm History",u.defaultKey) != u.defaultKey:
+        alarmHandlerGUI.tabs["Alarm History"].refresh_screen(alarmHandlerGUI.OL,alarmHandlerGUI.fileArray,alarmHandlerGUI.alarmLoop,alarmHandlerGUI.HL)
+      if alarmHandlerGUI.tabs.get("Settings",u.defaultKey) != u.defaultKey:
+        alarmHandlerGUI.tabs["Settings"].refresh_screen(alarmHandlerGUI)
+      alarmHandlerGUI.masterAlarmButton.destroy()
+      if alarmHandlerGUI.alarmLoop.globalAlarmStatus == "OK":
+        alarmHandlerGUI.masterAlarmImage = tk.PhotoImage(file='ok.ppm').subsample(2)
+        alarmHandlerGUI.masterAlarmButton = tk.Label(alarmHandlerGUI.win, image=alarmHandlerGUI.masterAlarmImage, cursor="hand2", bg=u.lightgrey_color)
+        alarmHandlerGUI.masterAlarmButton.image = tk.PhotoImage(file='ok.ppm').subsample(2)
+      if alarmHandlerGUI.alarmLoop.globalAlarmStatus != "OK":
+        alarmHandlerGUI.masterAlarmImage = tk.PhotoImage(file='alarm.ppm').subsample(2)
+        alarmHandlerGUI.masterAlarmButton = tk.Label(alarmHandlerGUI.win, image=alarmHandlerGUI.masterAlarmImage, cursor="hand2", bg=u.lightgrey_color)
+        alarmHandlerGUI.masterAlarmButton.image = tk.PhotoImage(file='alarm.ppm').subsample(2)
+      alarmHandlerGUI.masterAlarmButton.grid(rowspan=3, row=1, column=0, padx=5, pady=10, sticky='NESW')
+      alarmHandlerGUI.masterAlarmButton.bind("<Button-1>", alarmHandlerGUI.update_show_alarms)
+      alarmHandlerGUI.win.after(5000,self.GUI_loop, alarmHandlerGUI) # Recursion loop here - splits off a new instance of this function and finishes the one currently running (be careful)
+    if (alarmHandlerGUI.alarmLoop.globalLoopStatus=="Paused"):
+      alarmHandlerGUI.win.after(5000,self.GUI_loop, alarmHandlerGUI) # Recursion loop here - splits off a new instance of this function and finishes the one currently running (be careful)
+      print("In sleep mode: waited 5 seconds to refresh GUI again")
 
 class ALARM_LOOP():
   def __init__(self,alarmHandlerGUI):
@@ -89,62 +127,69 @@ class ALARM_LOOP():
       self.alarmList.append(OL.objectList[2][i].alarm)
       #print("Updated alarm lists == {}".format(self.alarmList[i].pList))
 
+  def doExternal(self,alarmHandlerGUI):
+    if os.path.exists(alarmHandlerGUI.externalFilename) and self.checkExternalStatus == True and (time.time() - os.path.getmtime(alarmHandlerGUI.externalFilename)) < alarmHandlerGUI.externalParameterFileStaleTime:
+      #print("Adding External alarms from {}".format(alarmHandlerGUI.externalFileArray.filename))
+      u.update_extra_filearray(alarmHandlerGUI.fileArray,alarmHandlerGUI.externalFileArray)
+      alarmHandlerGUI.OL.objectList = u.create_objects(alarmHandlerGUI.fileArray,alarmHandlerGUI.OL.cooldownLength) # FIXME Necessary?
+      self.reset_alarmList(alarmHandlerGUI.OL)
+      u.write_textfile(alarmHandlerGUI.OL,alarmHandlerGUI.fileArray) #FIXME Do this here?
+    else:
+      print("No extra alarm files found")
+
+  def doAlarmChecking(self,alarmHandlerGUI):
+    for i in range (0,len(self.alarmList)):
+      Thread(target=self.alarmList[i].alarm_analysis).start()
+      print(" -- Alarm {}: {}, {} = {}".format(self.alarmList[i].pList["Alarm Status"],self.alarmList[i].name,self.alarmList[i].value,self.alarmList[i].pList["Value"]))
+      Thread(target=self.alarmList[i].alarm_evaluate).start()
+      # Check if the alarm is alarming and has not been "OK"ed by the user acknowledge
+      #print("Checking alarm {} alarm status = {}, silence status = {}, and user acknowledge = {}".format(i,self.alarmList[i].alarmSelfStatus,self.alarmList[i].userSilenceSelfStatus,self.ok_notify_check(self.alarmList[i].userNotifySelfStatus)))
+      # If the userNotifyStatus is NULL (i.e. not set) then the alarm handler will just read it and move on with its life
+      if self.globalUserAlarmSilence == "Alert" and self.ok_notify_check(self.alarmList[i].userNotifySelfStatus) != "OK" and self.alarmList[i].userSilenceSelfStatus == "Alert":
+        # Just let the method I wrote take care of determining global alarm status
+        self.globalAlarmStatus = self.alarmList[i].userNotifySelfStatus # Update global alarm status
+        u.append_historyList(alarmHandlerGUI.HL,alarmHandlerGUI.OL,i) # Update Alarm History
+        localStat = self.alarmList[i].userNotifySelfStatus
+
   def alarm_loop(self,alarmHandlerGUI):
     if (self.globalLoopStatus=="Looping"):
       print("Waited 10 seconds, analyzing alarms")
-      if os.path.exists(alarmHandlerGUI.externalFilename) and self.checkExternalStatus == True and (time.time() - os.path.getmtime(alarmHandlerGUI.externalFilename)) < alarmHandlerGUI.externalParameterFileStaleTime:
-        #print("Adding External alarms from {}".format(alarmHandlerGUI.externalFileArray.filename))
-        u.update_extra_filearray(alarmHandlerGUI.fileArray,alarmHandlerGUI.externalFileArray)
-        alarmHandlerGUI.OL.objectList = u.create_objects(alarmHandlerGUI.fileArray,alarmHandlerGUI.OL.cooldownLength) # FIXME Necessary?
-        self.reset_alarmList(alarmHandlerGUI.OL)
-        u.write_textfile(alarmHandlerGUI.OL,alarmHandlerGUI.fileArray) #FIXME Do this here?
-      else:
-        print("No extra alarm files found")
+      Thread(self.doExternal(alarmHandlerGUI)).start()
       localStat = "OK"
-      for i in range (0,len(self.alarmList)):
-        self.alarmList[i].alarm_analysis()
-        self.alarmList[i].alarm_evaluate()
-        # Check if the alarm is alarming and has not been "OK"ed by the user acknowledge
-        #print("Checking alarm {} alarm status = {}, silence status = {}, and user acknowledge = {}".format(i,self.alarmList[i].alarmSelfStatus,self.alarmList[i].userSilenceSelfStatus,self.ok_notify_check(self.alarmList[i].userNotifySelfStatus)))
-        # If the userNotifyStatus is NULL (i.e. not set) then the alarm handler will just read it and move on with its life
-        if self.globalUserAlarmSilence == "Alert" and self.ok_notify_check(self.alarmList[i].userNotifySelfStatus) != "OK" and self.alarmList[i].userSilenceSelfStatus == "Alert":
-          # Just let the method I wrote take care of determining global alarm status
-          self.globalAlarmStatus = self.alarmList[i].userNotifySelfStatus # Update global alarm status
-          u.append_historyList(alarmHandlerGUI.HL,alarmHandlerGUI.OL,i) # Update Alarm History
-          localStat = self.alarmList[i].userNotifySelfStatus
+      self.doAlarmChecking(alarmHandlerGUI)
       if localStat == "OK":
         self.globalAlarmStatus = "OK"
       else:
         print("Global Alarm Alarmed")
         #print("After: Parameter list value for \"Value\" updated to be {}".format(self.alarmList[i].pList.get("Value",u.defaultKey)))
       u.update_objectList(alarmHandlerGUI.OL,alarmHandlerGUI.fileArray,self.alarmList)
-      u.write_textfile(alarmHandlerGUI.OL,alarmHandlerGUI.fileArray) #FIXME Do this here?
       u.write_historyFile(alarmHandlerGUI.HL)
-      if alarmHandlerGUI.tabs.get("Alarm Handler",u.defaultKey) != u.defaultKey:
-        alarmHandlerGUI.tabs["Alarm Handler"].refresh_screen(alarmHandlerGUI.OL,alarmHandlerGUI.fileArray,alarmHandlerGUI.alarmLoop,alarmHandlerGUI.HL)
-      if alarmHandlerGUI.tabs.get("Grid Alarm Handler",u.defaultKey) != u.defaultKey:
-        alarmHandlerGUI.tabs["Grid Alarm Handler"].refresh_screen(alarmHandlerGUI.OL,alarmHandlerGUI.fileArray,alarmHandlerGUI.alarmLoop,alarmHandlerGUI.HL)
-      if alarmHandlerGUI.tabs.get("Expert Alarm Handler",u.defaultKey) != u.defaultKey:
-        alarmHandlerGUI.tabs["Expert Alarm Handler"].refresh_screen(alarmHandlerGUI.OL,alarmHandlerGUI.fileArray,alarmHandlerGUI.alarmLoop,alarmHandlerGUI.HL)
-      if alarmHandlerGUI.tabs.get("Active Alarm Handler",u.defaultKey) != u.defaultKey:
-        alarmHandlerGUI.tabs["Active Alarm Handler"].refresh_screen(alarmHandlerGUI.OL,alarmHandlerGUI.fileArray,alarmHandlerGUI.alarmLoop,alarmHandlerGUI.HL)
-      if alarmHandlerGUI.tabs.get("Alarm History",u.defaultKey) != u.defaultKey:
-        alarmHandlerGUI.tabs["Alarm History"].refresh_screen(alarmHandlerGUI.OL,alarmHandlerGUI.fileArray,alarmHandlerGUI.alarmLoop,alarmHandlerGUI.HL)
-      if alarmHandlerGUI.tabs.get("Settings",u.defaultKey) != u.defaultKey:
-        alarmHandlerGUI.tabs["Settings"].refresh_screen(alarmHandlerGUI)
-      alarmHandlerGUI.masterAlarmButton.destroy()
-      if alarmHandlerGUI.alarmLoop.globalAlarmStatus == "OK":
-        alarmHandlerGUI.masterAlarmImage = tk.PhotoImage(file='ok.ppm').subsample(2)
-        alarmHandlerGUI.masterAlarmButton = tk.Label(alarmHandlerGUI.win, image=alarmHandlerGUI.masterAlarmImage, cursor="hand2", bg=u.lightgrey_color)
-        alarmHandlerGUI.masterAlarmButton.image = tk.PhotoImage(file='ok.ppm').subsample(2)
-      if alarmHandlerGUI.alarmLoop.globalAlarmStatus != "OK":
-        #alarmHandlerGUI.alarmClient.sendPacket("2")
-        #self.userNotifyLoop.update_user_notify_status(alarmHandlerGUI.OL)
-        alarmHandlerGUI.masterAlarmImage = tk.PhotoImage(file='alarm.ppm').subsample(2)
-        alarmHandlerGUI.masterAlarmButton = tk.Label(alarmHandlerGUI.win, image=alarmHandlerGUI.masterAlarmImage, cursor="hand2", bg=u.lightgrey_color)
-        alarmHandlerGUI.masterAlarmButton.image = tk.PhotoImage(file='alarm.ppm').subsample(2)
-      alarmHandlerGUI.masterAlarmButton.grid(rowspan=3, row=1, column=0, padx=5, pady=10, sticky='NESW')
-      alarmHandlerGUI.masterAlarmButton.bind("<Button-1>", alarmHandlerGUI.update_show_alarms)
+      #u.write_textfile(alarmHandlerGUI.OL,alarmHandlerGUI.fileArray) #FIXME Do this here?
+      #if alarmHandlerGUI.tabs.get("Alarm Handler",u.defaultKey) != u.defaultKey:
+      #  alarmHandlerGUI.tabs["Alarm Handler"].refresh_screen(alarmHandlerGUI.OL,alarmHandlerGUI.fileArray,alarmHandlerGUI.alarmLoop,alarmHandlerGUI.HL)
+      #if alarmHandlerGUI.tabs.get("Grid Alarm Handler",u.defaultKey) != u.defaultKey:
+      #  alarmHandlerGUI.tabs["Grid Alarm Handler"].refresh_screen(alarmHandlerGUI.OL,alarmHandlerGUI.fileArray,alarmHandlerGUI.alarmLoop,alarmHandlerGUI.HL)
+      #if alarmHandlerGUI.tabs.get("Expert Alarm Handler",u.defaultKey) != u.defaultKey:
+      #  alarmHandlerGUI.tabs["Expert Alarm Handler"].refresh_screen(alarmHandlerGUI.OL,alarmHandlerGUI.fileArray,alarmHandlerGUI.alarmLoop,alarmHandlerGUI.HL)
+      #if alarmHandlerGUI.tabs.get("Active Alarm Handler",u.defaultKey) != u.defaultKey:
+      #  alarmHandlerGUI.tabs["Active Alarm Handler"].refresh_screen(alarmHandlerGUI.OL,alarmHandlerGUI.fileArray,alarmHandlerGUI.alarmLoop,alarmHandlerGUI.HL)
+      #if alarmHandlerGUI.tabs.get("Alarm History",u.defaultKey) != u.defaultKey:
+      #  alarmHandlerGUI.tabs["Alarm History"].refresh_screen(alarmHandlerGUI.OL,alarmHandlerGUI.fileArray,alarmHandlerGUI.alarmLoop,alarmHandlerGUI.HL)
+      #if alarmHandlerGUI.tabs.get("Settings",u.defaultKey) != u.defaultKey:
+      #  alarmHandlerGUI.tabs["Settings"].refresh_screen(alarmHandlerGUI)
+      #alarmHandlerGUI.masterAlarmButton.destroy()
+      #if alarmHandlerGUI.alarmLoop.globalAlarmStatus == "OK":
+      #  alarmHandlerGUI.masterAlarmImage = tk.PhotoImage(file='ok.ppm').subsample(2)
+      #  alarmHandlerGUI.masterAlarmButton = tk.Label(alarmHandlerGUI.win, image=alarmHandlerGUI.masterAlarmImage, cursor="hand2", bg=u.lightgrey_color)
+      #  alarmHandlerGUI.masterAlarmButton.image = tk.PhotoImage(file='ok.ppm').subsample(2)
+      #if alarmHandlerGUI.alarmLoop.globalAlarmStatus != "OK":
+      #  #alarmHandlerGUI.alarmClient.sendPacket("2")
+      #  #self.userNotifyLoop.update_user_notify_status(alarmHandlerGUI.OL)
+      #  alarmHandlerGUI.masterAlarmImage = tk.PhotoImage(file='alarm.ppm').subsample(2)
+      #  alarmHandlerGUI.masterAlarmButton = tk.Label(alarmHandlerGUI.win, image=alarmHandlerGUI.masterAlarmImage, cursor="hand2", bg=u.lightgrey_color)
+      #  alarmHandlerGUI.masterAlarmButton.image = tk.PhotoImage(file='alarm.ppm').subsample(2)
+      #alarmHandlerGUI.masterAlarmButton.grid(rowspan=3, row=1, column=0, padx=5, pady=10, sticky='NESW')
+      #alarmHandlerGUI.masterAlarmButton.bind("<Button-1>", alarmHandlerGUI.update_show_alarms)
       alarmHandlerGUI.win.after(10000,self.alarm_loop, alarmHandlerGUI) # Recursion loop here - splits off a new instance of this function and finishes the one currently running (be careful)
     if (self.globalLoopStatus=="Paused"):
       alarmHandlerGUI.win.after(10000,self.alarm_loop, alarmHandlerGUI) # Recursion loop here - splits off a new instance of this function and finishes the one currently running (be careful)
@@ -229,6 +274,8 @@ class ALARM():
     #print("Initializing: pList = {}".format(self.pList))
     self.alarmAnalysisReturn = None # For camguin outputs to stdout to catch
     self.alarmErrorReturn = None
+    self.name = myAO.name
+    self.value = myAO.value
     self.runNumber = 0
     self.alarmSelfStatus = myAO.alarmStatus
     self.userNotifySelfStatus = myAO.userNotifyStatus
@@ -715,6 +762,7 @@ class ALARM():
 
 class FILE_ARRAY():
   def __init__(self,filen,delimiter):
+    self.mutex = Lock()
     self.filename = filen
     self.delim = delimiter
     self.conf = {}
@@ -722,6 +770,7 @@ class FILE_ARRAY():
 
 class HISTORY_LIST():
   def __init__(self,filen,delimiter,pdelimiter,time):
+    self.mutex = Lock()
     self.currentHist = -1
     self.displayPList = 0
     self.timeWait = time
