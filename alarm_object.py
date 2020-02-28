@@ -53,7 +53,7 @@ class ALARM_LOOP_GUI():
 
   def GUI_loop(self,alarmHandlerGUI):
     if (alarmHandlerGUI.alarmLoop.globalLoopStatus=="Looping"):
-      print("Waited 5 seconds, refreshing GUI")
+      print("Waited 10 seconds, refreshing GUI")
       u.update_objectList(alarmHandlerGUI.OL,alarmHandlerGUI.fileArray,alarmHandlerGUI.alarmLoop.alarmList)
       u.write_textfile(alarmHandlerGUI.OL,alarmHandlerGUI.fileArray) #FIXME Do this here?
       if alarmHandlerGUI.tabs.get("Alarm Handler",u.defaultKey) != u.defaultKey:
@@ -79,10 +79,10 @@ class ALARM_LOOP_GUI():
         alarmHandlerGUI.masterAlarmButton.image = tk.PhotoImage(file='alarm.ppm').subsample(2)
       alarmHandlerGUI.masterAlarmButton.grid(rowspan=3, row=1, column=0, padx=5, pady=10, sticky='NESW')
       alarmHandlerGUI.masterAlarmButton.bind("<Button-1>", alarmHandlerGUI.update_show_alarms)
-      alarmHandlerGUI.win.after(5000,self.GUI_loop, alarmHandlerGUI) # Recursion loop here - splits off a new instance of this function and finishes the one currently running (be careful)
+      alarmHandlerGUI.win.after(10000,self.GUI_loop, alarmHandlerGUI) # Recursion loop here - splits off a new instance of this function and finishes the one currently running (be careful)
     if (alarmHandlerGUI.alarmLoop.globalLoopStatus=="Paused"):
-      alarmHandlerGUI.win.after(5000,self.GUI_loop, alarmHandlerGUI) # Recursion loop here - splits off a new instance of this function and finishes the one currently running (be careful)
-      print("In sleep mode: waited 5 seconds to refresh GUI again")
+      alarmHandlerGUI.win.after(10000,self.GUI_loop, alarmHandlerGUI) # Recursion loop here - splits off a new instance of this function and finishes the one currently running (be careful)
+      print("In sleep mode: waited 10 seconds to refresh GUI again")
 
 class ALARM_LOOP():
   def __init__(self,alarmHandlerGUI):
@@ -138,9 +138,13 @@ class ALARM_LOOP():
       print("No extra alarm files found")
 
   def doAlarmChecking(self,alarmHandlerGUI):
+    print("\n - Global Alarm Status: ")
+    localAlStat = 0
     for i in range (0,len(self.alarmList)):
       Thread(target=self.alarmList[i].alarm_analysis).start()
-      print(" -- Alarm {}: {}, {} = {}".format(self.alarmList[i].pList["Alarm Status"],self.alarmList[i].name,self.alarmList[i].value,self.alarmList[i].pList["Value"]))
+      if self.alarmList[i].pList["Alarm Status"] != "OK":
+        print(" -- Alarm {}: {}, {} = {}".format(self.alarmList[i].pList["Alarm Status"],self.alarmList[i].name,self.alarmList[i].value,self.alarmList[i].pList["Value"]))
+        localAlStat += 1
       Thread(target=self.alarmList[i].alarm_evaluate).start()
       # Check if the alarm is alarming and has not been "OK"ed by the user acknowledge
       #print("Checking alarm {} alarm status = {}, silence status = {}, and user acknowledge = {}".format(i,self.alarmList[i].alarmSelfStatus,self.alarmList[i].userSilenceSelfStatus,self.ok_notify_check(self.alarmList[i].userNotifySelfStatus)))
@@ -150,6 +154,10 @@ class ALARM_LOOP():
         self.globalAlarmStatus = self.alarmList[i].userNotifySelfStatus # Update global alarm status
         u.append_historyList(alarmHandlerGUI.HL,alarmHandlerGUI.OL,i) # Update Alarm History
         localStat = self.alarmList[i].userNotifySelfStatus
+    if localAlStat == 0:
+      print(' -- '+'\x1b[1;1;32m'+'Alarms all OK '+'\x1b[0m'+'\n')
+    else:
+      print(' -- '+'\x1b[1;1;31m'+'{} alarms triggered '.format(localAlStat)+'\x1b[0m')
 
   def alarm_loop(self,alarmHandlerGUI):
     if (self.globalLoopStatus=="Looping"):
