@@ -15,6 +15,7 @@ from distutils.util import strtobool
 
 green_color = '#3C8373'
 lightgrey_color = '#E0E0E0'
+lightergrey_color = '#E7E7E7'
 grey_color = '#C0C0C0'
 darkgrey_color = '#909090' # Maybe swap this for yellow everywhere?
 red_button_color = '#9E1A1A'

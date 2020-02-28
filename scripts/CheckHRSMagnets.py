@@ -18,30 +18,39 @@ Magnet_readback_tolerances = [0.05,0.025,0.025,0.025,0.025,0.05,0.025,0.1,0.05,0
 
 AllGood = True
 i = 0
+nTrip = 0
 while i < len(Magnet_set_epics):
   #cmds = ['caget', '-t', '-w 1', 'IGL0I00C1068_DAC06']
   cmds = ['caget', '-t', '-w 1', str(Magnet_set_epics[i])]
   cond_out = "NULL"
   cond_out = subprocess.Popen(cmds, stdout=subprocess.PIPE).stdout.read().strip().decode('ascii') # Needs to be decoded... be careful 
   if "Invalid" in cond_out:
-    print("Error, {} not found".format(Magnet_set_epics[i]))
+    #print("Error, {} not found".format(Magnet_set_epics[i]))
+    i = i+1
     continue
   if Magnet_set_points[i]!=float(cond_out):
-    print("ERROR: Magnet set point {} = {} -> Not equal to correct value of {}".format(Magnet_set_epics[i],cond_out,Magnet_set_points[i]))
-
+    nTrip = nTrip+1
+    AllGood = False
+    if nTrip < 2:
+      print("ERROR: Magnet set point {} = {}\n  Not equal to correct value of {}".format(Magnet_set_epics[i],cond_out,Magnet_set_points[i]))
 
   cmds = ['caget', '-t', '-w 1', str(Magnet_readback_epics[i])]
   cond_out = "NULL"
   cond_out = subprocess.Popen(cmds, stdout=subprocess.PIPE).stdout.read().strip().decode('ascii') # Needs to be decoded... be careful 
   if "Invalid" in cond_out:
-    print("Error, {} not found".format(Magnet_readback_epics[i]))
+    #print("Error, {} not found".format(Magnet_readback_epics[i]))
+    i = i+1
     continue
   if 100.0*abs(Magnet_readback_points[i]-float(cond_out))/(Magnet_readback_points[i]) > Magnet_readback_tolerances[i]:
-    print("ERROR: Magnet readback point \n{} = {}\n  This is more than {} % away\n  Correct value is {}\n  It is {} % away".format(Magnet_readback_epics[i],cond_out,Magnet_readback_tolerances[i],Magnet_readback_points[i], 100*(Magnet_readback_points[i]-float(cond_out))/Magnet_readback_points[i]))
+    nTrip = nTrip+1
+    if nTrip < 2:
+      print("ERROR: Magnet readback point \n{} = {}\n  This is more than {} % away\n  Correct value is {}\n  It is {} % away".format(Magnet_readback_epics[i],cond_out,Magnet_readback_tolerances[i],Magnet_readback_points[i], 100*(Magnet_readback_points[i]-float(cond_out))/Magnet_readback_points[i]))
     AllGood = False
   i = i+1
 
 if AllGood is False:
+  if nTrip >= 2:
+    print("MAJOR ERROR: multiple problems\n  Check GUIs and stripcharts")
   print("Please check the magnet set \npoints and readbacks. If a \nDipole is bad then check \ndetector alignment\n")
 else:
   print("OK")

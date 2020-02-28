@@ -24,6 +24,7 @@ import utils as u
 import bclient as bclient
 import rcdb as rcdb
 from distutils.util import strtobool
+from threading import Thread
 
 
 class AlarmHandler:
@@ -32,7 +33,7 @@ class AlarmHandler:
     os.environ["TCL_LIBRARY"] = "/lib64/tcl8.5/"
     self.win = tk.Tk()
     self.win.title("Continuous Aggregate Monitor: Alarm Handler")
-    self.win.configure(background=u.lightgrey_color)
+    self.win.configure(background=u.lightergrey_color)
     self.get_alarm_handler_style()
     self.delim = ','
     self.pdelim = '='
@@ -56,6 +57,7 @@ class AlarmHandler:
     self.masterAlarmButton = tk.Label(self.win, image=self.masterAlarmImage, cursor="hand2", bg=u.lightgrey_color)
     self.alarmClient = bclient.sockClient(self.remoteName)
     self.alarmLoop = alarm_object.ALARM_LOOP(self)
+    self.alarmLoopGUI = alarm_object.ALARM_LOOP_GUI(self)
     self.alarmLoopMonitor = alarm_object.ALARM_LOOP_MONITOR(self)
     self.tabs = self.create_widgets()
   
@@ -131,6 +133,7 @@ class AlarmHandler:
     return tabs
 
 alarm_handler_GUI = AlarmHandler()
-alarm_handler_GUI.alarmLoopMonitor.alarm_loop_monitor(alarm_handler_GUI)
-alarm_handler_GUI.alarmLoop.alarm_loop(alarm_handler_GUI)
-alarm_handler_GUI.win.mainloop()
+Thread(alarm_handler_GUI.alarmLoopMonitor.alarm_loop_monitor(alarm_handler_GUI)).start()
+Thread(alarm_handler_GUI.alarmLoop.alarm_loop(alarm_handler_GUI)).start()
+Thread(alarm_handler_GUI.alarmLoopGUI.GUI_loop(alarm_handler_GUI)).start()
+Thread(alarm_handler_GUI.win.mainloop()).start()
