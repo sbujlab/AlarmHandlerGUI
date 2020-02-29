@@ -79,10 +79,10 @@ class ALARM_LOOP_GUI():
         alarmHandlerGUI.masterAlarmButton.image = tk.PhotoImage(file='alarm.ppm').subsample(2)
       alarmHandlerGUI.masterAlarmButton.grid(rowspan=3, row=1, column=0, padx=5, pady=10, sticky='NESW')
       alarmHandlerGUI.masterAlarmButton.bind("<Button-1>", alarmHandlerGUI.update_show_alarms)
-      alarmHandlerGUI.win.after(10000,self.GUI_loop, alarmHandlerGUI) # Recursion loop here - splits off a new instance of this function and finishes the one currently running (be careful)
+      alarmHandlerGUI.win.after(5000,self.GUI_loop, alarmHandlerGUI) # Recursion loop here - splits off a new instance of this function and finishes the one currently running (be careful)
     if (alarmHandlerGUI.alarmLoop.globalLoopStatus=="Paused"):
-      alarmHandlerGUI.win.after(10000,self.GUI_loop, alarmHandlerGUI) # Recursion loop here - splits off a new instance of this function and finishes the one currently running (be careful)
-      print("In sleep mode: waited 10 seconds to refresh GUI again")
+      alarmHandlerGUI.win.after(5000,self.GUI_loop, alarmHandlerGUI) # Recursion loop here - splits off a new instance of this function and finishes the one currently running (be careful)
+      print("In sleep mode: waited 5 seconds to refresh GUI again")
 
 class ALARM_LOOP():
   def __init__(self,alarmHandlerGUI):
@@ -157,7 +157,7 @@ class ALARM_LOOP():
     if localAlStat == 0:
       print(' -- '+'\x1b[1;1;32m'+'Alarms all OK '+'\x1b[0m'+'\n')
     else:
-      print(' -- '+'\x1b[1;1;31m'+'{} alarms triggered '.format(localAlStat)+'\x1b[0m')
+      print(' -- '+'\x1b[1;1;31m'+'{} alarms triggered '.format(localAlStat)+'\x1b[0m'+'\n')
 
   def alarm_loop(self,alarmHandlerGUI):
     if (self.globalLoopStatus=="Looping"):
