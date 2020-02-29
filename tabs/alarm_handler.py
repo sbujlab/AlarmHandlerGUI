@@ -201,6 +201,8 @@ class ALARM_HANDLER(tk.Frame):
       self.displayFrames[j].radioButGreen.grid(row=0,column=0,padx=5,sticky='W')
       self.displayFrames[j].radioButGreen.config(text='   ')
     
+    self.displayFrames[j].butt.config(text="Value = {}".format(OL.objectList[2][j].parameterList.get("Value",u.defaultKey))) # loop over displayFrames
+
 
 
   def initialize_displayFrames(self,OL,fileArray): # Needs a short row to contain [name = value, alarm status = type, alarm stat !OK, user silence stat, alarm stat OK], context menu displays full parameter list
@@ -392,7 +394,32 @@ class ALARM_HANDLER(tk.Frame):
   def update_GUI(self,OL,fileArray):
     fileArray.filearray = u.write_filearray(fileArray)
     #OL.objectList = u.create_objects(fileArray,OL.cooldownLength)
-    self.make_screen(OL,fileArray)
+    #self.make_screen(OL,fileArray)
+    # NEW
+    #for i in range(0,len(self.alarmCols)):
+    #  self.alarmCols[i].destroy()
+    #self.alarmCols = []
+    #self.initialize_cols(OL)
+    for each in self.displayFrames:
+      localBut = each.butt
+      self.update_displayFrame(OL,localBut)
+      #each.destroy()
+    #self.displayFrames = self.initialize_displayFrames(OL,fileArray)
+    #for each in self.buttonMenus:
+    #  each.destroy()
+    #self.buttonMenus = self.initialize_menus(OL,fileArray)
+    #self.alarmFrame.grid_forget()
+    #self.alarmFrame.grid(column=0, row=1, sticky='NW')
+    #self.erase_pDataFrame()
+    if OL.currentlySelectedButton != -1 and OL.displayPList == 1:
+      self.display_parameter_list(OL,fileArray,2,OL.currentlySelectedButton)
+      self.pDataFrame.grid(column=1,row=1, sticky='NE')
+    #self.erase_grid_all_col()
+    #self.layout_grid_all_col(OL,fileArray)
+    if OL.currentlySelectedButton != -1:
+      OL.currentlySelectedButton = OL.selectedButtonColumnIndicesList[2] #Overwrite with expert list in case in use
+      self.select_button(OL,fileArray,self.displayFrames[OL.currentlySelectedButton].butt)
+    #print("currently selected button = {}".format(OL.currentlySelectedButton))
 
   def display_parameter_list(self,OL,fileArray,i,j):
     self.erase_pDataFrame()
