@@ -173,7 +173,6 @@ class ALARM_HANDLER(tk.Frame):
       #self.update_GUI(OL,fileArray)
     if but.cget('text')=="{}{}".format(self.controlButtonsText[3],self.CBTextSuffix1[3]): 
       but.config(text="{}{}".format(self.controlButtonsText[3],self.CBTextSuffix1[3]))
-      self.HBchecked = 1
       bclient.sockClient(self.remoteName).sendPacket("7") 
     if but.cget('text')=="{}{}".format(self.controlButtonsText[4],self.CBTextSuffix1[4]): 
       # Alarm Info
@@ -194,6 +193,7 @@ class ALARM_HANDLER(tk.Frame):
     #for each in self.controlButtons:
     #  each.destroy()
     #self.controlButtons = self.make_control_buttons(OL,fileArray,alarmLoop)
+    self.HBchecked = 1
     self.update_control_buttons(OL,fileArray,alarmLoop)
 
   def make_screen(self,OL,fileArray):
@@ -553,9 +553,9 @@ class ALARM_HANDLER(tk.Frame):
     i,j = butMenu.indices
     self.select_button(OL,fileArray,self.displayFrames[j].butt)
     self.display_parameter_list(OL,fileArray,i,j)
-    #self.controlButtons[3].grid_forget()
-    self.controlButtons[3].config(text="{}{}".format(self.controlButtonsText[3],self.CBTextSuffix2[3]))
-    #self.controlButtons[3].grid(row = 0, column = 3,columnspan=1,padx=5,pady=5,sticky='W')
+    #self.controlButtons[4].grid_forget()
+    self.controlButtons[4].config(text="{}{}".format(self.controlButtonsText[4],self.CBTextSuffix2[4]))
+    #self.controlButtons[4].grid(row = 0, column = 3,columnspan=1,padx=5,pady=5,sticky='W')
     ####self.update_GUI(OL,fileArray)
 
   def button_silence_menu(self,OL,fileArray,butMenu):
