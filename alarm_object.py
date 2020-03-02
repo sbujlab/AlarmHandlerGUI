@@ -13,6 +13,7 @@ import utils as u
 import bclient as bclient
 import os
 import time
+import gc
 from decimal import Decimal
 from threading import Thread, Lock
 
@@ -52,6 +53,7 @@ class ALARM_LOOP_GUI():
     pass
 
   def GUI_loop(self,alarmHandlerGUI):
+    gc.collect()
     if (alarmHandlerGUI.alarmLoop.globalLoopStatus=="Looping"):
       print("Waited 10 seconds, refreshing GUI")
       u.update_objectList(alarmHandlerGUI.OL,alarmHandlerGUI.fileArray,alarmHandlerGUI.alarmLoop.alarmList)

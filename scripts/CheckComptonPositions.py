@@ -19,15 +19,15 @@ readback_tolerances = [0.100,0.10,0.15,0.10]
 AllGood = True
 i = 0
 
+cmds = ['caget', '-t', '-w 1', 'COMPTON_PW1PCAV_ca']
+comptonPower = "NULL"
+comptonPower = subprocess.Popen(cmds, stdout=subprocess.PIPE).stdout.read().strip().decode('ascii') # Needs to be decoded... be careful 
+cmds = ['caget', '-t', '-w 1', 'IBC1H04CRCUR2']
+beamCurrent = "NULL"
+beamCurrent = subprocess.Popen(cmds, stdout=subprocess.PIPE).stdout.read().strip().decode('ascii') # Needs to be decoded... be careful 
+
 
 while i < len(readback_epics):
-
-  cmds = ['caget', '-t', '-w 1', 'COMPTON_PW1PCAV_ca']
-  comptonPower = "NULL"
-  comptonPower = subprocess.Popen(cmds, stdout=subprocess.PIPE).stdout.read().strip().decode('ascii') # Needs to be decoded... be careful 
-  cmds = ['caget', '-t', '-w 1', 'IBC1H04CRCUR2']
-  beamCurrent = "NULL"
-  beamCurrent = subprocess.Popen(cmds, stdout=subprocess.PIPE).stdout.read().strip().decode('ascii') # Needs to be decoded... be careful 
 
   if float(beamCurrent)<50.0 or float(comptonPower)<1000.0:
     if i == len(readback_epics):
@@ -42,11 +42,11 @@ while i < len(readback_epics):
     print("Error, {} not found".format(readback_epics[i]))
     continue
   if abs(readback_points[i]-float(cond_out)) > readback_tolerances[i]:
-    print("ERROR: Channel {} = {}mm\n- This is more than {}mm away\n- It is {}mm away".format(readback_epics[i],cond_out,readback_tolerances[i], (float(cond_out)-readback_points[i])))
+    #print("ERROR: Channel {} = {}mm\n- This is more than {}mm away\n- It is {}mm away".format(readback_epics[i],cond_out,readback_tolerances[i], (float(cond_out)-readback_points[i])))
     AllGood = False
   i = i+1
 
 if AllGood is False:
-  print("Please check the Compton Lock")
+  print("Check Compton Lock")
 else:
   print("OK")

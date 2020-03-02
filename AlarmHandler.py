@@ -23,6 +23,7 @@ import tabs.settings as settings
 import utils as u
 import bclient as bclient
 import rcdb as rcdb
+import gc
 from distutils.util import strtobool
 from threading import Thread, Lock
 
@@ -33,7 +34,7 @@ class AlarmHandler:
     os.environ["TCL_LIBRARY"] = "/lib64/tcl8.5/"
     self.win = tk.Tk()
     self.win.title("Continuous Aggregate Monitor: Alarm Handler")
-    self.win.configure(background=u.lightergrey_color)
+    self.win.configure(background=u.lightgrey_color)
     self.get_alarm_handler_style()
     self.delim = ','
     self.pdelim = '='
@@ -75,9 +76,10 @@ class AlarmHandler:
 
   def update_show_alarms(self, event):
     for key in self.tabs:
-      if key != "Alarm History" and key!= "Active Alarm Handler" and self.OL.currentlySelectedButton != -1:
+      if key == "Alarm Handler" and self.OL.currentlySelectedButton != -1:
         #self.OL.selectedButtonColumnIndicesList[2]=u.recentAlarmButtons[2] # Update the currently clicked button index to the alarming one
-        self.tabs[key].select_control_buttons(self.OL,self.fileArray,self.alarmLoop,self.tabs[key].controlButtons[3])
+        #self.tabs[key].select_control_buttons(self.OL,self.fileArray,self.alarmLoop,self.tabs[key].controlButtons[3]) # If you want Green Man to beep
+        self.tabs[key].select_control_buttons(self.OL,self.fileArray,self.alarmLoop,self.tabs[key].controlButtons[4])
       #webbrowser.open_new(r"https://en.wikipedia.org/wiki/Green_Monster")
 
 #    def alarm_handler_tab(self, expt_tab):

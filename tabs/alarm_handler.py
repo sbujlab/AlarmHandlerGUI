@@ -110,6 +110,7 @@ class ALARM_HANDLER(tk.Frame):
         if self.HBchecked == 0:
           self.CBTextSuffix2[i] = self.CBTextSuffix1[i] # Grab prior value
           self.CBTextSuffix1[i] = "\nHeartbeat: {}".format(alarmLoop.userNotifyLoop.nLoops%1000)
+          print("{}{}".format(self.CBTextSuffix1[i],self.CBTextSuffix2[i]))
         if self.CBTextSuffix2[i] == self.CBTextSuffix1[i]:
           self.controlButtons[i].config(background=u.red_color)
           self.controlButtons[i].config(fg=u.white_color)
@@ -227,7 +228,8 @@ class ALARM_HANDLER(tk.Frame):
 
   def update_displayFrame(self,OL,localBut):
     i,j = localBut.indices
-    self.displayFrames[j].butt.config(text="Value = {}".format(OL.objectList[2][j].parameterList.get("Value",u.defaultKey))) # loop over displayFrames
+    self.displayFrames[j].butt.config(text="{}".format(OL.objectList[2][j].parameterList.get("Value",u.defaultKey))) # loop over displayFrames
+    #self.displayFrames[j].butt.config(text="Value = {}".format(OL.objectList[2][j].parameterList.get("Value",u.defaultKey))) # loop over displayFrames
     #self.displayFrames[j].butt.grid_forget()
     #self.displayFrames[j].radioButGreen.grid_forget()
     #self.displayFrames[j].radioButRed.grid_forget()
@@ -336,6 +338,7 @@ class ALARM_HANDLER(tk.Frame):
         lgrid.append(disp)
 
         disp.butt = tk.Button(lgrid[i], text="Value = {}".format(OL.objectList[2][i].parameterList.get("Value",u.defaultKey)), justify='center', background=u.lightgrey_color) # loop over displayFrames
+        #disp.butt = tk.Button(lgrid[i], text="{}".format(OL.objectList[2][i].parameterList.get("Value",u.defaultKey)), justify='center', background=u.lightgrey_color) # loop over displayFrames
         #disp.butt = tk.Button(lgrid[i], text="Value = {}".format(OL.objectList[2][i].parameterList.get("Value",u.defaultKey)), justify='center', background=OL.objectList[2][i].color) # loop over displayFrames
         disp.butt.indices = (2,OL.objectList[2][i].columnIndex)
         disp.butt.config(command = lambda but=disp.butt: self.select_disp_button(OL,fileArray,but))
