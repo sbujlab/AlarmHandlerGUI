@@ -1,0 +1,3 @@
+#!/bin/tcsh
+cd /adaqfs/home/apar/cameronc/ExpertShift/GUI
+python3 AlarmHandler.py -f ExpertConfig.txt $argv

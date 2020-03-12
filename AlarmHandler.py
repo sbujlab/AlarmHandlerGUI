@@ -113,7 +113,8 @@ class AlarmHandler:
     elif self.showGrid == True:
       tab_titles = [('Alarm Handler', alarm_handler.ALARM_HANDLER),('Grid Alarm Handler', grid_alarm_handler.GRID_ALARM_HANDLER),('Active Alarm Handler', active_alarm_handler.ACTIVE_ALARM_HANDLER),('Alarm History', alarm_history.ALARM_HISTORY),('Settings',settings.SETTINGS)]
     else:
-      tab_titles = [('Alarm Handler', alarm_handler.ALARM_HANDLER),('Active Alarm Handler', active_alarm_handler.ACTIVE_ALARM_HANDLER),('Alarm History', alarm_history.ALARM_HISTORY),('Settings',settings.SETTINGS)]
+      tab_titles = [('Alarm Handler', alarm_handler.ALARM_HANDLER),('Alarm History', alarm_history.ALARM_HISTORY),('Settings',settings.SETTINGS)]
+      # Normal Alarm Handler mode: tab_titles = [('Alarm Handler', alarm_handler.ALARM_HANDLER),('Active Alarm Handler', active_alarm_handler.ACTIVE_ALARM_HANDLER),('Alarm History', alarm_history.ALARM_HISTORY),('Settings',settings.SETTINGS)]
     tabs = {}
     for title, fn in tab_titles:
       tab = ttk.Frame(tab_control, width=10, height=20, style="My.TFrame")

@@ -1,0 +1,10 @@
+#!/bin/tcsh
+#\
+exec $CODA_BIN/dpsh -notk -bg -f "$0" #${1+"$@"}
+#
+msql connect db
+
+db set database $env(EXPID)
+db query "select runNumber from sessions where name='$env(SESSION)'"
+puts [db get next]
+exit

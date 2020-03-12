@@ -22,7 +22,8 @@ class ALARM_HANDLER(tk.Frame):
     self.pDataFrame = tk.LabelFrame(tab, text='Alarm Parameter Display', background=u.white_color)
     self.pDataFrame.disp = []
     self.colTitles = {0:"Alarms"}
-    self.NperCol = 11
+    self.NperCol = 10
+    self.NperCol1 = 5
     OL.currentlySelectedButton = -1
     OL.displayPList = 0
     OL.displayPListN = -1
@@ -222,7 +223,7 @@ class ALARM_HANDLER(tk.Frame):
     #print("currently selected button = {}".format(OL.currentlySelectedButton))
 
   def initialize_cols(self,OL):
-    for i in range(0, int(1.0*len(OL.objectList[2])/self.NperCol)+1):
+    for i in range(0, int(1.0*(len(OL.objectList[2])+(self.NperCol-self.NperCol1))/(self.NperCol))+1):
       self.alarmCols.append(tk.LabelFrame(self.alarmFrame, text=self.colTitles.get(i,"ctd."), background=u.lightgrey_color))
       self.alarmCols[i].grid(column=i,row=0,padx=5,pady=5,sticky='N')
 
@@ -314,7 +315,12 @@ class ALARM_HANDLER(tk.Frame):
         localStr = "{}, {}, {}".format(OL.objectList[0][OL.objectList[2][i].parentIndices[0]].value,OL.objectList[1][OL.objectList[2][i].parentIndices[1]].value[:25],OL.objectList[2][i].value[:25])
         if len(localStr) > 30:
           localStr = "{}, {}\n{}".format(OL.objectList[0][OL.objectList[2][i].parentIndices[0]].value,OL.objectList[1][OL.objectList[2][i].parentIndices[1]].value[:25],OL.objectList[2][i].value[:35])
-        disp = tk.LabelFrame(self.alarmCols[int(1.0*i/self.NperCol)], text=localStr, font=('Helvetica 8'), background=u.lightgrey_color) 
+        perCol = self.NperCol
+        if i < self.NperCol:
+          perCol = self.NperCol1
+          disp = tk.LabelFrame(self.alarmCols[int(1.0*((i)/perCol))], text=localStr, font=('Helvetica 8'), background=u.lightgrey_color) 
+        else:
+          disp = tk.LabelFrame(self.alarmCols[int(1.0*((i+self.NperCol-self.NperCol1)/perCol))], text=localStr, font=('Helvetica 8'), background=u.lightgrey_color) 
         disp.redStat = tk.IntVar()
         disp.orangeStat = tk.IntVar()
         disp.yellowStat = tk.IntVar()
@@ -403,7 +409,12 @@ class ALARM_HANDLER(tk.Frame):
 
   def layout_grid_all_col(self,OL,fileArray):
     for i in range(0,len(self.displayFrames)):
-      self.displayFrames[i].grid(column=int(1.0*i/self.NperCol),row=i%self.NperCol,columnspan=self.colsp,padx=5,pady=5,sticky='EW')
+      perCol = self.NperCol
+      if i < self.NperCol1:
+        perCol = self.NperCol1
+        self.displayFrames[i].grid(column=int(1.0*(i)/perCol),row=i%perCol,columnspan=self.colsp,padx=5,pady=5,sticky='EW')
+      else:
+        self.displayFrames[i].grid(column=int(1.0*(i+self.NperCol-self.NperCol1)/perCol),row=i%perCol,columnspan=self.colsp,padx=5,pady=5,sticky='EW')
     #self.buttonMenus = self.initialize_menus(OL,fileArray)
 
   def erase_grid_all_col(self):
