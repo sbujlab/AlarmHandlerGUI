@@ -1,15 +1,3 @@
-#Injector PQB,Hall A Aq,Feedback Status,Value,Feedback-Off
-#Injector PQB,Hall A Aq,Feedback Status,Alarm Status,Feedback-Off
-#Injector PQB,Hall A Aq,Feedback Status,User Silence Status,Alert
-#Injector PQB,Hall A Aq,Feedback Status,User Notify Status,Feedback-Off
-#Injector PQB,Hall A Aq,Feedback Status,Script Name,CheckAqFeedback.sh
-#Injector PQB,Hall A Aq,Feedback Status,Case Argument,IBC1H04CRCUR2
-#Injector PQB,Hall A Aq,Feedback Status,Case Value,Beam-Above-35uA
-#Injector PQB,Hall A Aq,Feedback Status,Exactly Beam-Above-35uA,Feedback-On
-#Injector PQB,Hall A Aq,Feedback Status,Trip Limit,1
-#Injector PQB,Hall A Aq,Feedback Status,Trip Counter,0
-#Injector PQB,Hall A Aq,Feedback Status,Alarm Type,BASH
-
 import os
 import time
 import subprocess

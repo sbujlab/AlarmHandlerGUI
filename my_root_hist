@@ -1,0 +1,2 @@
+gROOT->LoadMacro("/adaqfs/home/apar/PREX/japan/panguin/macros/SyncCheckManually.C"); SyncCheckManually(999999); gSystem->Exit(0);
+gROOT->LoadMacro("/adaqfs/home/apar/PREX/japan/panguin/macros/BPM12XCheckManually.C"); BPM12XCheckManually(999999); gSystem->Exit(0);

@@ -1,0 +1,731 @@
+Injector PQB,Hall A Aq,BCM Asym from Aq Feedback,Value,-40.6041
+Injector PQB,Hall A Aq,BCM Asym from Aq Feedback,Alarm Status,OK
+Injector PQB,Hall A Aq,BCM Asym from Aq Feedback,User Silence Status,Alert
+Injector PQB,Hall A Aq,BCM Asym from Aq Feedback,User Notify Status,OK
+Injector PQB,Hall A Aq,BCM Asym from Aq Feedback,Script Name,CheckAqFeedback.sh
+Injector PQB,Hall A Aq,BCM Asym from Aq Feedback,Case Variable Name,Check-EB
+Injector PQB,Hall A Aq,BCM Asym from Aq Feedback,Case Value,Current-Below-35uA
+Injector PQB,Hall A Aq,BCM Asym from Aq Feedback,Same Value Comparator EB-Active,-22.7272
+Injector PQB,Hall A Aq,BCM Asym from Aq Feedback,Same Value Comparator 2 EB-Active,13.5288
+Injector PQB,Hall A Aq,BCM Asym from Aq Feedback,Trip Limit,30
+Injector PQB,Hall A Aq,BCM Asym from Aq Feedback,Trip Counter,0
+Injector PQB,Hall A Aq,BCM Asym from Aq Feedback,Response,Check Aq feedback and Runbird
+Injector PQB,Hall A Aq,BCM Asym from Aq Feedback,Alarm Type,BASH
+Injector PQB,Hall A Aq,BCM Asym Width 300ppm,Value,282.682
+Injector PQB,Hall A Aq,BCM Asym Width 300ppm,Alarm Status,OK
+Injector PQB,Hall A Aq,BCM Asym Width 300ppm,User Silence Status,Alert
+Injector PQB,Hall A Aq,BCM Asym Width 300ppm,User Notify Status,OK
+Injector PQB,Hall A Aq,BCM Asym Width 300ppm,Variable Name,BCM1H01_AsymWidth
+Injector PQB,Hall A Aq,BCM Asym Width 300ppm,High,300.0
+Injector PQB,Hall A Aq,BCM Asym Width 300ppm,Threshold Variable Name,IBC1H04CRCUR2
+Injector PQB,Hall A Aq,BCM Asym Width 300ppm,Threshold Value,6.24
+Injector PQB,Hall A Aq,BCM Asym Width 300ppm,Threshold Low,50.0
+Injector PQB,Hall A Aq,BCM Asym Width 300ppm,Trip Limit,10
+Injector PQB,Hall A Aq,BCM Asym Width 300ppm,Trip Counter,0
+Injector PQB,Hall A Aq,BCM Asym Width 300ppm,Response,Check Aq in the injector or on a scope
+Injector PQB,Hall A Aq,BCM Asym Width 300ppm,Alarm Type,EPICS
+Injector PQB,Hall A Aq,BCM Asym Width 500ppm,Value,282.682
+Injector PQB,Hall A Aq,BCM Asym Width 500ppm,Alarm Status,OK
+Injector PQB,Hall A Aq,BCM Asym Width 500ppm,User Silence Status,Alert
+Injector PQB,Hall A Aq,BCM Asym Width 500ppm,User Notify Status,OK
+Injector PQB,Hall A Aq,BCM Asym Width 500ppm,Variable Name,BCM1H01_AsymWidth
+Injector PQB,Hall A Aq,BCM Asym Width 500ppm,High,500.0
+Injector PQB,Hall A Aq,BCM Asym Width 500ppm,Threshold Variable Name,IBC1H04CRCUR2
+Injector PQB,Hall A Aq,BCM Asym Width 500ppm,Threshold Value,6.24
+Injector PQB,Hall A Aq,BCM Asym Width 500ppm,Threshold Low,50.0
+Injector PQB,Hall A Aq,BCM Asym Width 500ppm,Trip Limit,10
+Injector PQB,Hall A Aq,BCM Asym Width 500ppm,Trip Counter,0
+Injector PQB,Hall A Aq,BCM Asym Width 500ppm,Response,Check Aq in the injector or on a scope
+Injector PQB,Hall A Aq,BCM Asym Width 500ppm,Alarm Type,EPICS
+Injector PQB,Hall C Aq,BCM Asym from Aq Feedback,Value,-91.0342
+Injector PQB,Hall C Aq,BCM Asym from Aq Feedback,Alarm Status,OK
+Injector PQB,Hall C Aq,BCM Asym from Aq Feedback,User Silence Status,Alert
+Injector PQB,Hall C Aq,BCM Asym from Aq Feedback,User Notify Status,OK
+Injector PQB,Hall C Aq,BCM Asym from Aq Feedback,Script Name,CheckAqFeedbackC.sh
+Injector PQB,Hall C Aq,BCM Asym from Aq Feedback,Case Variable Name,Check-EB
+Injector PQB,Hall C Aq,BCM Asym from Aq Feedback,Case Value,Current-Below-3uA
+Injector PQB,Hall C Aq,BCM Asym from Aq Feedback,Same Value Comparator EB-Active,54.1955
+Injector PQB,Hall C Aq,BCM Asym from Aq Feedback,Same Value Comparator 2 EB-Active,-27.0399
+Injector PQB,Hall C Aq,BCM Asym from Aq Feedback,Trip Limit,40
+Injector PQB,Hall C Aq,BCM Asym from Aq Feedback,Trip Counter,0
+Injector PQB,Hall C Aq,BCM Asym from Aq Feedback,Response,Check Aq feedback and Runbird
+Injector PQB,Hall C Aq,BCM Asym from Aq Feedback,Alarm Type,BASH
+DAQ,Parity DAQ,Sync Check,Value,OK
+DAQ,Parity DAQ,Sync Check,Alarm Status,OK
+DAQ,Parity DAQ,Sync Check,User Silence Status,Alert
+DAQ,Parity DAQ,Sync Check,User Notify Status,OK
+DAQ,Parity DAQ,Sync Check,Script Name,CheckSync.sh
+DAQ,Parity DAQ,Sync Check,Trip Limit,20
+DAQ,Parity DAQ,Sync Check,Trip Counter,0
+DAQ,Parity DAQ,Sync Check,Response,Call DAQ experts and restart
+DAQ,Parity DAQ,Sync Check,Exactly,OK
+DAQ,Parity DAQ,Sync Check,Alarm Type,BASH
+DAQ,Parity DAQ,Sufficient Current to Run,Value,OK
+DAQ,Parity DAQ,Sufficient Current to Run,Alarm Status,OK
+DAQ,Parity DAQ,Sufficient Current to Run,User Silence Status,Alert
+DAQ,Parity DAQ,Sufficient Current to Run,User Notify Status,OK
+DAQ,Parity DAQ,Sufficient Current to Run,Script Name,CheckDAQ.sh
+DAQ,Parity DAQ,Sufficient Current to Run,Trip Limit,50
+DAQ,Parity DAQ,Sufficient Current to Run,Trip Counter,0
+DAQ,Parity DAQ,Sufficient Current to Run,Response,Start the DAQ
+DAQ,Parity DAQ,Sufficient Current to Run,Exactly,OK
+DAQ,Parity DAQ,Sufficient Current to Run,Alarm Type,BASH
+Injector PQB,RTP IHWP,Vertical Wien Angle,Value,-90.5996
+Injector PQB,RTP IHWP,Vertical Wien Angle,Alarm Status,OK
+Injector PQB,RTP IHWP,Vertical Wien Angle,User Silence Status,Alert
+Injector PQB,RTP IHWP,Vertical Wien Angle,User Notify Status,OK
+Injector PQB,RTP IHWP,Vertical Wien Angle,Variable Name,VWienAngle
+Injector PQB,RTP IHWP,Vertical Wien Angle,Case Variable Name,IGL1I00OD16_16
+Injector PQB,RTP IHWP,Vertical Wien Angle,Case Value,OUT
+Injector PQB,RTP IHWP,Vertical Wien Angle,Double Case Variable Name,FlipState
+Injector PQB,RTP IHWP,Vertical Wien Angle,Double Case Value,FLIP-LEFT
+Injector PQB,RTP IHWP,Vertical Wien Angle,High IN FLIP-RIGHT,88.2
+Injector PQB,RTP IHWP,Vertical Wien Angle,High IN FLIP-LEFT,-90.2
+Injector PQB,RTP IHWP,Vertical Wien Angle,High OUT FLIP-RIGHT,88.2
+Injector PQB,RTP IHWP,Vertical Wien Angle,High OUT FLIP-LEFT,-90.2
+Injector PQB,RTP IHWP,Vertical Wien Angle,Low IN FLIP-RIGHT,87.8
+Injector PQB,RTP IHWP,Vertical Wien Angle,Low IN FLIP-LEFT,-90.9
+Injector PQB,RTP IHWP,Vertical Wien Angle,Low OUT FLIP-RIGHT,87.8
+Injector PQB,RTP IHWP,Vertical Wien Angle,Low OUT FLIP-LEFT,-90.9
+Injector PQB,RTP IHWP,Vertical Wien Angle,Trip Limit,30
+Injector PQB,RTP IHWP,Vertical Wien Angle,Trip Counter,0
+Injector PQB,RTP IHWP,Vertical Wien Angle,Alarm Type,EPICS
+Injector PQB,RTP IHWP,RTP PITA 1,Value,-652.076
+Injector PQB,RTP IHWP,RTP PITA 1,Alarm Status,OK
+Injector PQB,RTP IHWP,RTP PITA 1,User Silence Status,Alert
+Injector PQB,RTP IHWP,RTP PITA 1,User Notify Status,OK
+Injector PQB,RTP IHWP,RTP PITA 1,Variable Name,RTPPITA1CNT
+Injector PQB,RTP IHWP,RTP PITA 1,Case Variable Name,IGL1I00OD16_16
+Injector PQB,RTP IHWP,RTP PITA 1,Case Value,OUT
+Injector PQB,RTP IHWP,RTP PITA 1,Double Case Variable Name,FlipState
+Injector PQB,RTP IHWP,RTP PITA 1,Double Case Value,FLIP-LEFT
+Injector PQB,RTP IHWP,RTP PITA 1,Low IN FLIP-LEFT,-660
+Injector PQB,RTP IHWP,RTP PITA 1,High IN FLIP-LEFT,-60
+Injector PQB,RTP IHWP,RTP PITA 1,Low IN FLIP-RIGHT,-660
+Injector PQB,RTP IHWP,RTP PITA 1,High IN FLIP-RIGHT,-60
+Injector PQB,RTP IHWP,RTP PITA 1,Low OUT FLIP-LEFT,-910
+Injector PQB,RTP IHWP,RTP PITA 1,High OUT FLIP-LEFT,-310
+Injector PQB,RTP IHWP,RTP PITA 1,Low OUT FLIP-RIGHT,-910
+Injector PQB,RTP IHWP,RTP PITA 1,High OUT FLIP-RIGHT,-310
+Injector PQB,RTP IHWP,RTP PITA 1,Trip Limit,30
+Injector PQB,RTP IHWP,RTP PITA 1,Trip Counter,0
+Injector PQB,RTP IHWP,RTP PITA 1,Alarm Type,EPICS
+Injector PQB,RTP IHWP,RTP PITA 2,Value,-652.076
+Injector PQB,RTP IHWP,RTP PITA 2,Alarm Status,OK
+Injector PQB,RTP IHWP,RTP PITA 2,User Silence Status,Alert
+Injector PQB,RTP IHWP,RTP PITA 2,User Notify Status,OK
+Injector PQB,RTP IHWP,RTP PITA 2,Variable Name,RTPPITA2CNT
+Injector PQB,RTP IHWP,RTP PITA 2,Case Variable Name,IGL1I00OD16_16
+Injector PQB,RTP IHWP,RTP PITA 2,Case Value,OUT
+Injector PQB,RTP IHWP,RTP PITA 2,Double Case Variable Name,FlipState
+Injector PQB,RTP IHWP,RTP PITA 2,Double Case Value,FLIP-LEFT
+Injector PQB,RTP IHWP,RTP PITA 2,Low IN FLIP-LEFT,-660
+Injector PQB,RTP IHWP,RTP PITA 2,High IN FLIP-LEFT,-60
+Injector PQB,RTP IHWP,RTP PITA 2,Low IN FLIP-RIGHT,-660
+Injector PQB,RTP IHWP,RTP PITA 2,High IN FLIP-RIGHT,-60
+Injector PQB,RTP IHWP,RTP PITA 2,Low OUT FLIP-LEFT,-910
+Injector PQB,RTP IHWP,RTP PITA 2,High OUT FLIP-LEFT,-310
+Injector PQB,RTP IHWP,RTP PITA 2,Low OUT FLIP-RIGHT,-910
+Injector PQB,RTP IHWP,RTP PITA 2,High OUT FLIP-RIGHT,-310
+Injector PQB,RTP IHWP,RTP PITA 2,Trip Limit,30
+Injector PQB,RTP IHWP,RTP PITA 2,Trip Counter,0
+Injector PQB,RTP IHWP,RTP PITA 2,Alarm Type,EPICS
+Injector PQB,RTP IHWP,V a position U,Value,1146
+Injector PQB,RTP IHWP,V a position U,Alarm Status,OK
+Injector PQB,RTP IHWP,V a position U,User Silence Status,Alert
+Injector PQB,RTP IHWP,V a position U,User Notify Status,OK
+Injector PQB,RTP IHWP,V a position U,Variable Name,RTPAPOSUCNT
+Injector PQB,RTP IHWP,V a position U,Case Variable Name,IGL1I00OD16_16
+Injector PQB,RTP IHWP,V a position U,Case Value,OUT
+Injector PQB,RTP IHWP,V a position U,Double Case Variable Name,FlipState
+Injector PQB,RTP IHWP,V a position U,Double Case Value,FLIP-LEFT
+Injector PQB,RTP IHWP,V a position U,Exactly IN FLIP-LEFT,913
+Injector PQB,RTP IHWP,V a position U,Exactly IN FLIP-RIGHT,913
+Injector PQB,RTP IHWP,V a position U,Exactly OUT FLIP-LEFT,1146
+Injector PQB,RTP IHWP,V a position U,Exactly OUT FLIP-RIGHT,1146
+Injector PQB,RTP IHWP,V a position U,Trip Limit,30
+Injector PQB,RTP IHWP,V a position U,Trip Counter,0
+Injector PQB,RTP IHWP,V a position U,Alarm Type,EPICS
+Injector PQB,RTP IHWP,V a position V,Value,76
+Injector PQB,RTP IHWP,V a position V,Alarm Status,OK
+Injector PQB,RTP IHWP,V a position V,User Silence Status,Alert
+Injector PQB,RTP IHWP,V a position V,User Notify Status,OK
+Injector PQB,RTP IHWP,V a position V,Variable Name,RTPAPOSVCNT
+Injector PQB,RTP IHWP,V a position V,Case Variable Name,IGL1I00OD16_16
+Injector PQB,RTP IHWP,V a position V,Case Value,OUT
+Injector PQB,RTP IHWP,V a position V,Double Case Variable Name,FlipState
+Injector PQB,RTP IHWP,V a position V,Double Case Value,FLIP-LEFT
+Injector PQB,RTP IHWP,V a position V,Exactly IN FLIP-LEFT,-1003
+Injector PQB,RTP IHWP,V a position V,Exactly IN FLIP-RIGHT,-1003
+Injector PQB,RTP IHWP,V a position V,Exactly OUT FLIP-LEFT,76
+Injector PQB,RTP IHWP,V a position V,Exactly OUT FLIP-RIGHT,-724
+Injector PQB,RTP IHWP,V a position V,Trip Limit,30
+Injector PQB,RTP IHWP,V a position V,Trip Counter,0
+Injector PQB,RTP IHWP,V a position V,Alarm Type,EPICS
+Injector PQB,RTP IHWP,Solenoid Angle,Value,88.0277
+Injector PQB,RTP IHWP,Solenoid Angle,Alarm Status,OK
+Injector PQB,RTP IHWP,Solenoid Angle,User Silence Status,Alert
+Injector PQB,RTP IHWP,Solenoid Angle,User Notify Status,OK
+Injector PQB,RTP IHWP,Solenoid Angle,Variable Name,Phi_FG
+Injector PQB,RTP IHWP,Solenoid Angle,Case Variable Name,IGL1I00OD16_16
+Injector PQB,RTP IHWP,Solenoid Angle,Case Value,OUT
+Injector PQB,RTP IHWP,Solenoid Angle,Double Case Variable Name,FlipState
+Injector PQB,RTP IHWP,Solenoid Angle,Double Case Value,FLIP-LEFT
+Injector PQB,RTP IHWP,Solenoid Angle,High IN FLIP-LEFT,89.951
+Injector PQB,RTP IHWP,Solenoid Angle,High IN FLIP-RIGHT,90.1
+Injector PQB,RTP IHWP,Solenoid Angle,High OUT FLIP-LEFT,89.951
+Injector PQB,RTP IHWP,Solenoid Angle,High OUT FLIP-RIGHT,90.1
+Injector PQB,RTP IHWP,Solenoid Angle,Low IN FLIP-LEFT,87.851
+Injector PQB,RTP IHWP,Solenoid Angle,Low IN FLIP-RIGHT,89.8
+Injector PQB,RTP IHWP,Solenoid Angle,Low OUT FLIP-LEFT,87.851
+Injector PQB,RTP IHWP,Solenoid Angle,Low OUT FLIP-RIGHT,89.8
+Injector PQB,RTP IHWP,Solenoid Angle,Trip Limit,30
+Injector PQB,RTP IHWP,Solenoid Angle,Trip Counter,0
+Injector PQB,RTP IHWP,Solenoid Angle,Alarm Type,EPICS
+Injector PQB,RTP IHWP,Hall A IA,Value,37392
+Injector PQB,RTP IHWP,Hall A IA,Alarm Status,OK
+Injector PQB,RTP IHWP,Hall A IA,User Silence Status,Alert
+Injector PQB,RTP IHWP,Hall A IA,User Notify Status,OK
+Injector PQB,RTP IHWP,Hall A IA,Variable Name,C1068_QDAC03r.RVAL
+Injector PQB,RTP IHWP,Hall A IA,Case Variable Name,IGL1I00OD16_16
+Injector PQB,RTP IHWP,Hall A IA,Case Value,OUT
+Injector PQB,RTP IHWP,Hall A IA,Double Case Variable Name,FlipState
+Injector PQB,RTP IHWP,Hall A IA,Double Case Value,FLIP-LEFT
+Injector PQB,RTP IHWP,Hall A IA,Exactly IN FLIP-RIGHT,28560
+Injector PQB,RTP IHWP,Hall A IA,Exactly IN FLIP-LEFT,28560
+Injector PQB,RTP IHWP,Hall A IA,Exactly OUT FLIP-RIGHT,37392
+Injector PQB,RTP IHWP,Hall A IA,Exactly OUT FLIP-LEFT,37392
+Injector PQB,RTP IHWP,Hall A IA,Trip Limit,30
+Injector PQB,RTP IHWP,Hall A IA,Trip Counter,0
+Injector PQB,RTP IHWP,Hall A IA,Alarm Type,EPICS
+Injector PQB,RTP IHWP,Hall B IA,Value,33779
+Injector PQB,RTP IHWP,Hall B IA,Alarm Status,OK
+Injector PQB,RTP IHWP,Hall B IA,User Silence Status,Alert
+Injector PQB,RTP IHWP,Hall B IA,User Notify Status,OK
+Injector PQB,RTP IHWP,Hall B IA,Variable Name,C1068_QDAC07r.RVAL
+Injector PQB,RTP IHWP,Hall B IA,Case Variable Name,IGL1I00OD16_16
+Injector PQB,RTP IHWP,Hall B IA,Case Value,OUT
+Injector PQB,RTP IHWP,Hall B IA,Double Case Variable Name,FlipState
+Injector PQB,RTP IHWP,Hall B IA,Double Case Value,FLIP-LEFT
+Injector PQB,RTP IHWP,Hall B IA,Exactly IN FLIP-RIGHT,32275
+Injector PQB,RTP IHWP,Hall B IA,Exactly IN FLIP-LEFT,32275
+Injector PQB,RTP IHWP,Hall B IA,Exactly OUT FLIP-RIGHT,33779
+Injector PQB,RTP IHWP,Hall B IA,Exactly OUT FLIP-LEFT,33779
+Injector PQB,RTP IHWP,Hall B IA,Trip Limit,30
+Injector PQB,RTP IHWP,Hall B IA,Trip Counter,0
+Injector PQB,RTP IHWP,Hall B IA,Alarm Type,EPICS
+Injector PQB,RTP IHWP,Hall C IA,Value,17377
+Injector PQB,RTP IHWP,Hall C IA,Alarm Status,OK
+Injector PQB,RTP IHWP,Hall C IA,User Silence Status,Alert
+Injector PQB,RTP IHWP,Hall C IA,User Notify Status,OK
+Injector PQB,RTP IHWP,Hall C IA,Variable Name,C1068_QDAC11r.RVAL
+Injector PQB,RTP IHWP,Hall C IA,Case Variable Name,IGL1I00OD16_16
+Injector PQB,RTP IHWP,Hall C IA,Case Value,OUT
+Injector PQB,RTP IHWP,Hall C IA,Double Case Variable Name,FlipState
+Injector PQB,RTP IHWP,Hall C IA,Double Case Value,FLIP-LEFT
+Injector PQB,RTP IHWP,Hall C IA,Low IN FLIP-RIGHT,35822
+Injector PQB,RTP IHWP,Hall C IA,Low IN FLIP-LEFT,35822
+Injector PQB,RTP IHWP,Hall C IA,Low OUT FLIP-RIGHT,7000
+Injector PQB,RTP IHWP,Hall C IA,Low OUT FLIP-LEFT,7000
+Injector PQB,RTP IHWP,Hall C IA,High IN FLIP-RIGHT,59822
+Injector PQB,RTP IHWP,Hall C IA,High IN FLIP-LEFT,59822
+Injector PQB,RTP IHWP,Hall C IA,High OUT FLIP-RIGHT,31000
+Injector PQB,RTP IHWP,Hall C IA,High OUT FLIP-LEFT,31000
+Injector PQB,RTP IHWP,Hall C IA,Trip Limit,30
+Injector PQB,RTP IHWP,Hall C IA,Trip Counter,0
+Injector PQB,RTP IHWP,Hall C IA,Alarm Type,EPICS
+Injector PQB,Either IHWP State,V delta position U,Value,0
+Injector PQB,Either IHWP State,V delta position U,Alarm Status,OK
+Injector PQB,Either IHWP State,V delta position U,User Silence Status,Alert
+Injector PQB,Either IHWP State,V delta position U,User Notify Status,OK
+Injector PQB,Either IHWP State,V delta position U,Variable Name,RTPDPOSUCNT
+Injector PQB,Either IHWP State,V delta position U,Exactly,0
+Injector PQB,Either IHWP State,V delta position U,Trip Limit,30
+Injector PQB,Either IHWP State,V delta position U,Trip Counter,0
+Injector PQB,Either IHWP State,V delta position U,Alarm Type,EPICS
+Injector PQB,Either IHWP State,V delta position V,Value,0
+Injector PQB,Either IHWP State,V delta position V,Alarm Status,OK
+Injector PQB,Either IHWP State,V delta position V,User Silence Status,Alert
+Injector PQB,Either IHWP State,V delta position V,User Notify Status,OK
+Injector PQB,Either IHWP State,V delta position V,Variable Name,RTPDPOSVCNT
+Injector PQB,Either IHWP State,V delta position V,Exactly,0
+Injector PQB,Either IHWP State,V delta position V,Trip Limit,30
+Injector PQB,Either IHWP State,V delta position V,Trip Counter,0
+Injector PQB,Either IHWP State,V delta position V,Alarm Type,EPICS
+Injector PQB,Either IHWP State,RHWP Setting,Value,1468
+Injector PQB,Either IHWP State,RHWP Setting,Alarm Status,OK
+Injector PQB,Either IHWP State,RHWP Setting,User Silence Status,Alert
+Injector PQB,Either IHWP State,RHWP Setting,User Notify Status,OK
+Injector PQB,Either IHWP State,RHWP Setting,Variable Name,psub_pl_pos
+Injector PQB,Either IHWP State,RHWP Setting,High,1468.1
+Injector PQB,Either IHWP State,RHWP Setting,Low,1467.9
+Injector PQB,Either IHWP State,RHWP Setting,Trip Limit,30
+Injector PQB,Either IHWP State,RHWP Setting,Trip Counter,0
+Injector PQB,Either IHWP State,RHWP Setting,Alarm Type,EPICS
+Injector PQB,Either IHWP State,Horizontal Wien Angle,Value,-29.6402
+Injector PQB,Either IHWP State,Horizontal Wien Angle,Alarm Status,OK
+Injector PQB,Either IHWP State,Horizontal Wien Angle,User Silence Status,Alert
+Injector PQB,Either IHWP State,Horizontal Wien Angle,User Notify Status,OK
+Injector PQB,Either IHWP State,Horizontal Wien Angle,Variable Name,HWienAngle
+Injector PQB,Either IHWP State,Horizontal Wien Angle,High,-29.4
+Injector PQB,Either IHWP State,Horizontal Wien Angle,Low,-30.0
+Injector PQB,Either IHWP State,Horizontal Wien Angle,Trip Limit,30
+Injector PQB,Either IHWP State,Horizontal Wien Angle,Trip Counter,0
+Injector PQB,Either IHWP State,Horizontal Wien Angle,Alarm Type,EPICS
+Injector PQB,Either IHWP State,RTP Cell On,Value,ON
+Injector PQB,Either IHWP State,RTP Cell On,Alarm Status,OK
+Injector PQB,Either IHWP State,RTP Cell On,User Silence Status,Alert
+Injector PQB,Either IHWP State,RTP Cell On,User Notify Status,OK
+Injector PQB,Either IHWP State,RTP Cell On,Variable Name,IGL1I00OD16_8
+Injector PQB,Either IHWP State,RTP Cell On,Exactly,ON
+Injector PQB,Either IHWP State,RTP Cell On,Trip Limit,30
+Injector PQB,Either IHWP State,RTP Cell On,Trip Counter,0
+Injector PQB,Either IHWP State,RTP Cell On,Alarm Type,EPICS
+Injector PQB,Either IHWP State,VL,Value,12670
+Injector PQB,Either IHWP State,VL,Alarm Status,OK
+Injector PQB,Either IHWP State,VL,User Silence Status,Alert
+Injector PQB,Either IHWP State,VL,User Notify Status,OK
+Injector PQB,Either IHWP State,VL,Variable Name,RTPQWCNT
+Injector PQB,Either IHWP State,VL,Exactly,12670
+Injector PQB,Either IHWP State,VL,Trip Limit,30
+Injector PQB,Either IHWP State,VL,Trip Counter,0
+Injector PQB,Either IHWP State,VL,Alarm Type,EPICS
+The Beam,Compton,Compton Positions,Alarm Status,OK
+The Beam,Compton,Compton Positions,Threshold Variable Name,IBC1H04CRCUR2
+The Beam,Compton,Compton Positions,Threshold Value,OK
+The Beam,Compton,Compton Positions,Threshold Low,10
+The Beam,Compton,Compton Positions,Exactly,OK
+The Beam,Compton,Compton Positions,Value,OK
+The Beam,Compton,Compton Positions,Alarm Type,BASH
+The Beam,Compton,Compton Positions,Script Name,CheckComptonPositions.sh
+The Beam,Compton,Compton Positions,User Silence Status,Alert
+The Beam,Compton,Compton Positions,User Notify Status,OK
+The Beam,Compton,Compton Positions,Trip Limit,15
+The Beam,Compton,Compton Positions,Trip Counter,0
+The Beam,Compton,Compton Positions,User Notify Status,OK
+The Beam,Compton,Compton Positions,Response,Call OPS to thread the Compton Chicane
+The Beam,Compton,Compton IOC Response,Alarm Status,OK
+The Beam,Compton,Compton IOC Response,Case Variable Name,COMPTON_PW1PCAV_ca
+The Beam,Compton,Compton IOC Response,Case Value,2245.77
+The Beam,Compton,Compton IOC Response,Variable Name,IBC1H04CRCUR2
+The Beam,Compton,Compton IOC Response,Value,6.24
+The Beam,Compton,Compton IOC Response,High BAD,5.0
+The Beam,Compton,Compton IOC Response,User Silence Status,Alert
+The Beam,Compton,Compton IOC Response,User Notify Status,OK
+The Beam,Compton,Compton IOC Response,Trip Limit,3
+The Beam,Compton,Compton IOC Response,Trip Counter,0
+The Beam,Compton,Compton IOC Response,Alarm Type,EPICS
+The Beam,Compton,Compton IOC Response,Response,Call Dave and Amali
+The Beam,Compton,Compton ROC Response,Value,11
+The Beam,Compton,Compton ROC Response,Alarm Status,OK
+The Beam,Compton,Compton ROC Response,User Silence Status,Alert
+The Beam,Compton,Compton ROC Response,User Notify Status,OK
+The Beam,Compton,Compton ROC Response,Script Name,CheckComptonDAQ.sh
+The Beam,Compton,Compton ROC Response,Case Variable Name,Check-EB
+The Beam,Compton,Compton ROC Response,Case Value,Current-Below-35uA
+The Beam,Compton,Compton ROC Response,Same Value Comparator EB-Active,1616
+The Beam,Compton,Compton ROC Response,Same Value Comparator 2 EB-Active,1585
+The Beam,Compton,Compton ROC Response,Trip Limit,8
+The Beam,Compton,Compton ROC Response,Trip Counter,0
+The Beam,Compton,Compton ROC Response,Response,Reboot Compton ROC 6
+The Beam,Compton,Compton ROC Response,Alarm Type,BASH
+The Beam,Compton,Compton Laser Power,Alarm Status,OK
+The Beam,Compton,Compton Laser Power,Threshold Variable Name,IBC1H04CRCUR2
+The Beam,Compton,Compton Laser Power,Threshold Value,6.24
+The Beam,Compton,Compton Laser Power,Threshold Low,10
+The Beam,Compton,Compton Laser Power,High,100000
+The Beam,Compton,Compton Laser Power,Low,1000
+The Beam,Compton,Compton Laser Power,Value,2245.77
+The Beam,Compton,Compton Laser Power,Alarm Type,EPICS
+The Beam,Compton,Compton Laser Power,Variable Name,COMPTON_PW1PCAV_ca
+The Beam,Compton,Compton Laser Power,User Silence Status,Alert
+The Beam,Compton,Compton Laser Power,Trip Limit,20
+The Beam,Compton,Compton Laser Power,Trip Counter,0
+The Beam,Compton,Compton Laser Power,User Notify Status,OK
+The Beam,Compton,Compton Laser Power,Response,Call the Compton laser on call
+The Beam,Compton,Compton E-det position,Alarm Status,OK
+The Beam,Compton,Compton E-det position,Threshold Variable Name,MCP1P01M
+The Beam,Compton,Compton E-det position,Threshold Value,69.337
+The Beam,Compton,Compton E-det position,Threshold High,2.0
+The Beam,Compton,Compton E-det position,Exactly,GARAGE
+The Beam,Compton,Compton E-det position,Value,GARAGE
+The Beam,Compton,Compton E-det position,Alarm Type,EPICS
+The Beam,Compton,Compton E-det position,Variable Name,COM_DE_position
+The Beam,Compton,Compton E-det position,User Silence Status,Alert
+The Beam,Compton,Compton E-det position,User Notify Status,OK
+The Beam,Compton,Compton E-det position,Response,Move the compton electron detector out of the beam
+The Beam,Beamline Vacuum,All vacuum readbacks,Alarm Status,OK
+The Beam,Beamline Vacuum,All vacuum readbacks,Exactly,OK
+The Beam,Beamline Vacuum,All vacuum readbacks,Value,OK
+The Beam,Beamline Vacuum,All vacuum readbacks,User Silence Status,Alert
+The Beam,Beamline Vacuum,All vacuum readbacks,User Notify Status,OK
+The Beam,Beamline Vacuum,All vacuum readbacks,Script Name,CheckBeamlineVacuum.sh
+The Beam,Beamline Vacuum,All vacuum readbacks,Trip Limit,12
+The Beam,Beamline Vacuum,All vacuum readbacks,Trip Counter,0
+The Beam,Beamline Vacuum,All vacuum readbacks,Alarm Type,BASH
+The Beam,Beamline Quads,All Quads set and readback,Alarm Status,OK
+The Beam,Beamline Quads,All Quads set and readback,Exactly,OK
+The Beam,Beamline Quads,All Quads set and readback,Value,OK
+The Beam,Beamline Quads,All Quads set and readback,User Silence Status,Alert
+The Beam,Beamline Quads,All Quads set and readback,User Notify Status,OK
+The Beam,Beamline Quads,All Quads set and readback,Script Name,CheckBeamlineQuads.sh
+The Beam,Beamline Quads,All Quads set and readback,Trip Limit,12
+The Beam,Beamline Quads,All Quads set and readback,Trip Counter,0
+The Beam,Beamline Quads,All Quads set and readback,Alarm Type,BASH
+The Beam,Beamline,Moller Target,Variable Name,HAHFMLINENC
+The Beam,Beamline,Moller Target,Value,0.491
+The Beam,Beamline,Moller Target,Threshold Variable Name,IBC1H04CRCUR2
+The Beam,Beamline,Moller Target,Threshold Value,6.24
+The Beam,Beamline,Moller Target,Threshold Low,50.0
+The Beam,Beamline,Moller Target,Alarm Status,OK
+The Beam,Beamline,Moller Target,High,0.5
+The Beam,Beamline,Moller Target,Alarm Type,EPICS
+The Beam,Beamline,Moller Target,User Silence Status,Alert
+The Beam,Beamline,Moller Target,User Notify Status,OK
+The Beam,Beam Mod and FB,Access Time Left,Alarm Status,OK
+The Beam,Beam Mod and FB,Access Time Left,Value,7.17258e+06
+The Beam,Beam Mod and FB,Access Time Left,Low,13600
+The Beam,Beam Mod and FB,Access Time Left,LowLow,3600
+The Beam,Beam Mod and FB,Access Time Left,Alarm Type,EPICS
+The Beam,Beam Mod and FB,Access Time Left,Variable Name,HallA:CAsecure_tleft
+The Beam,Beam Mod and FB,Access Time Left,User Silence Status,Alert
+The Beam,Beam Mod and FB,Access Time Left,User Notify Status,OK
+The Beam,Beam Mod and FB,Access Available,Alarm Status,OK
+The Beam,Beam Mod and FB,Access Available,Value,Open
+The Beam,Beam Mod and FB,Access Available,Exactly,Open
+The Beam,Beam Mod and FB,Access Available,Alarm Type,EPICS
+The Beam,Beam Mod and FB,Access Available,Variable Name,HallA:CAsecure_status
+The Beam,Beam Mod and FB,Access Available,User Silence Status,Alert
+The Beam,Beam Mod and FB,Access Available,User Notify Status,OK
+The Beam,Beam Mod and FB,BMod Enabled,Alarm Status,OK
+The Beam,Beam Mod and FB,BMod Enabled,Value,MODULATE ENABLE
+The Beam,Beam Mod and FB,BMod Enabled,Exactly,MODULATE ENABLE
+The Beam,Beam Mod and FB,BMod Enabled,Alarm Type,EPICS
+The Beam,Beam Mod and FB,BMod Enabled,Variable Name,BEAMMODSWITCH
+The Beam,Beam Mod and FB,BMod Enabled,User Silence Status,Alert
+The Beam,Beam Mod and FB,BMod Enabled,User Notify Status,OK
+The Beam,Beam Mod and FB,BMod Enabled,Threshold Variable Name,IBC1H04CRCUR2
+The Beam,Beam Mod and FB,BMod Enabled,Threshold Value,6.24
+The Beam,Beam Mod and FB,BMod Enabled,Threshold Low,50.0
+The Beam,Ion Chamber Set Points,Target Max Threshold,Alarm Status,OK
+The Beam,Ion Chamber Set Points,Target Max Threshold,Value,15500
+The Beam,Ion Chamber Set Points,Target Max Threshold,High,17500
+The Beam,Ion Chamber Set Points,Target Max Threshold,High High,19400
+The Beam,Ion Chamber Set Points,Target Max Threshold,Alarm Type,EPICS
+The Beam,Ion Chamber Set Points,Target Max Threshold,Variable Name,IIC1H04AMAX
+The Beam,Ion Chamber Set Points,Target Max Threshold,User Silence Status,Alert
+The Beam,Ion Chamber Set Points,Target Max Threshold,User Notify Status,OK
+The Beam,Ion Chamber Set Points,Target Max Threshold,Threshold Variable Name,IBC1H04CRCUR2
+The Beam,Ion Chamber Set Points,Target Max Threshold,Threshold Value,6.24
+The Beam,Ion Chamber Set Points,Target Max Threshold,Threshold Low,50.0
+The Beam,Ion Chamber Set Points,Target Max Threshold,Alert Sound,10
+The Beam,Ion Chamber Set Points,1H00 Max Threshold,Alarm Status,OK
+The Beam,Ion Chamber Set Points,1H00 Max Threshold,Value,10500
+The Beam,Ion Chamber Set Points,1H00 Max Threshold,High,12500
+The Beam,Ion Chamber Set Points,1H00 Max Threshold,High High,16000
+The Beam,Ion Chamber Set Points,1H00 Max Threshold,Alarm Type,EPICS
+The Beam,Ion Chamber Set Points,1H00 Max Threshold,Variable Name,IIC1H00MAX
+The Beam,Ion Chamber Set Points,1H00 Max Threshold,User Silence Status,Alert
+The Beam,Ion Chamber Set Points,1H00 Max Threshold,User Notify Status,OK
+The Beam,Ion Chamber Set Points,1H00 Max Threshold,Threshold Variable Name,IBC1H04CRCUR2
+The Beam,Ion Chamber Set Points,1H00 Max Threshold,Threshold Value,6.24
+The Beam,Ion Chamber Set Points,1H00 Max Threshold,Threshold Low,50.0
+The Beam,FFB,FFB On,Alarm Status,OK
+The Beam,FFB,FFB On,Value,On
+The Beam,FFB,FFB On,Exactly,On
+The Beam,FFB,FFB On,Variable Name,FB_A:FB_On
+The Beam,FFB,FFB On,Alarm Type,EPICS
+The Beam,FFB,FFB On,User Silence Status,Alert
+The Beam,FFB,FFB On,User Notify Status,OK
+The Beam,FFB,FFB On,Threshold Variable Name,IBC1H04CRCUR2
+The Beam,FFB,FFB On,Threshold Value,6.24
+The Beam,FFB,FFB On,Threshold Low,50.0
+The Beam,FFB,FFB On,Trip Limit,8
+The Beam,FFB,FFB On,Trip Counter,0
+The Beam,FFB,FFB Status,Alarm Status,OK
+The Beam,FFB,FFB Status,Value,0
+The Beam,FFB,FFB Status,Exactly,0
+The Beam,FFB,FFB Status,Variable Name,FB_A:status:FB_status_in.B
+The Beam,FFB,FFB Status,Alarm Type,EPICS
+The Beam,FFB,FFB Status,User Silence Status,Alert
+The Beam,FFB,FFB Status,User Notify Status,OK
+The Beam,FFB,FFB Status,Threshold Variable Name,IBC1H04CRCUR2
+The Beam,FFB,FFB Status,Threshold Value,6.24
+The Beam,FFB,FFB Status,Threshold Low,50.0
+The Beam,FFB,FFB Status,Trip Limit,8
+The Beam,FFB,FFB Status,Trip Counter,0
+The Beam,FFB,FFB Unix Server On,Alarm Status,OK
+The Beam,FFB,FFB Unix Server On,Value,On
+The Beam,FFB,FFB Unix Server On,Exactly,On
+The Beam,FFB,FFB Unix Server On,Variable Name,FB_A:Unix_on
+The Beam,FFB,FFB Unix Server On,Alarm Type,EPICS
+The Beam,FFB,FFB Unix Server On,User Silence Status,Alert
+The Beam,FFB,FFB Unix Server On,User Notify Status,OK
+The Beam,FFB,FFB Manual,Alarm Status,OK
+The Beam,FFB,FFB Manual,Value,manual
+The Beam,FFB,FFB Manual,Exactly,manual
+The Beam,FFB,FFB Manual,Variable Name,FB_A:BPM:auto_agc
+The Beam,FFB,FFB Manual,Alarm Type,EPICS
+The Beam,FFB,FFB Manual,User Silence Status,Alert
+The Beam,FFB,FFB Manual,User Notify Status,OK
+The Beam,FFB,FFB Use RF,Alarm Status,OK
+The Beam,FFB,FFB Use RF,Value,RF On
+The Beam,FFB,FFB Use RF,Exactly,RF On
+The Beam,FFB,FFB Use RF,Variable Name,FB_A:use_RF
+The Beam,FFB,FFB Use RF,Alarm Type,EPICS
+The Beam,FFB,FFB Use RF,User Silence Status,Alert
+The Beam,FFB,FFB Use RF,User Notify Status,OK
+The Beam,FFB,FFB Feed Forward,Alarm Status,OK
+The Beam,FFB,FFB Feed Forward,Value,On
+The Beam,FFB,FFB Feed Forward,Exactly,On
+The Beam,FFB,FFB Feed Forward,Variable Name,FB_A:FF_mode
+The Beam,FFB,FFB Feed Forward,Alarm Type,EPICS
+The Beam,FFB,FFB Feed Forward,User Silence Status,Alert
+The Beam,FFB,FFB Feed Forward,User Notify Status,OK
+The Beam,FFB,FFB Gain WS Sat,Alarm Status,OK
+The Beam,FFB,FFB Gain WS Sat,Value,20
+The Beam,FFB,FFB Gain WS Sat,High,24
+The Beam,FFB,FFB Gain WS Sat,Variable Name,FB_A:BPM:common.L
+The Beam,FFB,FFB Gain WS Sat,Alarm Type,EPICS
+The Beam,FFB,FFB Gain WS Sat,User Silence Status,Alert
+The Beam,FFB,FFB Gain WS Sat,User Notify Status,OK
+The Beam,FFB,FFB Gain Limit,Alarm Status,OK
+The Beam,FFB,FFB Gain Limit,Value,2900
+The Beam,FFB,FFB Gain Limit,High,3000
+The Beam,FFB,FFB Gain Limit,Variable Name,FB_A:BPM:common.A
+The Beam,FFB,FFB Gain Limit,Alarm Type,EPICS
+The Beam,FFB,FFB Gain Limit,User Silence Status,Alert
+The Beam,FFB,FFB Gain Limit,User Notify Status,OK
+The Beam,FFB,FFB Saturation,Alarm Status,OK
+The Beam,FFB,FFB Saturation,Value,OK
+The Beam,FFB,FFB Saturation,Exactly,OK
+The Beam,FFB,FFB Saturation,Variable Name,FB_A:status:DAC_satur
+The Beam,FFB,FFB Saturation,Alarm Type,EPICS
+The Beam,FFB,FFB Saturation,User Silence Status,Alert
+The Beam,FFB,FFB Saturation,User Notify Status,OK
+The Beam,FFB,FFB BPM 12 Read Back,Alarm Status,OK
+The Beam,FFB,FFB BPM 12 Read Back,Value,0
+The Beam,FFB,FFB BPM 12 Read Back,Exactly,0
+The Beam,FFB,FFB BPM 12 Read Back,IOC Alarm List Name,IPM1C12Alrm
+The Beam,FFB,FFB BPM 12 Read Back,Current Variable,IBC1H04CRCUR2
+The Beam,FFB,FFB BPM 12 Read Back,Alarm Type,EPICS
+The Beam,FFB,FFB BPM 12 Read Back,User Silence Status,Alert
+The Beam,FFB,FFB BPM 12 Read Back,User Notify Status,OK
+The Beam,FFB,FFB BPM 12 Read Back,Trip Limit,8
+The Beam,FFB,FFB BPM 12 Read Back,Trip Counter,0
+The Beam,FFB,FFB BPM 11 Read Back,Alarm Status,OK
+The Beam,FFB,FFB BPM 11 Read Back,Value,0
+The Beam,FFB,FFB BPM 11 Read Back,Exactly,0
+The Beam,FFB,FFB BPM 11 Read Back,IOC Alarm List Name,IPM1C11Alrm
+The Beam,FFB,FFB BPM 11 Read Back,Current Variable,IBC1H04CRCUR2
+The Beam,FFB,FFB BPM 11 Read Back,Alarm Type,EPICS
+The Beam,FFB,FFB BPM 11 Read Back,User Silence Status,Alert
+The Beam,FFB,FFB BPM 11 Read Back,User Notify Status,OK
+The Beam,FFB,FFB BPM 11 Read Back,Trip Limit,8
+The Beam,FFB,FFB BPM 11 Read Back,Trip Counter,0
+The Beam,FFB,FFB BPM 4A Read Back,Alarm Status,OK
+The Beam,FFB,FFB BPM 4A Read Back,Value,0
+The Beam,FFB,FFB BPM 4A Read Back,Exactly,0
+The Beam,FFB,FFB BPM 4A Read Back,IOC Alarm List Name,IPM1H04AAlrm
+The Beam,FFB,FFB BPM 4A Read Back,Current Variable,IBC1H04CRCUR2
+The Beam,FFB,FFB BPM 4A Read Back,Alarm Type,EPICS
+The Beam,FFB,FFB BPM 4A Read Back,User Silence Status,Alert
+The Beam,FFB,FFB BPM 4A Read Back,User Notify Status,OK
+The Beam,FFB,FFB BPM 4A Read Back,Trip Limit,8
+The Beam,FFB,FFB BPM 4A Read Back,Trip Counter,0
+The Beam,FFB,FFB BPM 4E Read Back,Alarm Status,OK
+The Beam,FFB,FFB BPM 4E Read Back,Value,0
+The Beam,FFB,FFB BPM 4E Read Back,Exactly,0
+The Beam,FFB,FFB BPM 4E Read Back,IOC Alarm List Name,IPM1H04EAlrm
+The Beam,FFB,FFB BPM 4E Read Back,Current Variable,IBC1H04CRCUR2
+The Beam,FFB,FFB BPM 4E Read Back,Alarm Type,EPICS
+The Beam,FFB,FFB BPM 4E Read Back,User Silence Status,Alert
+The Beam,FFB,FFB BPM 4E Read Back,User Notify Status,OK
+The Beam,FFB,FFB BPM 4E Read Back,Trip Limit,8
+The Beam,FFB,FFB BPM 4E Read Back,Trip Counter,0
+The Beam,FFB,BPM settings,Value,OK
+The Beam,FFB,BPM settings,Alarm Status,OK
+The Beam,FFB,BPM settings,User Silence Status,Alert
+The Beam,FFB,BPM settings,User Notify Status,OK
+The Beam,FFB,BPM settings,Script Name,checkFFBbpms.sh
+The Beam,FFB,BPM settings,Exactly,OK
+The Beam,FFB,BPM settings,Trip Limit,8
+The Beam,FFB,BPM settings,Trip Counter,0
+The Beam,FFB,BPM settings,Response,Look at FFB BPMs
+The Beam,FFB,BPM settings,Alarm Type,BASH
+Hall A,HRS Detectors,VDC Thresholds,Alarm Status,OK
+Hall A,HRS Detectors,VDC Thresholds,Value,2.99993
+Hall A,HRS Detectors,VDC Thresholds,Low,2.8
+Hall A,HRS Detectors,VDC Thresholds,LowLow,1.0
+Hall A,HRS Detectors,VDC Thresholds,Alarm Type,EPICS
+Hall A,HRS Detectors,VDC Thresholds,Variable Name,RVDCthres:volt1Read
+Hall A,HRS Detectors,VDC Thresholds,User Silence Status,Alert
+Hall A,HRS Detectors,VDC Thresholds,User Notify Status,OK
+Hall A,Arc Momentum,Hall A Dpp,Alarm Status,OK
+Hall A,Arc Momentum,Hall A Dpp,Value,0
+Hall A,Arc Momentum,Hall A Dpp,Low,-0.002
+Hall A,Arc Momentum,Hall A Dpp,High,0.00025
+Hall A,Arc Momentum,Hall A Dpp,Alarm Type,EPICS
+Hall A,Arc Momentum,Hall A Dpp,Variable Name,HALLA:dpp
+Hall A,Arc Momentum,Hall A Dpp,Trip Limit,12
+Hall A,Arc Momentum,Hall A Dpp,Trip Counter,0
+Hall A,Arc Momentum,Hall A Dpp,User Silence Status,Alert
+Hall A,Arc Momentum,Hall A Dpp,User Notify Status,OK
+Hall A,Magnets,All Set and Readback checks,Alarm Status,OK
+Hall A,Magnets,All Set and Readback checks,Exactly,OK
+Hall A,Magnets,All Set and Readback checks,Value,OK
+Hall A,Magnets,All Set and Readback checks,User Silence Status,Alert
+Hall A,Magnets,All Set and Readback checks,User Notify Status,OK
+Hall A,Magnets,All Set and Readback checks,Script Name,CheckHRSMagnets.sh
+Hall A,Magnets,All Set and Readback checks,Trip Limit,3
+Hall A,Magnets,All Set and Readback checks,Trip Counter,0
+Hall A,Magnets,All Set and Readback checks,Alarm Type,BASH
+Hall A,Collimator,IOC Response,Alarm Status,OK
+Hall A,Collimator,IOC Response,Case Variable Name,PREXSeptumTemp20
+Hall A,Collimator,IOC Response,Case Value,23.3873
+Hall A,Collimator,IOC Response,Variable Name,IBC1H04CRCUR2
+Hall A,Collimator,IOC Response,Value,6.24
+Hall A,Collimator,IOC Response,High BAD,-1.0
+Hall A,Collimator,IOC Response,User Silence Status,Alert
+Hall A,Collimator,IOC Response,User Notify Status,OK
+Hall A,Collimator,IOC Response,Trip Limit,2
+Hall A,Collimator,IOC Response,Trip Counter,0
+Hall A,Collimator,IOC Response,Alarm Type,EPICS
+Hall A,Collimator,IOC Response,Response,Call MCC to turn off beam immediately and reboot IOC
+Hall A,Collimator,IOC Response,Alert Sound,10
+Hall A,Collimator,0.5 GPM Water Flow,High,10
+Hall A,Collimator,0.5 GPM Water Flow,Low,3
+Hall A,Collimator,0.5 GPM Water Flow,Value,5.0498
+Hall A,Collimator,0.5 GPM Water Flow,Alarm Status,OK
+Hall A,Collimator,0.5 GPM Water Flow,Alarm Type,EPICS
+Hall A,Collimator,0.5 GPM Water Flow,Variable Name,HacB_HPE1313A:0_Ch11
+Hall A,Collimator,0.5 GPM Water Flow,User Silence Status,Alert
+Hall A,Collimator,0.5 GPM Water Flow,User Notify Status,OK
+Hall A,Collimator,0.5 GPM Water Flow,Alert Sound,10
+Hall A,Collimator,1 GPM Water Flow,High,10
+Hall A,Collimator,1 GPM Water Flow,Low,2.5
+Hall A,Collimator,1 GPM Water Flow,Value,3.5957
+Hall A,Collimator,1 GPM Water Flow,Alarm Status,OK
+Hall A,Collimator,1 GPM Water Flow,Alarm Type,EPICS
+Hall A,Collimator,1 GPM Water Flow,Variable Name,HacB_HPE1313A:0_Ch24
+Hall A,Collimator,1 GPM Water Flow,User Silence Status,Alert
+Hall A,Collimator,1 GPM Water Flow,User Notify Status,OK
+Hall A,Collimator,Input Water Temp,High,29.5
+Hall A,Collimator,Input Water Temp,Low,15
+Hall A,Collimator,Input Water Temp,Value,23.2281
+Hall A,Collimator,Input Water Temp,Alarm Status,OK
+Hall A,Collimator,Input Water Temp,Alarm Type,EPICS
+Hall A,Collimator,Input Water Temp,Variable Name,PREXSeptumTemp13
+Hall A,Collimator,Input Water Temp,User Silence Status,Alert
+Hall A,Collimator,Input Water Temp,User Notify Status,OK
+Hall A,Collimator,Return Water Temp,High,31.5
+Hall A,Collimator,Return Water Temp,Low,15
+Hall A,Collimator,Return Water Temp,Value,23.3873
+Hall A,Collimator,Return Water Temp,Alarm Status,OK
+Hall A,Collimator,Return Water Temp,Alarm Type,EPICS
+Hall A,Collimator,Return Water Temp,Variable Name,PREXSeptumTemp20
+Hall A,Collimator,Return Water Temp,User Silence Status,Alert
+Hall A,Collimator,Return Water Temp,User Notify Status,OK
+Hall A,Collimator,Return Water Temp,Alert Sound,10
+Hall A,Collimator,Return Delta 3,Value,0.1592
+Hall A,Collimator,Return Delta 3,Alarm Status,OK
+Hall A,Collimator,Return Delta 3,High,3.0
+Hall A,Collimator,Return Delta 3,Low,-0.5
+Hall A,Collimator,Return Delta 3,Variable Name,PREXSeptumTemp20
+Hall A,Collimator,Return Delta 3,Difference Reference Variable Name,PREXSeptumTemp13
+Hall A,Collimator,Return Delta 3,Difference Reference Value,23.2281
+Hall A,Collimator,Return Delta 3,User Silence Status,Alert
+Hall A,Collimator,Return Delta 3,User Notify Status,OK
+Hall A,Collimator,Return Delta 3,Alarm Type,EPICS
+Hall A,Collimator,Return Delta 3,Trip Limit,7
+Hall A,Collimator,Return Delta 3,Trip Counter,0
+Hall A,Collimator,Return Delta 3,Response,ELOG then call RC and maybe Silence
+Hall A,Collimator,Return Delta 5,Value,0.1592
+Hall A,Collimator,Return Delta 5,Alarm Status,OK
+Hall A,Collimator,Return Delta 5,High,5.0
+Hall A,Collimator,Return Delta 5,Low,-0.5
+Hall A,Collimator,Return Delta 5,Variable Name,PREXSeptumTemp20
+Hall A,Collimator,Return Delta 5,Difference Reference Variable Name,PREXSeptumTemp13
+Hall A,Collimator,Return Delta 5,Difference Reference Value,23.2281
+Hall A,Collimator,Return Delta 5,User Silence Status,Alert
+Hall A,Collimator,Return Delta 5,User Notify Status,OK
+Hall A,Collimator,Return Delta 5,Alarm Type,EPICS
+Hall A,Collimator,Return Delta 5,Response,Call MCC to turn off beam immediately
+Hall A,Collimator,Return Delta 5,Trip Counter,0
+Hall A,Collimator,Return Delta 5,Response,Call MCC to turn off beam immediately
+Hall A,Raster,Raster IX,Value,4.0584
+Hall A,Raster,Raster IX,Variable Name,EHAR_B_IXPEAK
+Hall A,Raster,Raster IX,Low,3.9
+Hall A,Raster,Raster IX,Alarm Status,OK
+Hall A,Raster,Raster IX,Alarm Type,EPICS
+Hall A,Raster,Raster IX,User Silence Status,Alert
+Hall A,Raster,Raster IX,User Notify Status,OK
+Hall A,Raster,Raster IX,Threshold Variable Name,IBC1H04CRCUR2
+Hall A,Raster,Raster IX,Threshold Value,6.24
+Hall A,Raster,Raster IX,Threshold Low,-0.05
+Hall A,Raster,Raster IX,Threshold 2 Variable Name,pcrex90_PullString
+Hall A,Raster,Raster IX,Threshold 2 Value,2009.9
+Hall A,Raster,Raster IX,Threshold 2 Low,1240
+Hall A,Raster,Raster IX,Threshold 2 High,2600
+Hall A,Raster,Raster IX,Alert Sound,10
+Hall A,Raster,Raster IY,Value,4.46424
+Hall A,Raster,Raster IY,Variable Name,EHAR_B_IYPEAK
+Hall A,Raster,Raster IY,Low,4.3
+Hall A,Raster,Raster IY,Alarm Status,OK
+Hall A,Raster,Raster IY,Alarm Type,EPICS
+Hall A,Raster,Raster IY,User Silence Status,Alert
+Hall A,Raster,Raster IY,User Notify Status,OK
+Hall A,Raster,Raster IY,Threshold Variable Name,IBC1H04CRCUR2
+Hall A,Raster,Raster IY,Threshold Value,6.24
+Hall A,Raster,Raster IY,Threshold Low,-0.05
+Hall A,Raster,Raster IY,Threshold 2 Variable Name,pcrex90_PullString
+Hall A,Raster,Raster IY,Threshold 2 Value,2009.9
+Hall A,Raster,Raster IY,Threshold 2 Low,1240
+Hall A,Raster,Raster IY,Threshold 2 High,2700
+Hall A,Raster,Raster IY,Alert Sound,10
+CODA,Time since last start,Start Time,Variable Name,Run Start Time
+CODA,Time since last start,Start Time,Value,148
+CODA,Time since last start,Start Time,Start Time,1583957699
+CODA,Time since last start,Start Time,Run Number,7085
+CODA,Time since last start,Start Time,Alarm Status,OK
+CODA,Time since last start,Start Time,High,4800
+CODA,Time since last start,Start Time,User Silence Status,Alert
+CODA,Time since last start,Start Time,User Notify Status,OK
+CODA,Time since last start,Start Time,Alarm Type,CODA
+CODA,Time since last start,Start Time,Response,Start a new CODA run
+Japan,BPM-12-WS,yield_bpm12WS,Value,-21188.7
+Japan,BPM-12-WS,yield_bpm12WS,Alarm Status,OK
+Japan,BPM-12-WS,yield_bpm12WS,HighHigh,180000
+Japan,BPM-12-WS,yield_bpm12WS,Ring-Length,100
+Japan,BPM-12-WS,yield_bpm12WS,Tolerance,30
+Japan,BPM-12-WS,yield_bpm12WS,Alarm Type,External
+Japan,BPM-12-WS,yield_bpm12WS,User Silence Status,Alert
+Japan,BPM-12-WS,yield_bpm12WS,User Notify Status,OK
+Japan,BPM-12-WS,yield_bpm12WS,Response,Call MCC ask to gain search
+Japan,BPM-4a-WS,yield_bpm4aWS,Value,-1408.62
+Japan,BPM-4a-WS,yield_bpm4aWS,Alarm Status,OK
+Japan,BPM-4a-WS,yield_bpm4aWS,HighHigh,180000
+Japan,BPM-4a-WS,yield_bpm4aWS,Ring-Length,100
+Japan,BPM-4a-WS,yield_bpm4aWS,Tolerance,30
+Japan,BPM-4a-WS,yield_bpm4aWS,Alarm Type,External
+Japan,BPM-4a-WS,yield_bpm4aWS,User Silence Status,Alert
+Japan,BPM-4a-WS,yield_bpm4aWS,User Notify Status,OK
+Japan,BPM-4a-WS,yield_bpm4aWS,Response,Call MCC ask to gain search
+Japan,BPM-4e-WS,yield_bpm4eWS,Value,-12200.1
+Japan,BPM-4e-WS,yield_bpm4eWS,Alarm Status,OK
+Japan,BPM-4e-WS,yield_bpm4eWS,HighHigh,180000
+Japan,BPM-4e-WS,yield_bpm4eWS,Ring-Length,100
+Japan,BPM-4e-WS,yield_bpm4eWS,Tolerance,30
+Japan,BPM-4e-WS,yield_bpm4eWS,Alarm Type,External
+Japan,BPM-4e-WS,yield_bpm4eWS,User Silence Status,Alert
+Japan,BPM-4e-WS,yield_bpm4eWS,User Notify Status,OK
+Japan,BPM-4e-WS,yield_bpm4eWS,Response,Call MCC ask to gain search
+Japan,BPM-11-WS,yield_bpm11WS,Value,-20660.8
+Japan,BPM-11-WS,yield_bpm11WS,Alarm Status,OK
+Japan,BPM-11-WS,yield_bpm11WS,HighHigh,180000
+Japan,BPM-11-WS,yield_bpm11WS,Ring-Length,100
+Japan,BPM-11-WS,yield_bpm11WS,Tolerance,30
+Japan,BPM-11-WS,yield_bpm11WS,Alarm Type,External
+Japan,BPM-11-WS,yield_bpm11WS,User Silence Status,Alert
+Japan,BPM-11-WS,yield_bpm11WS,User Notify Status,OK
+Japan,BPM-11-WS,yield_bpm11WS,Response,Call MCC ask to gain search

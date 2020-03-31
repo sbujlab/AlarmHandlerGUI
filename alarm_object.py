@@ -54,6 +54,7 @@ class ALARM_LOOP_GUI():
 
   def GUI_loop(self,alarmHandlerGUI):
     gc.collect()
+    del gc.garbage[:]
     if (alarmHandlerGUI.alarmLoop.globalLoopStatus=="Looping"):
       print("Waited 10 seconds, refreshing GUI")
       u.update_objectList(alarmHandlerGUI.OL,alarmHandlerGUI.fileArray,alarmHandlerGUI.alarmLoop.alarmList)
@@ -708,7 +709,7 @@ class ALARM():
         self.pList["Alarm Status"] = exactlyStr
       elif comparator != "NULL" and comparator2 != "NULL" and (val == comparator and val == comparator2): # Comparator wants to check if its not exactly
         # FIXME This assumes the comparator is only ever used for Aq feedback
-        self.pList["Alarm Status"] = "Aq Feedback Is Off"
+        self.pList["Alarm Status"] = "Value is Static!"
       else:
         self.pList["Alarm Status"] = "OK"
       # If the thresholds conditions are NOT met then erase prior alarm status, else let that Alert status propagate forward

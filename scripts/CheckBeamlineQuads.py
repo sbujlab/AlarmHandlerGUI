@@ -12,6 +12,7 @@ args = vars(parser.parse_args())
 
 Magnet_set_epics = ["MQK1H01.BDL","MQO1H02.BDL","MQM1H02.BDL","MQO1H03.BDL","MQO1H03A.BDL","MQA1H04.BDL"]
 Magnet_set_points = [-11520.5,7563.26,-7286.23,7601.64,7657.7,-6100.9]
+Magnet_set_points_tolerances = [1.0,1.0,1.0,1.0,1.0,1.0]
 Magnet_readback_epics = ["MQK1H01M","MQO1H02M","MQM1H02M","MQO1H03M","MQO1H03AM","MQA1H04M"]
 Magnet_readback_points = [-1.32967,46.5788,-42.5495,42.7773,41.5018,-0.750732]
 Magnet_readback_tolerances = [15.0,15.0,15.0,15.0,15.0,15.0]
@@ -32,8 +33,8 @@ elif float(cond_out) > 10.0:
     if "Invalid" in cond_out:
       print("Error, {} not found".format(Magnet_set_epics[i]))
       continue
-    if Magnet_set_points[i]!=float(cond_out):
-      print("ERROR: Magnet set point {} = {} -> Not equal to correct value of {}".format(Magnet_set_epics[i],cond_out,Magnet_set_points[i]))
+    if abs(Magnet_set_points[i] - float(cond_out)) > Magnet_set_points_tolerances[i]:
+      print("ERROR: Magnet set point {} = {} -> Not equal to correct value of {} +- {}".format(Magnet_set_epics[i],cond_out,Magnet_set_points[i],Magnet_set_points_tolerances[i]))
 
  
     cmds = ['caget', '-t', '-w 1', str(Magnet_readback_epics[i])]
