@@ -1,3 +1,5 @@
 #!/bin/tcsh
+setenv TCL_LIBRARY /usr/share/tcl8.5/
 cd /adaqfs/home/apar/cameronc/ExpertShift/GUI
+/bin/rm -f alarmHistory.csv
 python3 AlarmHandler.py -f ExpertConfig.txt $argv
