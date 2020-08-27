@@ -24,7 +24,7 @@ class ALARM_HANDLER(tk.Frame):
     self.pDataFrame.disp = []
     self.colTitles = {0:"Alarms"}
     self.NperCol = 10
-    self.NperCol1 = 5
+    self.NperCol1 = 6
     OL.currentlySelectedButton = -1
     OL.displayPList = 0
     OL.displayPListN = -1
@@ -219,7 +219,8 @@ class ALARM_HANDLER(tk.Frame):
     #tk.Frame.__init__(self.alarmFrame, tab, width=2000, height=2000, **kwargs)  # holds canvas & scrollbars
     self.alarmFrame.grid_rowconfigure(0, weight=1)
     self.alarmFrame.grid_columnconfigure(0, weight=1)
-    self.canvas = tk.Canvas(self.alarmFrame, width=800, height=650, bd=0, highlightthickness=0)
+    #FIXME Arbitrarily chose width = 850 and height = 750 because it looks good
+    self.canvas = tk.Canvas(self.alarmFrame, width=850, height=750, bd=0, highlightthickness=0)
     self.hScroll = tk.Scrollbar(self.alarmFrame, orient='horizontal',
         command=self.canvas.xview)
     self.hScroll.grid(row=1, column=0, sticky='we')
@@ -230,7 +231,7 @@ class ALARM_HANDLER(tk.Frame):
     self.canvas.configure(xscrollcommand=self.hScroll.set,
         yscrollcommand=self.vScroll.set)
 
-    self.aFrame = tk.Frame(self.canvas, width=800, height=650, bd=2)
+    self.aFrame = tk.Frame(self.canvas, width=850, height=750, bd=2)
     self.aFrame.grid_columnconfigure(0, weight=1)
     self.canvas.create_window(0, 0, window=self.aFrame, anchor='nw', tags='inner')
     # OLD
