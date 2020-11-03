@@ -312,6 +312,7 @@ class ALARM_HANDLER(tk.Frame):
       for i in range(0,len(OL.objectList[2])):
         # Loop over the list of objects, creating displayFrames
         localStr = "{}, {}, {}".format(OL.objectList[0][OL.objectList[2][i].parentIndices[0]].value,OL.objectList[1][OL.objectList[2][i].parentIndices[1]].value[:25],OL.objectList[2][i].value[:25])
+        # Write a string that is composed of the three levels - Top, second, and Name, with some useful formating.
         if len(localStr) > 30:
           localStr = "{}, {}\n{}".format(OL.objectList[0][OL.objectList[2][i].parentIndices[0]].value,OL.objectList[1][OL.objectList[2][i].parentIndices[1]].value[:25],OL.objectList[2][i].value[:35])
         disp = tk.LabelFrame(self.alarmCols[int(1.0*i/self.NperCol)], text=localStr, font=('Helvetica 8'), background=u.lightgrey_color) 
