@@ -1,2 +1,47 @@
-"Name=Injector PQB, Hall C Aq, BCM Asym from Aq Feedback",Value=0,Alarm Status=Aq Feedback Is Off,User Silence Status=Alert,User Notify Status=Aq Feedback Is Off,Script Name=/adaqfs/home/apar/alarms/AlarmHandlerGUI/CheckAqFeedbackC.sh,Case Variable Name=Check-EB,Case Value=EB-Active,Same Value Comparator EB-Active=0,Same Value Comparator 2 EB-Active=0,Trip Limit=40,Trip Counter=41,Response=Check Aq feedback and Runbird,Alarm Type=BASH,"Time=time.struct_time(tm_year=2020, tm_mon=3, tm_mday=12, tm_hour=16, tm_min=32, tm_sec=51, tm_wday=3, tm_yday=72, tm_isdst=1)"
-"Name=Injector PQB, Hall C Aq, BCM Asym from Aq Feedback",Value=74.507,Alarm Status=OK,User Silence Status=Alert,User Notify Status=Aq,Script Name=/adaqfs/home/apar/alarms/AlarmHandlerGUI/CheckAqFeedbackC.sh,Case Variable Name=Check-EB,Case Value=EB-Active,Same Value Comparator EB-Active=74.507,Same Value Comparator 2 EB-Active=-2.14639,Trip Limit=40,Trip Counter=0,Response=Check Aq feedback and Runbird,Alarm Type=BASH,"Time=time.struct_time(tm_year=2020, tm_mon=3, tm_mday=12, tm_hour=16, tm_min=42, tm_sec=51, tm_wday=3, tm_yday=72, tm_isdst=1)"
+"Name=Hall A, Collimator, 0.5 GPM Water Flow",High=10,Low=3,Value=0.0273438,Alarm Status=Low,Alarm Type=EPICS,Variable Name=HacB_HPE1313A:0_Ch11,User Silence Status=Alert,User Notify Status=Low,Alert Sound=10,"Time=time.struct_time(tm_year=2020, tm_mon=10, tm_mday=22, tm_hour=18, tm_min=31, tm_sec=34, tm_wday=3, tm_yday=296, tm_isdst=1)"
+"Name=Hall A, Raster, Raster IX",Value=-1,Variable Name=EHAR_B_IXPEAK,Low=3.9,Alarm Status=Low,Alarm Type=EPICS,User Silence Status=Alert,User Notify Status=Low,Threshold Variable Name=IBC1H04CRCUR2,Threshold Value=0,Threshold Low=-0.05,Threshold 2 Variable Name=pcrex90_PullString,Threshold 2 Value=1833.1,Threshold 2 Low=1240,Threshold 2 High=1900,Alert Sound=10,"Time=time.struct_time(tm_year=2020, tm_mon=10, tm_mday=22, tm_hour=18, tm_min=31, tm_sec=34, tm_wday=3, tm_yday=296, tm_isdst=1)"
+"Name=Hall A, Raster, Raster IY",Value=-1,Variable Name=EHAR_B_IYPEAK,Low=4.3,Alarm Status=Low,Alarm Type=EPICS,User Silence Status=Alert,User Notify Status=Low,Threshold Variable Name=IBC1H04CRCUR2,Threshold Value=0,Threshold Low=-0.05,Threshold 2 Variable Name=pcrex90_PullString,Threshold 2 Value=1833.1,Threshold 2 Low=1240,Threshold 2 High=1900,Alert Sound=10,"Time=time.struct_time(tm_year=2020, tm_mon=10, tm_mday=22, tm_hour=18, tm_min=31, tm_sec=34, tm_wday=3, tm_yday=296, tm_isdst=1)"
+"Name=Hall A, Magnets, All Set and Readback checks",Alarm Status=Exactly,Exactly=OK,"Value=ERROR: Magnet set point MQ171L.S = 0
+  Not equal to correct value of 225.387
+MAJOR ERROR: multiple problems
+  Check GUIs and stripcharts
+Please check the magnet set 
+points and readbacks. If a 
+Dipole is bad then check 
+detector alignment",User Silence Status=Alert,User Notify Status=Exactly,Script Name=/adaqfs/home/apar/alarms/AlarmHandlerGUI/CheckHRSMagnets.sh,Trip Limit=3,Trip Counter=4,Alarm Type=BASH,"Time=time.struct_time(tm_year=2020, tm_mon=10, tm_mday=22, tm_hour=18, tm_min=31, tm_sec=46, tm_wday=3, tm_yday=296, tm_isdst=1)"
+"Name=Hall A, Collimator, 0.5 GPM Water Flow",High=10,Low=3,Value=0.0283203,Alarm Status=Low,Alarm Type=EPICS,Variable Name=HacB_HPE1313A:0_Ch11,User Silence Status=Alert,User Notify Status=Low,Alert Sound=10,"Time=time.struct_time(tm_year=2020, tm_mon=10, tm_mday=22, tm_hour=18, tm_min=41, tm_sec=38, tm_wday=3, tm_yday=296, tm_isdst=1)"
+"Name=Hall A, Magnets, All Set and Readback checks",Alarm Status=Exactly,Exactly=OK,"Value=ERROR: Magnet set point MQ171L.S = 0
+  Not equal to correct value of 225.387
+MAJOR ERROR: multiple problems
+  Check GUIs and stripcharts
+Please check the magnet set 
+points and readbacks. If a 
+Dipole is bad then check 
+detector alignment",User Silence Status=Alert,User Notify Status=Exactly,Script Name=/adaqfs/home/apar/alarms/AlarmHandlerGUI/CheckHRSMagnets.sh,Trip Limit=3,Trip Counter=150,Alarm Type=BASH,"Time=time.struct_time(tm_year=2020, tm_mon=10, tm_mday=22, tm_hour=18, tm_min=41, tm_sec=53, tm_wday=3, tm_yday=296, tm_isdst=1)"
+"Name=Hall A, Collimator, 0.5 GPM Water Flow",High=10,Low=3,Value=0.0273438,Alarm Status=Low,Alarm Type=EPICS,Variable Name=HacB_HPE1313A:0_Ch11,User Silence Status=Alert,User Notify Status=Low,Alert Sound=10,"Time=time.struct_time(tm_year=2020, tm_mon=10, tm_mday=22, tm_hour=18, tm_min=51, tm_sec=45, tm_wday=3, tm_yday=296, tm_isdst=1)"
+"Name=Hall A, Magnets, All Set and Readback checks",Alarm Status=Exactly,Exactly=OK,"Value=ERROR: Magnet set point MQ171L.S = 0
+  Not equal to correct value of 225.387
+MAJOR ERROR: multiple problems
+  Check GUIs and stripcharts
+Please check the magnet set 
+points and readbacks. If a 
+Dipole is bad then check 
+detector alignment",User Silence Status=Alert,User Notify Status=Exactly,Script Name=/adaqfs/home/apar/alarms/AlarmHandlerGUI/CheckHRSMagnets.sh,Trip Limit=3,Trip Counter=313,Alarm Type=BASH,"Time=time.struct_time(tm_year=2020, tm_mon=10, tm_mday=22, tm_hour=18, tm_min=52, tm_sec=0, tm_wday=3, tm_yday=296, tm_isdst=1)"
+"Name=Hall A, Collimator, 0.5 GPM Water Flow",High=10,Low=3,Value=0.0273438,Alarm Status=Low,Alarm Type=EPICS,Variable Name=HacB_HPE1313A:0_Ch11,User Silence Status=Alert,User Notify Status=Low,Alert Sound=10,"Time=time.struct_time(tm_year=2020, tm_mon=10, tm_mday=22, tm_hour=19, tm_min=1, tm_sec=57, tm_wday=3, tm_yday=296, tm_isdst=1)"
+"Name=Hall A, Magnets, All Set and Readback checks",Alarm Status=Exactly,Exactly=OK,"Value=ERROR: Magnet set point MQ171L.S = 0
+  Not equal to correct value of 225.387
+MAJOR ERROR: multiple problems
+  Check GUIs and stripcharts
+Please check the magnet set 
+points and readbacks. If a 
+Dipole is bad then check 
+detector alignment",User Silence Status=Alert,User Notify Status=Exactly,Script Name=/adaqfs/home/apar/alarms/AlarmHandlerGUI/CheckHRSMagnets.sh,Trip Limit=3,Trip Counter=437,Alarm Type=BASH,"Time=time.struct_time(tm_year=2020, tm_mon=10, tm_mday=22, tm_hour=19, tm_min=2, tm_sec=12, tm_wday=3, tm_yday=296, tm_isdst=1)"
+"Name=Hall A, Collimator, 0.5 GPM Water Flow",High=10,Low=3,Value=0.027832,Alarm Status=Low,Alarm Type=EPICS,Variable Name=HacB_HPE1313A:0_Ch11,User Silence Status=Alert,User Notify Status=Low,Alert Sound=10,"Time=time.struct_time(tm_year=2020, tm_mon=10, tm_mday=22, tm_hour=19, tm_min=12, tm_sec=3, tm_wday=3, tm_yday=296, tm_isdst=1)"
+"Name=Hall A, Magnets, All Set and Readback checks",Alarm Status=Exactly,Exactly=OK,"Value=ERROR: Magnet set point MQ171L.S = 0
+  Not equal to correct value of 225.387
+MAJOR ERROR: multiple problems
+  Check GUIs and stripcharts
+Please check the magnet set 
+points and readbacks. If a 
+Dipole is bad then check 
+detector alignment",User Silence Status=Alert,User Notify Status=Exactly,Script Name=/adaqfs/home/apar/alarms/AlarmHandlerGUI/CheckHRSMagnets.sh,Trip Limit=3,Trip Counter=557,Alarm Type=BASH,"Time=time.struct_time(tm_year=2020, tm_mon=10, tm_mday=22, tm_hour=19, tm_min=12, tm_sec=19, tm_wday=3, tm_yday=296, tm_isdst=1)"

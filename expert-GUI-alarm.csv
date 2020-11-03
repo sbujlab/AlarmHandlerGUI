@@ -1,0 +1,285 @@
+Checks,Stats,Data,Value,"Live ROOTfile last updated at 2020-09-18 08:27:56.937403281 -0400
+Stats file last updated at 2020-09-18 08:28:49.504969367 -0400
+
+	Total Number of events = 18825
+	EventCut passing events = 0 (0.00%)
+	Current < 50 #muA events = 18825 (100.00%)
+	BPM12 wire saturation events = 0 (0.00%)
+	Total Good Q this run (4C = slug) = 0.000 C ABU / 0.000 C no cuts
+	Good beam time / total time = 0.00 ABU minutes / 2.61 mins"
+Checks,Stats,Data,Alarm Status,OK
+Checks,Stats,Data,User Silence Status,Alert
+Checks,Stats,Data,User Notify Status,OK
+Checks,Stats,Data,Script Name,./scripts/CheckStats.sh
+Checks,Stats,Data,Alarm Type,BASH
+Checks,Integrated Charge,Estimate,Value,"- Shift Info:
+-- Swing shift, 2020-10-22
+-- 12374 seconds in, 42.96% done
+-- Average current =  uA
+- Charge:
+-- Total integrated charge = 
+-- Projected total charge = 
+-- 90% cut efficiency integrated charge = 
+-- 90% Projected total good charge ="
+Checks,Integrated Charge,Estimate,Alarm Status,OK
+Checks,Integrated Charge,Estimate,User Silence Status,Alert
+Checks,Integrated Charge,Estimate,User Notify Status,OK
+Checks,Integrated Charge,Estimate,Script Name,../checks/checkCharge.sh
+Checks,Integrated Charge,Estimate,Alarm Type,BASH
+Checks,Run Info,RCDB Info,Value,"The most recent run in progress is
+Run: 8572  -  Slug: 223
+Condition: Test  -  Target: Home
+User comment: Hallc charge feedback"
+Checks,Run Info,RCDB Info,Alarm Status,OK
+Checks,Run Info,RCDB Info,User Silence Status,Alert
+Checks,Run Info,RCDB Info,User Notify Status,OK
+Checks,Run Info,RCDB Info,Script Name,./scripts/runNotes.sh
+Checks,Run Info,RCDB Info,Alarm Type,BASH
+Checks,Alarm Handler,Status,Value,"Global Alarm Alarmed
+The Beam,FFB,FFB Unix Server On,Alarm Status,Exactly
+The Beam,FFB,FFB Manual,Alarm Status,Exactly
+The Beam,FFB,FFB Gain WS Sat,Alarm Status,High
+The Beam,FFB,FFB Gain Limit,Alarm Status,High
+Hall A,Magnets,All Set and Readback checks,Alarm Status,Exactly"
+Checks,Alarm Handler,Status,Alarm Status,OK
+Checks,Alarm Handler,Status,User Silence Status,Alert
+Checks,Alarm Handler,Status,User Notify Status,OK
+Checks,Alarm Handler,Status,Script Name,./scripts/CheckGlobalAlarmStatus.sh
+Checks,Alarm Handler,Status,Alarm Type,BASH
+Checks,Beam Current,Micro Amps,Value,0
+Checks,Beam Current,Micro Amps,Alarm Status,OK
+Checks,Beam Current,Micro Amps,User Silence Status,Alert
+Checks,Beam Current,Micro Amps,User Notify Status,OK
+Checks,Beam Current,Micro Amps,Variable Name,IBC1H04CRCUR2
+Checks,Beam Current,Micro Amps,Alarm Type,EPICS
+Checks,Beam Trips,Time Since Last Trip,Value,Beam is tripped now
+Checks,Beam Trips,Time Since Last Trip,Alarm Status,OK
+Checks,Beam Trips,Time Since Last Trip,User Silence Status,Alert
+Checks,Beam Trips,Time Since Last Trip,User Notify Status,OK
+Checks,Beam Trips,Time Since Last Trip,Script Name,../checks/checkTrip.sh
+Checks,Beam Trips,Time Since Last Trip,Alarm Type,BASH
+Injector PQB,Hall A Aq,BCM Asym from Aq Feedback,Value,0
+Injector PQB,Hall A Aq,BCM Asym from Aq Feedback,Alarm Status,OK
+Injector PQB,Hall A Aq,BCM Asym from Aq Feedback,User Silence Status,Alert
+Injector PQB,Hall A Aq,BCM Asym from Aq Feedback,User Notify Status,OK
+Injector PQB,Hall A Aq,BCM Asym from Aq Feedback,Script Name,CheckAqFeedback.sh
+Injector PQB,Hall A Aq,BCM Asym from Aq Feedback,Case Variable Name,Check-EB
+Injector PQB,Hall A Aq,BCM Asym from Aq Feedback,Case Value,Current-Below-35uA
+Injector PQB,Hall A Aq,BCM Asym from Aq Feedback,Same Value Comparator EB-Active,1.82427
+Injector PQB,Hall A Aq,BCM Asym from Aq Feedback,Same Value Comparator 2 EB-Active,1.82427
+Injector PQB,Hall A Aq,BCM Asym from Aq Feedback,Trip Limit,30
+Injector PQB,Hall A Aq,BCM Asym from Aq Feedback,Trip Counter,0
+Injector PQB,Hall A Aq,BCM Asym from Aq Feedback,Response,Check Aq feedback and Runbird
+Injector PQB,Hall A Aq,BCM Asym from Aq Feedback,Alarm Type,BASH
+Injector PQB,Hall A Aq,BCM Asym Width 500ppm,Value,0
+Injector PQB,Hall A Aq,BCM Asym Width 500ppm,Alarm Status,OK
+Injector PQB,Hall A Aq,BCM Asym Width 500ppm,User Silence Status,Alert
+Injector PQB,Hall A Aq,BCM Asym Width 500ppm,User Notify Status,OK
+Injector PQB,Hall A Aq,BCM Asym Width 500ppm,Variable Name,BCM1H01_AsymWidth
+Injector PQB,Hall A Aq,BCM Asym Width 500ppm,High,500.0
+Injector PQB,Hall A Aq,BCM Asym Width 500ppm,Threshold Variable Name,IBC1H04CRCUR2
+Injector PQB,Hall A Aq,BCM Asym Width 500ppm,Threshold Value,0
+Injector PQB,Hall A Aq,BCM Asym Width 500ppm,Threshold Low,50.0
+Injector PQB,Hall A Aq,BCM Asym Width 500ppm,Trip Limit,10
+Injector PQB,Hall A Aq,BCM Asym Width 500ppm,Trip Counter,0
+Injector PQB,Hall A Aq,BCM Asym Width 500ppm,Response,Check Aq in the injector or on a scope
+Injector PQB,Hall A Aq,BCM Asym Width 500ppm,Alarm Type,EPICS
+Injector PQB,Hall C Aq,BCM Asym from Aq Feedback,Value,0
+Injector PQB,Hall C Aq,BCM Asym from Aq Feedback,Alarm Status,OK
+Injector PQB,Hall C Aq,BCM Asym from Aq Feedback,User Silence Status,Alert
+Injector PQB,Hall C Aq,BCM Asym from Aq Feedback,User Notify Status,OK
+Injector PQB,Hall C Aq,BCM Asym from Aq Feedback,Script Name,/adaqfs/home/apar/alarms/AlarmHandlerGUI/CheckAqFeedbackC.sh
+Injector PQB,Hall C Aq,BCM Asym from Aq Feedback,Case Variable Name,Check-EB
+Injector PQB,Hall C Aq,BCM Asym from Aq Feedback,Case Value,Current-Below-3uA
+Injector PQB,Hall C Aq,BCM Asym from Aq Feedback,Same Value Comparator EB-Active,-65.5171
+Injector PQB,Hall C Aq,BCM Asym from Aq Feedback,Same Value Comparator 2 EB-Active,-65.5171
+Injector PQB,Hall C Aq,BCM Asym from Aq Feedback,Trip Limit,40
+Injector PQB,Hall C Aq,BCM Asym from Aq Feedback,Trip Counter,0
+Injector PQB,Hall C Aq,BCM Asym from Aq Feedback,Response,Check Aq feedback and Runbird
+Injector PQB,Hall C Aq,BCM Asym from Aq Feedback,Alarm Type,BASH
+CODA,Time since last start,Start Time,Variable Name,Run Start Time
+CODA,Time since last start,Start Time,Value,3285
+CODA,Time since last start,Start Time,Start Time,1603405889
+CODA,Time since last start,Start Time,Run Number,8572
+CODA,Time since last start,Start Time,Alarm Status,OK
+CODA,Time since last start,Start Time,High,4800
+CODA,Time since last start,Start Time,User Silence Status,Alert
+CODA,Time since last start,Start Time,User Notify Status,OK
+CODA,Time since last start,Start Time,Alarm Type,CODA
+CODA,Time since last start,Start Time,Response,Start a new CODA run
+DAQ,Parity DAQ,Sync Check,Value,OK
+DAQ,Parity DAQ,Sync Check,Alarm Status,OK
+DAQ,Parity DAQ,Sync Check,User Silence Status,Alert
+DAQ,Parity DAQ,Sync Check,User Notify Status,OK
+DAQ,Parity DAQ,Sync Check,Script Name,/adaqfs/home/apar/alarms/AlarmHandlerGUI/CheckSync.sh
+DAQ,Parity DAQ,Sync Check,Trip Limit,20
+DAQ,Parity DAQ,Sync Check,Trip Counter,0
+DAQ,Parity DAQ,Sync Check,Response,Call DAQ experts and restart
+DAQ,Parity DAQ,Sync Check,Exactly,OK
+DAQ,Parity DAQ,Sync Check,Alarm Type,BASH
+DAQ,Parity DAQ,Sufficient Current to Run,Value,OK
+DAQ,Parity DAQ,Sufficient Current to Run,Alarm Status,OK
+DAQ,Parity DAQ,Sufficient Current to Run,User Silence Status,Alert
+DAQ,Parity DAQ,Sufficient Current to Run,User Notify Status,OK
+DAQ,Parity DAQ,Sufficient Current to Run,Script Name,/adaqfs/home/apar/alarms/AlarmHandlerGUI/CheckDAQ.sh
+DAQ,Parity DAQ,Sufficient Current to Run,Trip Limit,50
+DAQ,Parity DAQ,Sufficient Current to Run,Trip Counter,0
+DAQ,Parity DAQ,Sufficient Current to Run,Response,Start the DAQ
+DAQ,Parity DAQ,Sufficient Current to Run,Exactly,OK
+DAQ,Parity DAQ,Sufficient Current to Run,Alarm Type,BASH
+The Beam,Compton,Compton IOC Response,Alarm Status,OK
+The Beam,Compton,Compton IOC Response,Case Variable Name,COMPTON_PW1PCAV_ca
+The Beam,Compton,Compton IOC Response,Case Value,0.014911
+The Beam,Compton,Compton IOC Response,Variable Name,IBC1H04CRCUR2
+The Beam,Compton,Compton IOC Response,Value,0
+The Beam,Compton,Compton IOC Response,High BAD,5.0
+The Beam,Compton,Compton IOC Response,User Silence Status,Alert
+The Beam,Compton,Compton IOC Response,User Notify Status,OK
+The Beam,Compton,Compton IOC Response,Trip Limit,3
+The Beam,Compton,Compton IOC Response,Trip Counter,0
+The Beam,Compton,Compton IOC Response,Alarm Type,EPICS
+The Beam,Compton,Compton IOC Response,Response,Call Dave and Amali
+The Beam,Compton,Compton ROC Response,Value,0
+The Beam,Compton,Compton ROC Response,Alarm Status,OK
+The Beam,Compton,Compton ROC Response,User Silence Status,Alert
+The Beam,Compton,Compton ROC Response,User Notify Status,OK
+The Beam,Compton,Compton ROC Response,Script Name,CheckComptonDAQ.sh
+The Beam,Compton,Compton ROC Response,Case Variable Name,Check-EB
+The Beam,Compton,Compton ROC Response,Case Value,Current-Below-35uA
+The Beam,Compton,Compton ROC Response,Same Value Comparator EB-Active,3895
+The Beam,Compton,Compton ROC Response,Same Value Comparator 2 EB-Active,3523
+The Beam,Compton,Compton ROC Response,Trip Limit,8
+The Beam,Compton,Compton ROC Response,Trip Counter,0
+The Beam,Compton,Compton ROC Response,Response,Reboot Compton ROC 6
+The Beam,Compton,Compton ROC Response,Alarm Type,BASH
+The Beam,Compton,Compton Laser Power,Alarm Status,OK
+The Beam,Compton,Compton Laser Power,Threshold Variable Name,IBC1H04CRCUR2
+The Beam,Compton,Compton Laser Power,Threshold Value,0
+The Beam,Compton,Compton Laser Power,Threshold Low,10
+The Beam,Compton,Compton Laser Power,High,100000
+The Beam,Compton,Compton Laser Power,Low,1000
+The Beam,Compton,Compton Laser Power,Value,0.014911
+The Beam,Compton,Compton Laser Power,Alarm Type,EPICS
+The Beam,Compton,Compton Laser Power,Variable Name,COMPTON_PW1PCAV_ca
+The Beam,Compton,Compton Laser Power,User Silence Status,Alert
+The Beam,Compton,Compton Laser Power,Trip Limit,60
+The Beam,Compton,Compton Laser Power,Trip Counter,0
+The Beam,Compton,Compton Laser Power,User Notify Status,OK
+The Beam,Compton,Compton Laser Power,Response,Call the Compton laser on call
+The Beam,Compton,Compton E-det position,Alarm Status,OK
+The Beam,Compton,Compton E-det position,Threshold Variable Name,MCP1P01M
+The Beam,Compton,Compton E-det position,Threshold Value,0
+The Beam,Compton,Compton E-det position,Threshold High,2.0
+The Beam,Compton,Compton E-det position,Exactly,GARAGE
+The Beam,Compton,Compton E-det position,Value,NULL
+The Beam,Compton,Compton E-det position,Alarm Type,EPICS
+The Beam,Compton,Compton E-det position,INVALID Variable Name,COM_DE_position
+The Beam,Compton,Compton E-det position,User Silence Status,Alert
+The Beam,Compton,Compton E-det position,User Notify Status,OK
+The Beam,Compton,Compton E-det position,Response,Move the compton electron detector out of the beam
+Hall A,Magnets,All Set and Readback checks,Alarm Status,Exactly
+Hall A,Magnets,All Set and Readback checks,Exactly,OK
+Hall A,Magnets,All Set and Readback checks,Value,"ERROR: Magnet set point MQ171L.S = 0
+  Not equal to correct value of 225.387
+MAJOR ERROR: multiple problems
+  Check GUIs and stripcharts
+Please check the magnet set 
+points and readbacks. If a 
+Dipole is bad then check 
+detector alignment"
+Hall A,Magnets,All Set and Readback checks,User Silence Status,Silenced
+Hall A,Magnets,All Set and Readback checks,User Notify Status,Exactly
+Hall A,Magnets,All Set and Readback checks,Script Name,/adaqfs/home/apar/alarms/AlarmHandlerGUI/CheckHRSMagnets.sh
+Hall A,Magnets,All Set and Readback checks,Trip Limit,3
+Hall A,Magnets,All Set and Readback checks,Trip Counter,721
+Hall A,Magnets,All Set and Readback checks,Alarm Type,BASH
+Hall A,Collimator,IOC Response,Alarm Status,OK
+Hall A,Collimator,IOC Response,Case Variable Name,PREXSeptumTemp20
+Hall A,Collimator,IOC Response,Case Value,19.511
+Hall A,Collimator,IOC Response,Variable Name,IBC1H04CRCUR2
+Hall A,Collimator,IOC Response,Value,0
+Hall A,Collimator,IOC Response,High BAD,-1.0
+Hall A,Collimator,IOC Response,User Silence Status,Alert
+Hall A,Collimator,IOC Response,User Notify Status,OK
+Hall A,Collimator,IOC Response,Trip Limit,2
+Hall A,Collimator,IOC Response,Trip Counter,0
+Hall A,Collimator,IOC Response,Alarm Type,EPICS
+Hall A,Collimator,IOC Response,Response,Call MCC to turn off beam immediately and reboot IOC
+Hall A,Collimator,IOC Response,Alert Sound,10
+Hall A,Collimator,0.5 GPM Water Flow,High,10
+Hall A,Collimator,0.5 GPM Water Flow,Low,3
+Hall A,Collimator,0.5 GPM Water Flow,Value,0.0283203
+Hall A,Collimator,0.5 GPM Water Flow,Alarm Status,Low
+Hall A,Collimator,0.5 GPM Water Flow,Alarm Type,EPICS
+Hall A,Collimator,0.5 GPM Water Flow,Variable Name,HacB_HPE1313A:0_Ch11
+Hall A,Collimator,0.5 GPM Water Flow,User Silence Status,Silenced
+Hall A,Collimator,0.5 GPM Water Flow,User Notify Status,Low
+Hall A,Collimator,0.5 GPM Water Flow,Alert Sound,10
+Hall A,Collimator,1 GPM Water Flow,High,10
+Hall A,Collimator,1 GPM Water Flow,Low,2.5
+Hall A,Collimator,1 GPM Water Flow,Value,5.61572
+Hall A,Collimator,1 GPM Water Flow,Alarm Status,OK
+Hall A,Collimator,1 GPM Water Flow,Alarm Type,EPICS
+Hall A,Collimator,1 GPM Water Flow,Variable Name,HacB_HPE1313A:0_Ch24
+Hall A,Collimator,1 GPM Water Flow,User Silence Status,Alert
+Hall A,Collimator,1 GPM Water Flow,User Notify Status,OK
+Hall A,Collimator,Input Water Temperature,High,29.5
+Hall A,Collimator,Input Water Temperature,Low,15
+Hall A,Collimator,Input Water Temperature,Value,19.5856
+Hall A,Collimator,Input Water Temperature,Alarm Status,OK
+Hall A,Collimator,Input Water Temperature,Alarm Type,EPICS
+Hall A,Collimator,Input Water Temperature,Variable Name,PREXSeptumTemp13
+Hall A,Collimator,Input Water Temperature,User Silence Status,Alert
+Hall A,Collimator,Input Water Temperature,User Notify Status,OK
+Hall A,Collimator,Return Water Temperature,High,31.5
+Hall A,Collimator,Return Water Temperature,Low,15
+Hall A,Collimator,Return Water Temperature,Value,19.511
+Hall A,Collimator,Return Water Temperature,Alarm Status,OK
+Hall A,Collimator,Return Water Temperature,Alarm Type,EPICS
+Hall A,Collimator,Return Water Temperature,Variable Name,PREXSeptumTemp20
+Hall A,Collimator,Return Water Temperature,User Silence Status,Alert
+Hall A,Collimator,Return Water Temperature,User Notify Status,OK
+Hall A,Collimator,Return Water Temperature,Alert Sound,10
+Hall A,Collimator,Return Water Temp Delta 3C,Value,-0.0746
+Hall A,Collimator,Return Water Temp Delta 3C,Alarm Status,OK
+Hall A,Collimator,Return Water Temp Delta 3C,High,3.0
+Hall A,Collimator,Return Water Temp Delta 3C,Low,-0.5
+Hall A,Collimator,Return Water Temp Delta 3C,Variable Name,PREXSeptumTemp20
+Hall A,Collimator,Return Water Temp Delta 3C,Difference Reference Variable Name,PREXSeptumTemp13
+Hall A,Collimator,Return Water Temp Delta 3C,Difference Reference Value,19.5856
+Hall A,Collimator,Return Water Temp Delta 3C,User Silence Status,Alert
+Hall A,Collimator,Return Water Temp Delta 3C,User Notify Status,OK
+Hall A,Collimator,Return Water Temp Delta 3C,Alarm Type,EPICS
+Hall A,Collimator,Return Water Temp Delta 3C,Trip Limit,7
+Hall A,Collimator,Return Water Temp Delta 3C,Trip Counter,0
+Hall A,Collimator,Return Water Temp Delta 3C,Response,Call MCC to turn off beam immediately
+Hall A,Raster,Raster IX,Value,-1
+Hall A,Raster,Raster IX,Variable Name,EHAR_B_IXPEAK
+Hall A,Raster,Raster IX,Low,3.9
+Hall A,Raster,Raster IX,Alarm Status,Low
+Hall A,Raster,Raster IX,Alarm Type,EPICS
+Hall A,Raster,Raster IX,User Silence Status,Silenced
+Hall A,Raster,Raster IX,User Notify Status,Low
+Hall A,Raster,Raster IX,Threshold Variable Name,IBC1H04CRCUR2
+Hall A,Raster,Raster IX,Threshold Value,0
+Hall A,Raster,Raster IX,Threshold Low,-0.05
+Hall A,Raster,Raster IX,Threshold 2 Variable Name,pcrex90_PullString
+Hall A,Raster,Raster IX,Threshold 2 Value,1833.1
+Hall A,Raster,Raster IX,Threshold 2 Low,1240
+Hall A,Raster,Raster IX,Threshold 2 High,1900
+Hall A,Raster,Raster IX,Alert Sound,10
+Hall A,Raster,Raster IY,Value,-1
+Hall A,Raster,Raster IY,Variable Name,EHAR_B_IYPEAK
+Hall A,Raster,Raster IY,Low,4.3
+Hall A,Raster,Raster IY,Alarm Status,Low
+Hall A,Raster,Raster IY,Alarm Type,EPICS
+Hall A,Raster,Raster IY,User Silence Status,Silenced
+Hall A,Raster,Raster IY,User Notify Status,Low
+Hall A,Raster,Raster IY,Threshold Variable Name,IBC1H04CRCUR2
+Hall A,Raster,Raster IY,Threshold Value,0
+Hall A,Raster,Raster IY,Threshold Low,-0.05
+Hall A,Raster,Raster IY,Threshold 2 Variable Name,pcrex90_PullString
+Hall A,Raster,Raster IY,Threshold 2 Value,1833.1
+Hall A,Raster,Raster IY,Threshold 2 Low,1240
+Hall A,Raster,Raster IY,Threshold 2 High,1900
+Hall A,Raster,Raster IY,Alert Sound,10

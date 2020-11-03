@@ -231,7 +231,7 @@ class ALARM_HANDLER(tk.Frame):
     self.canvas.configure(xscrollcommand=self.hScroll.set,
         yscrollcommand=self.vScroll.set)
 
-    self.aFrame = tk.Frame(self.canvas, width=850, height=750, bd=2)
+    self.aFrame = tk.Frame(self.canvas, width=1850, height=1750, bd=2)
     self.aFrame.grid_columnconfigure(0, weight=1)
     self.canvas.create_window(0, 0, window=self.aFrame, anchor='nw', tags='inner')
     # OLD
