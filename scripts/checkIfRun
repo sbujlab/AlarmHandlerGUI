@@ -1,0 +1,35 @@
+#!/bin/bash
+
+# Check if we should be running and actually are running (return 1)
+# or should be running and are not running (return -1)
+
+# this is not fully debugged yet, let me know if you want me to test
+# it, but I think that 42 people are doing the same thing.
+# Bob, July 18
+
+SCRIPTS=/adaqfs/home/apar/scripts
+DEBUG=0
+
+RunState=$(eval $SCRIPTS/querystate 2>/dev/null)
+
+if [ $DEBUG -eq 1 ] ; then
+  echo "RunState = $RunState"
+fi
+
+# if EB is active
+
+if [ $RunState = "active" ] ; then
+
+  let hapdaq=$(eval $SCRIPTS/hapdaqon)
+
+  if [ $DEBUG -eq 1 ] ; then
+    echo "hapdaq = $hapdaq"
+  fi
+
+  if [ $hapdaq -eq 1 ] ; then
+    echo "1"
+  else
+    echo "-1"
+    python3 ~/alarms/AlarmHandlerGUI/alert.py -a 4
+  fi
+fi

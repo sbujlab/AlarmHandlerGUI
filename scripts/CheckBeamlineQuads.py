@@ -34,7 +34,8 @@ elif float(cond_out) > 10.0:
       print("Error, {} not found".format(Magnet_set_epics[i]))
       continue
     if abs(Magnet_set_points[i] - float(cond_out)) > Magnet_set_points_tolerances[i]:
-      print("ERROR: Magnet set point {} = {} -> Not equal to correct value of {} +- {}".format(Magnet_set_epics[i],cond_out,Magnet_set_points[i],Magnet_set_points_tolerances[i]))
+      #print("ERROR: Magnet set point {} = {} -> Not equal to correct value of {} +- {}".format(Magnet_set_epics[i],cond_out,Magnet_set_points[i],Magnet_set_points_tolerances[i]))
+      AllGood = False
 
  
     cmds = ['caget', '-t', '-w 1', str(Magnet_readback_epics[i])]
@@ -42,9 +43,10 @@ elif float(cond_out) > 10.0:
     cond_out = subprocess.Popen(cmds, stdout=subprocess.PIPE).stdout.read().strip().decode('ascii') # Needs to be decoded... be careful 
     if "Invalid" in cond_out:
       print("Error, {} not found".format(Magnet_readback_epics[i]))
+      AllGood = False
       continue
     if 100.0*abs(Magnet_readback_points[i]-float(cond_out))/(Magnet_readback_points[i]) > Magnet_readback_tolerances[i]:
-      print("ERROR: Magnet readback point \n{} = {}\n  This is more than {} % away\n  Correct value is {}\n  It is {} % away".format(Magnet_readback_epics[i],cond_out,Magnet_readback_tolerances[i],Magnet_readback_points[i], 100*(Magnet_readback_points[i]-float(cond_out))/Magnet_readback_points[i]))
+      #print("ERROR: Magnet readback point \n{} = {}\n  This is more than {} % away\n  Correct value is {}\n  It is {} % away".format(Magnet_readback_epics[i],cond_out,Magnet_readback_tolerances[i],Magnet_readback_points[i], 100*(Magnet_readback_points[i]-float(cond_out))/Magnet_readback_points[i]))
       AllGood = False
     i = i+1
 
