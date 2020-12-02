@@ -15,14 +15,17 @@ import bclient as bclient
 import utils as u
 
 class ALARM_HANDLER(tk.Frame):
-  def __init__(self, alarmHandlerWindow, tab, OL, fileArray, alarmLoop, HL):
-
+  def __init__(self, alarmHandlerWindow, tab, OL, fileArray, alarmLoop, HL, **kwargs):
+    # Original bunch of LabelFrame contents
     self.controlFrame = tk.LabelFrame(tab, text='Alarm Controls', background=u.grey_color)
     self.alarmFrame = tk.LabelFrame(tab, text='Alarm Handler Viewer', background=u.lightgrey_color)
+#    self.aFrame = tk.Frame(self.alarmFrame, background=u.lightgrey_color)
     self.pDataFrame = tk.LabelFrame(tab, text='Alarm Parameter Display', background=u.white_color)
     self.pDataFrame.disp = []
     self.colTitles = {0:"Alarms"}
     self.NperCol = 11
+    # FIXME NperCol1 should change if the first column has some larger, special entries
+    self.NperCol1 = 11
     OL.currentlySelectedButton = -1
     OL.displayPList = 0
     OL.displayPListN = -1
@@ -34,11 +37,26 @@ class ALARM_HANDLER(tk.Frame):
     self.CBTextSuffix2 = ["\nFind Alarm","\nUnpause","\nUnsilence","\n-1","\nHide Parameters"]
 
     self.alarmCols = []
-    self.initialize_cols(OL)
+    #self.initialize_cols(OL)
     self.displayFrames = []
     self.buttonMenus = []
     self.controlButtons = self.make_control_buttons(OL,fileArray, alarmLoop)
-    self.make_screen(OL,fileArray)
+    self.make_screen(OL,fileArray, **kwargs)
+
+
+  def update_layout(self):
+    self.aFrame.update_idletasks()
+    self.canvas.configure(scrollregion=self.canvas.bbox('all'))
+    self.canvas.yview('moveto', '0.0')
+    self.canvas.xview('moveto', '0.0')
+    self.aFrame.size = self.alarmFrame.grid_size()
+
+  def on_configure(self, event):
+    w, h = event.width, event.height
+    natural = self.frame.winfo_reqwidth()
+    self.canvas.itemconfigure('inner', width=w if w > natural else natural)
+    self.canvas.configure(scrollregion=self.canvas.bbox('all'))
+
 
   def make_control_buttons(self,OL,fileArray,alarmLoop):
     grid = []
@@ -198,6 +216,25 @@ class ALARM_HANDLER(tk.Frame):
     self.update_control_buttons(OL,fileArray,alarmLoop)
 
   def make_screen(self,OL,fileArray):
+    #tk.Frame.__init__(self.alarmFrame, tab, width=2000, height=2000, **kwargs)  # holds canvas & scrollbars
+    self.alarmFrame.grid_rowconfigure(0, weight=1)
+    self.alarmFrame.grid_columnconfigure(0, weight=1)
+    #FIXME Arbitrarily chose width = 850 and height = 750 because it looks good
+    self.canvas = tk.Canvas(self.alarmFrame, width=850, height=750, bd=0, highlightthickness=0)
+    self.hScroll = tk.Scrollbar(self.alarmFrame, orient='horizontal',
+        command=self.canvas.xview)
+    self.hScroll.grid(row=1, column=0, sticky='we')
+    self.vScroll = tk.Scrollbar(self.alarmFrame, orient='vertical',
+        command=self.canvas.yview)
+    self.vScroll.grid(row=0, column=1, sticky='ns')
+    self.canvas.grid(row=0, column=0, sticky='nsew')
+    self.canvas.configure(xscrollcommand=self.hScroll.set,
+        yscrollcommand=self.vScroll.set)
+
+    self.aFrame = tk.Frame(self.canvas, width=1850, height=1750, bd=2)
+    self.aFrame.grid_columnconfigure(0, weight=1)
+    self.canvas.create_window(0, 0, window=self.aFrame, anchor='nw', tags='inner')
+    # OLD
     for i in range(0,len(self.alarmCols)):
       self.alarmCols[i].destroy()
     self.alarmCols = []
@@ -221,9 +258,14 @@ class ALARM_HANDLER(tk.Frame):
       self.select_button(OL,fileArray,self.displayFrames[OL.currentlySelectedButton].butt)
     #print("currently selected button = {}".format(OL.currentlySelectedButton))
 
+    # NEW
+    self.update_layout()
+    self.canvas.bind('<Configure>', self.on_configure)
+
+
   def initialize_cols(self,OL):
-    for i in range(0, int(1.0*len(OL.objectList[2])/self.NperCol)+1):
-      self.alarmCols.append(tk.LabelFrame(self.alarmFrame, text=self.colTitles.get(i,"ctd."), background=u.lightgrey_color))
+    for i in range(0, int(1.0*(len(OL.objectList[2])+(self.NperCol-self.NperCol1))/(self.NperCol))+1):
+      self.alarmCols.append(tk.LabelFrame(self.aFrame, text=self.colTitles.get(i,"ctd."), background=u.lightgrey_color))
       self.alarmCols[i].grid(column=i,row=0,padx=5,pady=5,sticky='N')
 
   def update_displayFrame(self,OL,localBut):
@@ -315,7 +357,12 @@ class ALARM_HANDLER(tk.Frame):
         # Write a string that is composed of the three levels - Top, second, and Name, with some useful formating.
         if len(localStr) > 30:
           localStr = "{}, {}\n{}".format(OL.objectList[0][OL.objectList[2][i].parentIndices[0]].value,OL.objectList[1][OL.objectList[2][i].parentIndices[1]].value[:25],OL.objectList[2][i].value[:35])
-        disp = tk.LabelFrame(self.alarmCols[int(1.0*i/self.NperCol)], text=localStr, font=('Helvetica 8'), background=u.lightgrey_color) 
+        perCol = self.NperCol
+        if i < self.NperCol:
+          perCol = self.NperCol1
+          disp = tk.LabelFrame(self.alarmCols[int(1.0*((i)/perCol))], text=localStr, font=('Helvetica 8'), background=u.lightgrey_color) 
+        else:
+          disp = tk.LabelFrame(self.alarmCols[int(1.0*((i+self.NperCol-self.NperCol1)/perCol))], text=localStr, font=('Helvetica 8'), background=u.lightgrey_color) 
         disp.redStat = tk.IntVar()
         disp.orangeStat = tk.IntVar()
         disp.yellowStat = tk.IntVar()
@@ -404,7 +451,12 @@ class ALARM_HANDLER(tk.Frame):
 
   def layout_grid_all_col(self,OL,fileArray):
     for i in range(0,len(self.displayFrames)):
-      self.displayFrames[i].grid(column=int(1.0*i/self.NperCol),row=i%self.NperCol,columnspan=self.colsp,padx=5,pady=5,sticky='EW')
+      perCol = self.NperCol
+      if i < self.NperCol1:
+        perCol = self.NperCol1
+        self.displayFrames[i].grid(column=int(1.0*(i)/perCol),row=i%perCol,columnspan=self.colsp,padx=5,pady=5,sticky='EW')
+      else:
+        self.displayFrames[i].grid(column=int(1.0*(i+self.NperCol-self.NperCol1)/perCol),row=i%perCol,columnspan=self.colsp,padx=5,pady=5,sticky='EW')
     #self.buttonMenus = self.initialize_menus(OL,fileArray)
 
   def erase_grid_all_col(self):
