@@ -187,6 +187,7 @@ def update_objectList(OL,fileArray,alarmList):
   else:
     print("Incorrect alarm.csv file type")
 
+# FIXME this method should change for a new OL technique
 def write_textfile(OL,fileArray):
   print("Writing text file to disk")
   fileArray.mutex.acquire()
@@ -214,6 +215,7 @@ def write_textfile(OL,fileArray):
     fileArray.mutex.release()
     return fileArray.filearray
 
+# FIXME this method should change for a new OL technique
 def add_to_filearray(OL,fileArray,but):
   fileArray.mutex.acquire()
   try:
@@ -230,6 +232,7 @@ def add_to_filearray(OL,fileArray,but):
     fileArray.mutex.release()
     return fileArray.filearray
 
+# FIXME this method should change for a new OL technique
 def silence_filearray_menu(OL,fileArray,butMenu):
   fileArray.mutex.acquire()
   try:
@@ -250,6 +253,7 @@ def silence_filearray_menu(OL,fileArray,butMenu):
   finally:
     fileArray.mutex.release()
 
+# FIXME this method should change for a new OL technique
 def notify_acknowledge_filearray_menu(OL,fileArray,butMenu):
   fileArray.mutex.acquire()
   try:
@@ -274,6 +278,7 @@ def notify_acknowledge_filearray_menu(OL,fileArray,butMenu):
   finally:
     fileArray.mutex.release()
 
+# FIXME this method should change for a new OL technique
 def edit_filearray_menu(OL,fileArray,butMenu):
   fileArray.mutex.acquire()
   try:
@@ -291,6 +296,7 @@ def subshift(L, start, end, insert_at):
   L = L[:start] + L[end:]
   return L[:insert_at] + temp + L[insert_at:]
 
+# FIXME this method should change for a new OL technique - just change the OL data and let the fileArray printer read OL and continue
 def move_filearray_menu(OL,fileArray,butMenu):
   fileArray.mutex.acquire()
   try:
@@ -311,6 +317,7 @@ def move_filearray_menu(OL,fileArray,butMenu):
     fileArray.mutex.release()
     return fileArray.filearray
 
+# FIXME this method should change for a new OL technique
 def copy_filearray_menu(OL,fileArray,butMenu):
   fileArray.mutex.acquire()
   try:
@@ -331,6 +338,7 @@ def copy_filearray_menu(OL,fileArray,butMenu):
     fileArray.mutex.release()
     return fileArray.filearray
 
+# FIXME this method should change for a new OL technique
 def delete_filearray_menu(OL,fileArray,butMenu):
   fileArray.mutex.acquire()
   try:
@@ -343,6 +351,7 @@ def delete_filearray_menu(OL,fileArray,butMenu):
     fileArray.mutex.release()
     return fileArray.filearray
 
+# FIXME this method should change for a new OL technique
 def add_filearray_menu(OL,fileArray,butMenu):
   fileArray.mutex.acquire()
   try:
@@ -372,6 +381,7 @@ def write_filearray(fileArray):
     fileArray.mutex.release()
     return fileArray.filearray
 
+# FIXME FIXME this method needs to change a lot to use a streamlined object and OL definition
 def create_objects(fileArray,cooldownLength):
   ncolumns = 0
   if len(fileArray.filearray)>0: 
@@ -539,6 +549,7 @@ def create_objects(fileArray,cooldownLength):
     #print("Creating alarm for object {} {}, type = {}".format(localObjectList[2][i].column,localObjectList[2][i].columnIndex,localObjectList[2][i].parameterList.get("Alarm Type",defaultKey)))
   return localObjectList
   
+# FIXME FIXME this method needs to just read a fresh filearray+extra filearray 
 def update_extra_filearray(fileArray,extraFileArray):
   # Update the extra file array with whatever contents it happens to have on disk at the moment
   extraFileArray = alarm_object.FILE_ARRAY(extraFileArray.filename,extraFileArray.delim)
@@ -573,6 +584,7 @@ def update_extra_filearray(fileArray,extraFileArray):
   finally:
     fileArray.mutex.release()
   
+# FIXME new OL needs to change this
 def append_object(OL,coli): 
   colLen = len(OL.objectList[coli])
   if colLen>0:
@@ -595,6 +607,7 @@ def append_object(OL,coli):
   if coli < len(OL.objectList)-1:
     append_object(OL,coli+1)
 
+# FIXME new OL needs to change this
 def insert_object(OL,coli): 
   colLen = len(OL.objectList[coli])
   originalLengthColumn = OL.selectedColumnButtonLengthList[coli]

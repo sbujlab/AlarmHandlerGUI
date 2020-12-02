@@ -253,6 +253,7 @@ class USER_NOTIFY():
       # Recursion loop here - splits off a new instance of this function and finishes the one currently running (be careful) - Wait longer if paused, no need to overkill 
       alarmHandlerGUI.win.after(1000*OL.cooldownReduction,self.user_notify_loop, alarmLoop,OL,fileArray,alarmHandlerGUI) 
 
+  # FIXME - uses old index notation to keep track of notify status in fileArray/objectList data
   def update_user_notify_status(self,alarmLoop,OL,fileArray):
     for e in range(0,len(OL.objectList[2])):
       tmpUNS = "OK" # Assume its ok, then update with the alarmList's "self" values
@@ -304,6 +305,7 @@ class ALARM():
     if "Camguin" in self.alarmType: # Alarm Type is the parameter (level 4 object) which keeps track of what analysis to do
       subprocess("root -L camguin_C.so({},{},{},{},{},{},{},{},{},{},{})".format(self.pList["Analysis"],self.pList["Tree"],self.pList["Branch"],self.pList["Leaf"],self.pList["Cuts"],int(self.pList["Ignore Event Cuts"]),self.pList["Hist Rebinning"],int(self.pList["Stability Ring Length"]),self.runNumber,1,0.0), stdout=self.alarmAnalysisReturn, stderr=self.alarmErrorReturn, timeout=30)
 
+    # FIXME Bash and EPICS are basically the same - find a way to merge them
     if "BASH" in self.alarmType: # Alarm Type parameter (level 4) for indicating that the return value is some special bash script
       if self.pList.get("Script Name",u.defaultKey) != "NULL":
         #print("Checking Script = {}".format(self.pList.get("Script Name",u.defaultKey)))
@@ -599,6 +601,7 @@ class ALARM():
         differenceLow = self.pList.get("Difference Low",u.defaultKey)
       if differenceHigh == u.defaultKey:  
         differenceHigh = self.pList.get("Difference High",u.defaultKey)
+    # FIXME vastly redundant ELSE condition here... just make them from the top?
     elif case != u.defaultKey and caseValue != "BAD": # Then we have a single case determining which set of limits to use
       lowlowStr = "Low Low "+caseValue
       lowStr = "Low "+caseValue
@@ -791,13 +794,16 @@ class HISTORY_LIST():
     self.filearray = u.parse_textfile(self) # Reads text file just like fileArray, same names so Python doesn't know the difference
     self.historyList = u.init_historyList(self)
 
+# FIXME The Object List class is full of old features that need to be removed and streamlined
 class OBJECT_LIST():
   def __init__(self,fileArray,cooldownLength):
     self.objectList = u.create_objects(fileArray,cooldownLength)
     self.currentlySelectedButton = -1
     self.displayPList = 0
     self.cooldownLength = cooldownLength # Wait a minute before alarming again
+    # FIXME this time step should be from the config file too
     self.cooldownReduction = 2
+    # These three lists need to be removed and just use self.currentlySelectedButton...
     self.selectedButtonColumnIndicesList = []
     self.activeObjectColumnIndicesList = [] # This stores the location where insertion will take place
     self.selectedColumnButtonLengthList = [] # This is the thing to store the number of buttons that should be displayed -> == the number of children of the parent clicked button
@@ -844,27 +850,31 @@ class OBJECT_LIST():
 
 class ALARM_OBJECT():
   def __init__(self):
+    # Needed parameters
+    self.name = "NULL"
+    self.value = "NULL"
+    self.parameterList = {} # Using a dictionary makes life much easier
+    self.color = u.lightgrey_color
+    self.alarmStatus = "OK"
+    self.userSilenceStatus = "Alert"
+    self.userNotifyStatus = "OK"
+    # Should come from the config file?
+    self.alertSound = "7"
+    self.cooldownLength = 60 # Default initialize, will be overwritten later
+    #self.parameterList["User Silence Status"] = self.userSilenceStatus
+    self.alarm = lambda: ALARM(self);
+    self.clicked = 0
+
+    # FIXME Depreciated
     self.indexStart = 0
     self.indexEnd = 0
     self.column = 0
     self.columnIndex = 0
     self.parentIndices = []
     self.numberChildren = 0
-    self.name = "NULL"
-    self.value = "NULL"
+    self.parameterListHistory = [] # Every time we update parameterList pass its prior value to history ... let actually accumulating of values take place in alarmLoop if wanted...
     self.valueHistory = []
     self.valueHistory.append(self.value)
-    self.parameterList = {} # Using a dictionary makes life much easier
-    self.parameterListHistory = [] # Every time we update parameterList pass its prior value to history ... let actually accumulating of values take place in alarmLoop if wanted...
-    self.color = u.lightgrey_color
-    self.alarmStatus = "OK"
-    self.userSilenceStatus = "Alert"
-    self.userNotifyStatus = "OK"
-    self.alertSound = "7"
-    self.cooldownLength = 60 # Default initialize, will be overwritten later
-    #self.parameterList["User Silence Status"] = self.userSilenceStatus
-    self.alarm = lambda: ALARM(self);
-    self.clicked = 0
 
   def click(self,clickStat):
     self.clicked = clickStat
