@@ -173,7 +173,9 @@ class ALARM_HANDLER(tk.Frame):
     elif but.cget('text')=="{}{}".format(self.controlButtonsText[1],self.CBTextSuffix2[1]) and alarmLoop.globalLoopStatus == "Paused":
       print("Turning on loop")
       alarmLoop.globalLoopStatus = "Looping"
-      alarmLoop.reset_alarmList(OL)
+      alarmLoop.alarmList = OL.objectList
+      gc.collect()
+      del gc.garbage[:]
       but.config(background=u.lightgrey_color)
       but.config(text="{}{}".format(self.controlButtonsText[1],self.CBTextSuffix1[1]))
     if but.cget('text')=="{}{}".format(self.controlButtonsText[0],self.CBTextSuffix1[0]): 
