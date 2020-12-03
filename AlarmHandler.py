@@ -67,6 +67,9 @@ class AlarmHandler:
 
     # This is the initial get of alarm handler data from disk
     self.fileArray = alarm_object.FILE_ARRAY(self.filename,self.delim)
+    if len(self.fileArray.filearray) == 0:
+      print("ERROR: Null alarm input file, please resolve in configure file")
+      self.quit()
     # This is the initial get of alarm handler's previous instance history data from disk
     self.HL = alarm_object.HISTORY_LIST(self.histfilename,self.delim,self.pdelim,self.timeWait)
     # This tacks on to the end of the alarm handler data and "external" alarm information - allows an online analyzer or standalone script to supplement alarms into this GUI

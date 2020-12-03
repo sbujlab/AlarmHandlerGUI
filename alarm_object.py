@@ -56,7 +56,7 @@ class ALARM_LOOP_GUI():
     gc.collect()
     del gc.garbage[:]
     if (alarmHandlerGUI.alarmLoop.globalLoopStatus=="Looping"):
-      print("Waited 10 seconds, refreshing GUI")
+      print("Active mode: waited 5 seconds, refreshing GUI")
       u.update_objectList(alarmHandlerGUI.OL,alarmHandlerGUI.alarmLoop.alarmList)
       u.write_textfile(alarmHandlerGUI.OL,alarmHandlerGUI.fileArray) #FIXME Do this here?
       if alarmHandlerGUI.tabs.get("Alarm Handler",u.defaultKey) != u.defaultKey:
@@ -91,7 +91,7 @@ class ALARM_LOOP_GUI():
 
 class ALARM_LOOP():
   def __init__(self,alarmHandlerGUI):
-    self.alarmList = alarmHandlerGUI.OL.objectList
+    self.alarmList = alarmHandlerGUI.OL.objectList # FIXME am I sure that this is a copy by pointer? Is it even necessary to make it a class object?
     #print("Initializing, adding alarm list parameterList = {}".format(alarmHandlerGUI.OL.objectList[i].alarm.parameterList))
     self.globalAlarmStatus = "OK" # Start in non-alarmed state
     self.checkExternalStatus = True # Check the externalAlarms.csv file
@@ -124,12 +124,19 @@ class ALARM_LOOP():
         checkedStat = checkNotifyStatus
     return checkedStat
   
-
+  # Add the external alarms file info into the objectList, etc.
   def doExternal(self,alarmHandlerGUI):
     if os.path.exists(alarmHandlerGUI.externalFilename) and self.checkExternalStatus == True and (time.time() - os.path.getmtime(alarmHandlerGUI.externalFilename)) < alarmHandlerGUI.externalParameterFileStaleTime:
       #print("Adding External alarms from {}".format(alarmHandlerGUI.externalFileArray.filename))
       u.update_extra_filearray(alarmHandlerGUI.fileArray,alarmHandlerGUI.externalFileArray)
+      # FIXME these two lines seem to be unnccessary CPU time ... are we gaining any clarity by refreshing internal memory?
+      alarmHandlerGUI.OL.objectList.clear() # FIXME is this necessary?
       alarmHandlerGUI.OL.objectList = u.create_objects(alarmHandlerGUI.fileArray,alarmHandlerGUI.OL.cooldownLength) # FIXME Necessary?
+      alarmHandlerGUI.OL.keys.clear() # FIXME is this necessary?
+      alarmHandlerGUI.OL.keys = u.create_objects_keys(alarmHandlerGUI.fileArray)
+      for i in range(0,len(alarmHandlerGUI.OL.keys)):
+        alarmHandlerGUI.OL.objectList[alarmHandlerGUI.OL.keys[i]].index = i
+      # This should be a copy by pointer - as I want the editting of alarmList to fully edit entries in objectList .... is this the right way to do things? FIXME FIXME 
       self.alarmList = alarmHandlerGUI.OL.objectList
       gc.collect()
       del gc.garbage[:]
@@ -140,22 +147,22 @@ class ALARM_LOOP():
   def doAlarmChecking(self,alarmHandlerGUI):
     print("\n - Global Alarm Status: ")
     localAlStat = 0
-    for alrm in self.alarmList.values():
+    for key,alrm in self.alarmList.items():
     # FIXME This is what I want to replace the above line with, using the object list dictionary of ALARM_OBJECT rather than their ALARMs
   # for i in range (0,len(alarmHandlerGUI.OL.objectList)):
       Thread(target=alrm.alarm_analysis).start()
       if alrm.parameterList["Alarm Status"] != "OK":
-        print(" -- Alarm {}: {}, {} = {}".format(alrm.parameterList["Alarm Status"],alrm.name,alrm.value,alrm.parameterList["Value"]))
+        #print(" -- Alarm {}: {}, {} = {}".format(alrm.parameterList["Alarm Status"],key,alrm.name,alrm.value))
         localAlStat += 1
       Thread(target=alrm.alarm_evaluate).start()
       # Check if the alarm is alarming and has not been "OK"ed by the user acknowledge
       #print("Checking alarm {} alarm status = {}, silence status = {}, and user acknowledge = {}".format(i,alrm.alarmSelfStatus,alrm.userSilenceSelfStatus,self.ok_notify_check(alrm.userNotifySelfStatus)))
       # If the userNotifyStatus is NULL (i.e. not set) then the alarm handler will just read it and move on with its life
-      if self.globalUserAlarmSilence == "Alert" and self.ok_notify_check(alrm.userNotifySelfStatus) != "OK" and alrm.userSilenceSelfStatus == "Alert":
+      if self.globalUserAlarmSilence == "Alert" and self.ok_notify_check(alrm.userNotifyStatus) != "OK" and alrm.userSilenceStatus == "Alert":
         # Just let the method I wrote take care of determining global alarm status
-        self.globalAlarmStatus = alrm.userNotifySelfStatus # Update global alarm status
-        u.append_historyList(alarmHandlerGUI.HL,alarmHandlerGUI.OL,i) # Update Alarm History
-        localStat = alrm.userNotifySelfStatus
+        self.globalAlarmStatus = alrm.userNotifyStatus # Update global alarm status
+        u.append_historyList(alarmHandlerGUI.HL,alarmHandlerGUI.OL,key) # Update Alarm History
+        localStat = alrm.userNotifyStatus
     if localAlStat == 0:
       print(' -- '+'\x1b[1;1;32m'+'Alarms all OK '+'\x1b[0m'+'\n')
     else:
@@ -171,34 +178,8 @@ class ALARM_LOOP():
         self.globalAlarmStatus = "OK"
       else:
         print("Global Alarm Alarmed")
-      u.update_objectList(alarmHandlerGUI.OL,self.alarmList)
+      u.update_objectList(alarmHandlerGUI.OL,self.alarmList) # If I am doing a copy by pointer this operation is entirely redundant... right? FIXME FIXME FIXME
       u.write_historyFile(alarmHandlerGUI.HL)
-      #u.write_textfile(alarmHandlerGUI.OL,alarmHandlerGUI.fileArray) #FIXME Do this here?
-      #if alarmHandlerGUI.tabs.get("Alarm Handler",u.defaultKey) != u.defaultKey:
-      #  alarmHandlerGUI.tabs["Alarm Handler"].refresh_screen(alarmHandlerGUI.OL,alarmHandlerGUI.fileArray,alarmHandlerGUI.alarmLoop,alarmHandlerGUI.HL)
-      #if alarmHandlerGUI.tabs.get("Grid Alarm Handler",u.defaultKey) != u.defaultKey:
-      #  alarmHandlerGUI.tabs["Grid Alarm Handler"].refresh_screen(alarmHandlerGUI.OL,alarmHandlerGUI.fileArray,alarmHandlerGUI.alarmLoop,alarmHandlerGUI.HL)
-      #if alarmHandlerGUI.tabs.get("Expert Alarm Handler",u.defaultKey) != u.defaultKey:
-      #  alarmHandlerGUI.tabs["Expert Alarm Handler"].refresh_screen(alarmHandlerGUI.OL,alarmHandlerGUI.fileArray,alarmHandlerGUI.alarmLoop,alarmHandlerGUI.HL)
-      #if alarmHandlerGUI.tabs.get("Active Alarm Handler",u.defaultKey) != u.defaultKey:
-      #  alarmHandlerGUI.tabs["Active Alarm Handler"].refresh_screen(alarmHandlerGUI.OL,alarmHandlerGUI.fileArray,alarmHandlerGUI.alarmLoop,alarmHandlerGUI.HL)
-      #if alarmHandlerGUI.tabs.get("Alarm History",u.defaultKey) != u.defaultKey:
-      #  alarmHandlerGUI.tabs["Alarm History"].refresh_screen(alarmHandlerGUI.OL,alarmHandlerGUI.fileArray,alarmHandlerGUI.alarmLoop,alarmHandlerGUI.HL)
-      #if alarmHandlerGUI.tabs.get("Settings",u.defaultKey) != u.defaultKey:
-      #  alarmHandlerGUI.tabs["Settings"].refresh_screen(alarmHandlerGUI)
-      #alarmHandlerGUI.masterAlarmButton.destroy()
-      #if alarmHandlerGUI.alarmLoop.globalAlarmStatus == "OK":
-      #  alarmHandlerGUI.masterAlarmImage = tk.PhotoImage(file='ok.ppm').subsample(2)
-      #  alarmHandlerGUI.masterAlarmButton = tk.Label(alarmHandlerGUI.win, image=alarmHandlerGUI.masterAlarmImage, cursor="hand2", bg=u.lightgrey_color)
-      #  alarmHandlerGUI.masterAlarmButton.image = tk.PhotoImage(file='ok.ppm').subsample(2)
-      #if alarmHandlerGUI.alarmLoop.globalAlarmStatus != "OK":
-      #  #alarmHandlerGUI.alarmClient.sendPacket("2")
-      #  #self.userNotifyLoop.update_user_notify_status(alarmHandlerGUI.OL)
-      #  alarmHandlerGUI.masterAlarmImage = tk.PhotoImage(file='alarm.ppm').subsample(2)
-      #  alarmHandlerGUI.masterAlarmButton = tk.Label(alarmHandlerGUI.win, image=alarmHandlerGUI.masterAlarmImage, cursor="hand2", bg=u.lightgrey_color)
-      #  alarmHandlerGUI.masterAlarmButton.image = tk.PhotoImage(file='alarm.ppm').subsample(2)
-      #alarmHandlerGUI.masterAlarmButton.grid(rowspan=3, row=1, column=0, padx=5, pady=10, sticky='NESW')
-      #alarmHandlerGUI.masterAlarmButton.bind("<Button-1>", alarmHandlerGUI.update_show_alarms)
       alarmHandlerGUI.win.after(10000,self.alarm_loop, alarmHandlerGUI) # Recursion loop here - splits off a new instance of this function and finishes the one currently running (be careful)
     if (self.globalLoopStatus=="Paused"):
       alarmHandlerGUI.win.after(10000,self.alarm_loop, alarmHandlerGUI) # Recursion loop here - splits off a new instance of this function and finishes the one currently running (be careful)
@@ -210,27 +191,21 @@ class USER_NOTIFY():
 
   def user_notify_loop(self,alarmLoop,OL,fileArray,alarmHandlerGUI):
     self.nLoops = self.nLoops + 1
-    #if alarmHandlerGUI.tabs.get("Alarm Handler",u.defaultKey) != u.defaultKey:
-    #  alarmHandlerGUI.tabs["Alarm Handler"].refresh_screen(alarmHandlerGUI.OL,alarmHandlerGUI.fileArray,alarmHandlerGUI.alarmLoop)
-    #if alarmHandlerGUI.tabs.get("Grid Alarm Handler",u.defaultKey) != u.defaultKey:
-    #  alarmHandlerGUI.tabs["Grid Alarm Handler"].refresh_screen(alarmHandlerGUI.OL,alarmHandlerGUI.fileArray,alarmHandlerGUI.alarmLoop)
-    #if alarmHandlerGUI.tabs.get("Expert Alarm Handler",u.defaultKey) != u.defaultKey:
-    #  alarmHandlerGUI.tabs["Expert Alarm Handler"].refresh_screen(alarmHandlerGUI.OL,alarmHandlerGUI.fileArray,alarmHandlerGUI.alarmLoop)
     localStat = "OK"
     alarmHandlerGUI.alertTheUserSoundNow = alarmHandlerGUI.alertTheUserSound # Default = 7 every restart of loop
-    for alrm in alarmLoop.alarmList.values():
+    for key,alrm in alarmLoop.alarmList.items():
       alrm.alarm_evaluate()
       # Check if the alarm is alarming and has not been "OK"ed by the user acknowledge
       #print("Checking alarm {} alarm status = {}, silence status = {}, and user acknowledge = {}".format(i,alrm.alarmSelfStatus,alrm.userSilenceSelfStatus,alarmLoop.ok_notify_check(alrm.userNotifySelfStatus)))
       # If the userNotifyStatus is NULL (i.e. not set) then the alarm handler will just read it and move on with its life
-      if alarmLoop.globalUserAlarmSilence == "Alert" and alarmLoop.ok_notify_check(alrm.userNotifySelfStatus) != "OK" and alrm.userSilenceSelfStatus == "Alert":
+      if alarmLoop.globalUserAlarmSilence == "Alert" and alarmLoop.ok_notify_check(alrm.userNotifyStatus) != "OK" and alrm.userSilenceStatus == "Alert":
         # Just let the method I wrote take care of determining global alarm status
-        print("Alert status = {}".format(alrm.alertSound))
-        alarmLoop.globalAlarmStatus = alrm.userNotifySelfStatus # Update global alarm status
+        #print("Alert status = {}".format(alrm.alertSound))
+        alarmLoop.globalAlarmStatus = alrm.userNotifyStatus # Update global alarm status
         if alrm.alertSound != alarmHandlerGUI.alertTheUserSound:
           alarmHandlerGUI.alertTheUserSoundNow = alrm.alertSound # Update global alarm sound
-        u.append_historyList(alarmHandlerGUI.HL,alarmHandlerGUI.OL,i) # Update Alarm History
-        localStat = alrm.userNotifySelfStatus
+        u.append_historyList(alarmHandlerGUI.HL,alarmHandlerGUI.OL,key) # Update Alarm History
+        localStat = alrm.userNotifyStatus
     if localStat == "OK":
       alarmLoop.globalAlarmStatus = "OK"
     else:
@@ -251,7 +226,6 @@ class USER_NOTIFY():
       # Recursion loop here - splits off a new instance of this function and finishes the one currently running (be careful) - Wait longer if paused, no need to overkill 
       alarmHandlerGUI.win.after(1000*OL.cooldownReduction,self.user_notify_loop, alarmLoop,OL,fileArray,alarmHandlerGUI) 
 
-  # FIXME - uses old index notation to keep track of notify status in fileArray/objectList data
   def update_user_notify_status(self,alarmLoop,OL,fileArray):
     for key in OL.objectList.keys():
       tmpUNS = "OK" # Assume its ok, then update with the alarmList's "self" values
@@ -269,8 +243,7 @@ class USER_NOTIFY():
         #print("COOL: Saving to file [{}][{}] userNotifyStatus = {}".format(2,e,tmpUNS))
         OL.objectList[key].parameterList["User Notify Status"] = tmpUNS
         OL.objectList[key].userNotifyStatus = tmpUNS
-        OL.objectList[key].alarm.userNotifySelfStatus = tmpUNS
-        # FIXME Depreciated - no longer have the ability to silence a chunk - no more chunks
+        # FIXME Depreciated - filearray gets wiped when written anyway right?
         #for t in range(OL.objectList[key].indexStart,OL.objectList[key].indexEnd+1):
         #  if fileArray.filearray[t][3] == "User Notify Status":
         #    fileArray.filearray[t][4] = tmpUNS
@@ -282,6 +255,7 @@ class FILE_ARRAY():
     self.filename = filen
     self.delim = delimiter
     self.conf = {}
+    self.filearray = [[]]
     self.filearray = u.parse_textfile(self)
 
 class HISTORY_LIST():
@@ -293,6 +267,7 @@ class HISTORY_LIST():
     self.filename = filen
     self.delim = delimiter
     self.paramDelim = pdelimiter
+    self.filearray = [[]]
     self.filearray = u.parse_textfile(self) # Reads text file just like fileArray, same names so Python doesn't know the difference
     self.historyList = u.init_historyList(self)
 
@@ -301,48 +276,22 @@ class OBJECT_LIST():
   def __init__(self,fileArray,cooldownLength):
     self.objectList = u.create_objects(fileArray,cooldownLength)
     self.keys = u.create_objects_keys(fileArray)
-    self.currentlySelectedButton = -1
-    self.displayPList = 0
-    self.cooldownLength = cooldownLength # Wait a minute before alarming again
-    # FIXME this time step should be from the config file too
-    self.cooldownReduction = 2
-    # These three lists need to be removed and just use self.currentlySelectedButton...
-    self.selectedButtonColumnIndicesList = []
-    self.activeObjectColumnIndicesList = [] # This stores the location where insertion will take place
-    self.selectedColumnButtonLengthList = [] # This is the thing to store the number of buttons that should be displayed -> == the number of children of the parent clicked button
-    for key in self.keys: # Look in the list of columns of objects, neglect final row
-      self.selectedButtonColumnIndicesList.append(-1) # This looks stupid because I'm being safe, initialize to the top row, first object child of each one
-      self.activeObjectColumnIndicesList.append(0) # This looks stupid because I'm being safe, initialize to the top row, first object child of each one
-      self.selectedColumnButtonLengthList.append(0) # Safety initialization
-    self.activeObjectColumnIndicesList[0]=self.objectList[0][len(self.objectList[0])-1].columnIndex
-    self.selectedColumnButtonLengthList[0] = len(self.objectList[0]) # Initialize first column length to be just the number there
+    if self.keys == None or len(self.keys) == 0:
+      print("Null alarm input file, please resolve in configure file")
+    else:
+      for i in range(0,len(self.keys)):
+        self.objectList[self.keys[i]].index = i
+      self.currentlySelectedButton = -1
+      self.displayPList = 0
+      self.cooldownLength = cooldownLength # Wait a minute before alarming again
+      # FIXME this time step should be from the config file too
+      self.cooldownReduction = 2
+      # These three lists need to be removed and just use self.currentlySelectedButton...
 
   # FIXME Depreciated chunk clicking feature here - replace with just click...
   def set_clicked(self,i,j):
-    self.activeObjectColumnIndicesList[i]=j
-    self.selectedButtonColumnIndicesList[i]=j
-    for column in range(0,len(self.objectList)):
-      for obj in range(0,len(self.objectList[column])):
-        if obj != self.selectedButtonColumnIndicesList[column]:
-          self.objectList[column][obj].click(0)
-        if column>i:
-          self.objectList[column][obj].click(0)
-    self.objectList[i][j].click(1)
-    for ind in range(i,len(self.objectList)-1): # Look in the list of columns of objects, neglect final row
-      #jNew = self.selectedButtonColumnIndices[ind] # Entry in the column
-      jNew = self.activeObjectColumnIndicesList[ind] # Entry in the column
-      for k in range(0,len(self.objectList[ind+1])): # For each entry in the column to the right
-        if self.objectList[ind][jNew].columnIndex==self.objectList[ind+1][k].parentIndices[ind]:
-          self.activeObjectColumnIndicesList[ind+1]=self.objectList[ind+1][k].columnIndex  
-          # loop until the end of children of this active click, then the inserting goes at the end of child lists
-          # FIXME is this why only last entry in a set of children will trigger parent's alarm status in expert mode?
-          break
-    # If i+1 then take last parentIndex==columnIndex columnIndex as activeObjectIndicesList[i+1]
-    if i < 4:
-      for k in range(0,len(self.objectList[i+1])): # For each entry on the right
-        # Take the button that was clicked and find the greatest child of it
-        if self.objectList[i][j].columnIndex == self.objectList[i+1][k].parentIndices[i]: # Take clicked colInd, if one to right's PI[of mine] == colInd, then set it as the activeObject on right (for file appending purposes)
-          self.activeObjectColumnIndicesList[i+1]=self.objectList[i+1][k].columnIndex
+    self.currentlySelectedButton = j
+    self.objectList[self.keys[j]].click(1)
 
 class ALARM_OBJECT():
   def __init__(self):
@@ -358,19 +307,13 @@ class ALARM_OBJECT():
     self.alertSound = "7"
     self.cooldownLength = 60 # Default initialize, will be overwritten later
     #self.parameterList["User Silence Status"] = self.userSilenceStatus
+    # FIXME FIXME old version.... needed a lambda!??
     #self.alarm = lambda: ALARM(self);
     self.clicked = 0
 
     # FIXME Depreciated
-    self.indexStart = 0
-    self.indexEnd = 0
-    self.column = 0
-    self.columnIndex = 0
-    self.parentIndices = []
-    self.numberChildren = 0
+    self.index = 0
     self.parameterListHistory = [] # Every time we update parameterList pass its prior value to history ... let actually accumulating of values take place in alarmLoop if wanted...
-    self.valueHistory = []
-    self.valueHistory.append(self.value)
 
     # Old "ALARM" Class initializer remnants
     self.alarmAnalysisReturn = None # For camguin outputs to stdout to catch
@@ -378,11 +321,10 @@ class ALARM_OBJECT():
     self.runNumber = 0
     self.alarmType = self.parameterList.get("Alarm Type",u.defaultKey)
     # Default alarm criteria is whether the value is not-null and otherwise is defined on context from given parameterList entries
-    self.alarmEvaluateType = "Exactly" 
     # Do I need to make a lambda initialized instance of the alarm action per event? I don't think this matters like it did for button context menu placements.... especially since these actions are being taken by the alarm handler in a loop over objectList
-    #print("Initializing new alarm for object {} {}, name = {}".format(self.column,self.columnIndex,self.name+" "+self.value))
-    self.alarm_analysis = lambda myAO = self: self.do_alarm_analysis(myAO)
-    self.alarm_evaluate = lambda myAO = self: self.do_alarm_evaluate(myAO) # Just keep this stub here in case
+    #print("Initializing new alarm for object {}, name = {}".format(self.index,self.name+" "+self.value))
+    self.alarm_analysis = lambda : self.do_alarm_analysis()
+    self.alarm_evaluate = lambda : self.do_alarm_evaluate() # Just keep this stub here in case
 
   def click(self,clickStat):
     self.clicked = clickStat
@@ -391,22 +333,27 @@ class ALARM_OBJECT():
     if (clickStat == 1 and self.alarmStatus == "OK"):
       self.color = u.grey_color
     #if (clickStat == 0 and self.alarmStatus == 1):
-    if self.alarmStatus != "OK":
-      self.color = self.color #FIXME col #3 still == red problem in expert mode? 
+    #if self.alarmStatus != "OK":
+    #  self.color = self.color #FIXME col #3 still == red problem in expert mode? 
     #if self.alarmStatus != "OK" and self.userSilenceStatus == "Alert":
     #  self.color = u.red_color
     #if self.userSilenceStatus == "Silenced":
     #  self.color = u.darkgrey_color
 
+  # FIXME FIXME super depreciated value style adding
   def add_parameter(self,obj1,obj2): # Updates dictionary with new value, appends or edits appropriately, but names are the keys... so be careful
     self.parameterList[obj1.value]=obj2.value
 
+  # FIXME FIXME super depreciated history method
   def add_parameter_history(self,val_append):
     self.parameterListHistory.append(val_append)
     # add a pair to a list of parameter names and values
 
   def polish_alarm_object(self):
     # Silence status
+    if "Value" not in self.parameterList:
+      self.parameterList["Value"] = "NULL"
+    self.value = self.parameterList["Value"]
     if "User Silence Status" not in self.parameterList:
       self.parameterList["User Silence Status"] = "Alert"
     self.userSilenceStatus = self.parameterList["User Silence Status"]
@@ -421,7 +368,7 @@ class ALARM_OBJECT():
     if "Alarm Status" not in self.parameterList:
       self.parameterList["Alarm Status"] = "OK"
     self.alarmStatus = self.parameterList["Alarm Status"]
-    if self.alarmStatus != "OK"
+    if self.alarmStatus != "OK":
       self.color = u.red_color
     if self.userSilenceStatus == "Silenced":
       self.color = u.yellow_color
@@ -429,12 +376,13 @@ class ALARM_OBJECT():
     if "User Notify Status" not in self.parameterList:
       self.parameterList["User Notify Status"] = "OK"
     self.userNotifyStatus = self.parameterList["User Notify Status"]
-    if self.userSilenceStatus = "Silenced":
+    if self.userSilenceStatus == "Silenced":
       self.parameterList["User Notify Status"] = "OK"
     elif self.alarmStatus != "OK" and self.userNotifyStatus.split(' ')[0] != "Cooldown":
       self.parameterList["User Notify Status"] = self.alarmStatus
-    else:
-      self.parameterList["User Notify Status"] = self.value
+    # FIXME what was this ELSE for?
+    #else:
+    #  self.parameterList["User Notify Status"] = self.value
     self.userNotifyStatus = self.parameterList["User Notify Status"]
 
   def do_alarm_analysis(self):
@@ -860,7 +808,8 @@ class ALARM_OBJECT():
         #print("Not OK: Less than, Trip counter = {}, trip limit = {}".format(tripCounter, tripLimit))
         # The alarm has not surpassed the limit
         self.parameterList["Alarm Status"] = "OK"
-        self.parameterList["Trip Counter"] = str(tripCounter + 1)
+        if "Cooldown" not in self.parameterList["User Notify Status"]:
+          self.parameterList["Trip Counter"] = str(tripCounter + 1)
       elif tripCounter != "NULL" and tripLimit != "NULL" and tripCounter >= tripLimit and self.parameterList.get("Alarm Status",u.defaultKey) != "OK":
         #print("Not OK: Greater than, Trip counter = {}, trip limit = {}".format(tripCounter, tripLimit))
         # The alarm has surpassed the limit
@@ -875,24 +824,23 @@ class ALARM_OBJECT():
     #print("Updated: parameterList = {}".format(self.parameterList))
     if self.parameterList.get("Alarm Status",u.defaultKey) != "OK" and self.parameterList.get("Alarm Status",u.defaultKey) != "Invalid" and self.parameterList.get("Alarm Status",u.defaultKey) != "NULL": # Update global alarm status unless NULL or invalid
       self.alertSound = self.parameterList.get("Alert Sound","7")
-      self.alarmSelfStatus = self.parameterList.get("Alarm Status",u.defaultKey)
-      # If the alarm is alarming and we aren't in cooldown the update user status
+      self.alarmStatus = self.parameterList.get("Alarm Status",u.defaultKey)
+      # If the alarm is alarming and we aren't in cooldown then update user status
       if self.parameterList.get("Alarm Status",u.defaultKey) != "OK" and self.parameterList.get("User Notify Status",u.defaultKey).split(' ')[0] != "Cooldown":
-        self.userNotifySelfStatus = self.parameterList.get("Alarm Status",u.defaultKey)
+        self.userNotifyStatus = self.parameterList.get("Alarm Status",u.defaultKey)
         self.parameterList["User Notify Status"] = self.parameterList.get("Alarm Status",u.defaultKey)
       self.userSilenceStatus = self.parameterList.get("User Silence Status",u.defaultKey)
       if self.userSilenceStatus != "Silenced":
         self.color = u.red_color
       elif self.userSilenceStatus == "Silenced":
+        # FIXME should be yellow here? Do these color status indicators even matter outside of the GUI tab loops?
         self.color = u.darkgrey_color # Still indicate that it is off, but not red now
-      for k in range(0,len(self.parentIndices)):
-        u.recentAlarmButtons[k] = self.parentIndices[k]
-      u.recentAlarmButtons[self.column] = self.columnIndex
+      u.recentAlarmButton = self.index
       return "Not OK"
     else:
       #print("Alarm OK")
-      self.alarmSelfStatus = self.parameterList.get("Alarm Status",u.defaultKey)
-      #self.userNotifySelfStatus = self.parameterList.get("User Notify Status",u.defaultKey)
+      self.alarmStatus = self.parameterList.get("Alarm Status",u.defaultKey)
+      self.userNotifyStatus = self.parameterList.get("User Notify Status",u.defaultKey)
       self.alarmStatus = "OK"
       self.color = u.lightgrey_color
       return "OK"

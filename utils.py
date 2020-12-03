@@ -27,7 +27,7 @@ black_color = '#000000'
 white_color = '#ffffff'
 defaultKey = "NULL"
 
-recentAlarmButtons = [-1,-1,-1,-1,-1]
+recentAlarmButton = -1
 camguinIDdict = {
     ("mean","ana"),("integral","ana"),
     ("burst","tree"),("mul","tree"),
@@ -39,7 +39,7 @@ camguinIDdict = {
 
 def parse_textfile(fileArray):
   fileArray.mutex.acquire()
-  fileArray.filearray = []
+  fileArray.filearray.clear()
   try:
     with open(fileArray.filename) as csv_file:
       csv_reader = csv.reader(csv_file, delimiter=fileArray.delim)
@@ -119,9 +119,9 @@ def init_historyList(HL):
     tmpHistList.append(tmpDict)
   return tmpHistList
 
-def append_historyList(HL,OL,i):
+def append_historyList(HL,OL,key):
   freshAlarm = 1
-  localStr = "{}, {}, {}".format(OL.objectList[0][OL.objectList[2][i].parentIndices[0]].value,OL.objectList[1][OL.objectList[2][i].parentIndices[1]].value[:25],OL.objectList[2][i].value[:35]) # FIXME there are better ways to do this...
+  localStr = "{}".format(OL.objectList[key].name) 
   for hl in HL.historyList: # Loop over all objects, check to see if they are already in the history, and if so then check their time stamp against right now + wait time
     #print("History time: {}, local time: {}, wait time: {}".format(mktime(hl.get("Time",defaultKey)), mktime(localtime()), HL.timeWait))
     if hl.get("Name",defaultKey) == localStr and hl.get("Time",defaultKey) != "NULL" and mktime(hl.get("Time",defaultKey)) > mktime(localtime()) - HL.timeWait:
@@ -131,7 +131,7 @@ def append_historyList(HL,OL,i):
     tmpList = []
     tmpDict["Name"] = localStr
     tmpList.append("Name={}".format(localStr))
-    for eachKey, eachItem in OL.objectList[2][i].parameterList.items():
+    for eachKey, eachItem in OL.objectList[key].parameterList.items():
       tmpDict[eachKey] = eachItem
       tmpList.append("{}={}".format(eachKey,eachItem))
     tmpDict["Time"] = localtime()
@@ -159,11 +159,11 @@ def backup_clear_hist(HL):
 
   # Clear the current history
   HL.filename = tmpFileStore 
-  HL.historyList = []
-  HL.filearray = []
+  HL.historyList.clear()
+  HL.filearray.clear()
   return saveFileName
 
-# FIXME this is updating alarmlist values into OL
+# FIXME this is updating alarmlist values into OL - is it even needed - pointer logic?
 def update_objectList(OL,alarmList):
   # Loop through column 3 (i = 2) and for each parameterList entry check if all column=4 entries have column3[i] as its parent
   # if it does then update it's child [0].value to be == key result
@@ -171,26 +171,31 @@ def update_objectList(OL,alarmList):
   for key in alarmList.keys():
     OL.objectList[key] = alarmList[key]
 
-# FIXME this method should change for a new OL technique
 def write_textfile(OL,fileArray):
-  print("Writing text file to disk")
+  print("Writing text file to disk - reading ObjectList")
   fileArray.mutex.acquire()
   try: 
-    fileArray.filearray = []
+    fileArray.filearray.clear()
     # for each in OL.objectList
     #   define the start and stop indices
     #   find all child columns whose start and stop indices lie within
     #   while that condition is true print from left to right
   
-    if len(OL.objectList)>1:
-      i = len(OL.objectList)-1 # i = 5-1 = 4, last column
-      for j in range(0,len(OL.objectList[i])): # Take the 5th column and make entries out of all of its parents values, in sequence
-        entryarray = []
-        parents = OL.objectList[i][j].parentIndices
-        for k in range(0,len(parents)):
-          entryarray.append(OL.objectList[k][parents[k]].value)
-        entryarray.append(OL.objectList[i][j].value)
-        fileArray.filearray.append(entryarray)
+    if len(OL.objectList)>0:
+      #print("Printing text file, {} items".format(len(OL.keys)))
+      # Ordered write based on ordering in OL.keys - should == ordering of button display
+      for Title in OL.keys:
+        #print("Key: {}".format(Title))
+        for key,item in OL.objectList[Title].parameterList.items():
+          entryarray = []
+        #  print("Name {} = {}".format(key,item))
+          entryarray.append(Title)
+          entryarray.append(key)
+          entryarray.append(item)
+        #  print("TEST: {}".format(entryarray))
+          fileArray.filearray.append(entryarray)
+    else:
+      print("ERROR: No data in memory!")
     outFile = open(fileArray.filename,'w+')
     wr = csv.writer(outFile,delimiter=fileArray.delim)
     filearrayrows=zip(*fileArray.filearray)
@@ -199,102 +204,101 @@ def write_textfile(OL,fileArray):
     fileArray.mutex.release()
     return fileArray.filearray
 
-# Depreciated EXPERT mode command this method should change for a new OL technique
-
-# FIXME this method should change for a new OL technique
 def silence_filearray_menu(OL,fileArray,butMenu):
   fileArray.mutex.acquire()
   try:
     i,j = butMenu.indices
     # For it and its children set alarmStatus = "OK"
-    if OL.objectList[i][j].userSilenceStatus == "Silenced":
-      OL.objectList[i][j].userSilenceStatus = "Alert" 
-      #OL.objectList[i][j].alarm.userSilenceSelfStatus = "Alert" 
-      OL.objectList[2][j].parameterList["User Silence Status"] = "Alert"
-    elif OL.objectList[i][j].userSilenceStatus == "Alert":
-      OL.objectList[i][j].userSilenceStatus = "Silenced" 
-      #OL.objectList[i][j].alarm.userSilenceSelfStatus = "Silenced" 
-      OL.objectList[2][j].parameterList["User Silence Status"] = "Silenced"
-      OL.objectList[i][j].color = yellow_color
-    for q in range(OL.objectList[i][j].indexStart,OL.objectList[i][j].indexEnd+1):
-      if fileArray.filearray[q][3] == "User Silence Status": # Update the filearray too
-        fileArray.filearray[q][4] = OL.objectList[i][j].userSilenceStatus
+    if OL.objectList[OL.keys[j]].userSilenceStatus == "Silenced":
+      OL.objectList[OL.keys[j]].userSilenceStatus = "Alert" 
+      OL.objectList[OL.keys[j]].parameterList["User Silence Status"] = "Alert"
+    elif OL.objectList[OL.keys[j]].userSilenceStatus == "Alert":
+      OL.objectList[OL.keys[j]].userSilenceStatus = "Silenced" 
+      OL.objectList[OL.keys[j]].parameterList["User Silence Status"] = "Silenced"
+      OL.objectList[OL.keys[j]].color = yellow_color
+    for q in range(0,len(fileArray.filearray)):
+      if fileArray.filearray[q][0] == OL.keys[j]: # Update the filearray too
+        if fileArray.filearray[q][1] == "User Silence Status":
+          fileArray.filearray[q][2] = OL.objectList[OL.keys[j]].userSilenceStatus
   finally:
     fileArray.mutex.release()
 
-# FIXME this method should change for a new OL technique
 def notify_acknowledge_filearray_menu(OL,fileArray,butMenu):
   fileArray.mutex.acquire()
   try:
     i,j = butMenu.indices
-    tmpStat = OL.objectList[i][j].userNotifyStatus.split(' ')
-    if OL.objectList[i][j].parameterList.get("Trip Counter",defaultKey) != "NULL":
-      OL.objectList[i][j].parameterList["Trip Counter"] = "0"
+    tmpStat = OL.objectList[OL.keys[j]].userNotifyStatus.split(' ')
+    if OL.objectList[OL.keys[j]].parameterList.get("Trip Counter",defaultKey) != defaultKey:
+      OL.objectList[OL.keys[j]].parameterList["Trip Counter"] = "0"
     if tmpStat[0] == "Cooldown":
-      OL.objectList[i][j].userNotifyStatus = "OK" # The user is manually OKing this alarm... 
-      OL.objectList[i][j].parameterList["User Notify Status"] = "OK"
-      #OL.objectList[i][j].alarm.userNotifySelfStatus = "OK"
+      OL.objectList[OL.keys[j]].userNotifyStatus = "OK" # The user is manually OKing this alarm... 
+      OL.objectList[OL.keys[j]].parameterList["User Notify Status"] = "OK"
     else:
       # The user is just now acknowledging, therefore start the cooldown
-      OL.objectList[i][j].userNotifyStatus = "Cooldown {}".format(int(OL.cooldownLength))
-      OL.objectList[i][j].parameterList["User Notify Status"] = "Cooldown {}".format(int(OL.cooldownLength))
-      #OL.objectList[i][j].alarm.userNotifySelfStatus = "Cooldown {}".format(int(OL.cooldownLength))
-      #OL.objectList[i][j].color = yellow_color
-    for q in range(OL.objectList[i][j].indexStart,OL.objectList[i][j].indexEnd+1):
-      if fileArray.filearray[q][3] == "User Notify Status": # Update the filearray too
-        #print("Printing to filearray[{}][{}] User Notify Status = {}".format(q,4,OL.objectList[i][j].userNotifyStatus))
-        fileArray.filearray[q][4] = OL.objectList[i][j].userNotifyStatus
+      OL.objectList[OL.keys[j]].userNotifyStatus = "Cooldown {}".format(int(OL.cooldownLength))
+      OL.objectList[OL.keys[j]].parameterList["User Notify Status"] = "Cooldown {}".format(int(OL.cooldownLength))
+      OL.objectList[OL.keys[j]].color = orange_color
+    for q in range(0,len(fileArray.filearray)):
+      if fileArray.filearray[q][0] == OL.keys[j]: # Update the filearray too
+        if fileArray.filearray[q][1] == "User Notify Status":
+          fileArray.filearray[q][2] = OL.objectList[OL.keys[j]].userNotifyStatus
   finally:
     fileArray.mutex.release()
 
-# FIXME this method should change for a new OL technique
+# FIXME not currently in use outside of depreciated "expert" mode tab
 def edit_filearray_menu(OL,fileArray,butMenu):
   fileArray.mutex.acquire()
   try:
     i,j = butMenu.indices
-    file_ind_start = OL.objectList[i][j].indexStart
-    file_ind_stop = OL.objectList[i][j].indexEnd
-    for k in range(file_ind_start,file_ind_stop+1): # +1 is so it will do the first one if both ==
-      fileArray.filearray[k][i] = butMenu.editValue # i is the column... where our data word exists
+    tmpStat = OL.objectList[OL.keys[j]].userNotifyStatus.split(' ')
+    # butMenu.editValue
+    OL.objectList[OL.keys[j]].parameterList["Value"] = butMenu.editValue
+    OL.objectList[OL.keys[j]].value = butMenu.editValue
+    for q in range(0,len(fileArray.filearray)):
+      if fileArray.filearray[q][0] == key: # Update the filearray too
+        if fileArray.filearray[q][1] == "Value":
+          fileArray.filearray[q][2] = OL.objectList[OL.keys[j]].value
   finally:
-    fileArray.mutex.release
-    return fileArray.filearray
+    fileArray.mutex.release()
 
 def subshift(L, start, end, insert_at):
   temp = L[start:end]
   L = L[:start] + L[end:]
   return L[:insert_at] + temp + L[insert_at:]
 
-# FIXME this method should change for a new OL technique - just change the OL data and let the fileArray printer read OL and continue
+# FIXME FIXME Start Here FIXME FIXME this method should change for a new OL technique - just change the OL data and let the fileArray printer read OL and continue
 def move_filearray_menu(OL,fileArray,butMenu):
   fileArray.mutex.acquire()
   try:
     i,j = butMenu.indices
     mvN = butMenu.moveN
+    # FIXME do some things here:
+    # 1) Shift OL.keys[j] to j+mvN
+    # 2) Shift Button Array entry j to j+mvN
+    # 3) Find filearray index q where j'th key'd OL item begins and how many elements it has for file_ind_start and stop
+
     # Shift fileArray down by moveN, make it == the values at tmpFA[moveNind][i]
     # Shift fileArray[+moveNind] up by size of moved bit
-    file_ind_start = OL.objectList[i][j].indexStart
-    file_ind_stop = OL.objectList[i][j].indexEnd
+    # FIXME file_ind_start = OL.objectList[i][j].indexStart
+    # FIXME file_ind_stop = OL.objectList[i][j].indexEnd
     #print("col {}, entry {}, move by {}, start file ind {}, end file ind {}, position to plant into {}".format(i,j,mvN,file_ind_start,file_ind_stop,OL.objectList[i][j+mvN].indexEnd))
-    #inplace_shift(fileArray.filearray,file_ind_start,file_ind_stop-file_ind_start+1,file_ind_distance+file_ind_start)
-    if mvN>0:
-      #fileArray.filearray = subshift(fileArray.filearray,file_ind_start,file_ind_stop+1,OL.objectList[i][j+mvN].indexEnd)
-      fileArray.filearray = subshift(fileArray.filearray,file_ind_start,file_ind_stop+1,OL.objectList[i][j+mvN].indexEnd-(file_ind_stop-file_ind_start))
-    if mvN<0:
-      fileArray.filearray = subshift(fileArray.filearray,file_ind_start,file_ind_stop+1,OL.objectList[i][j+mvN].indexStart)
+    #if mvN>0:
+      #FIXME fileArray.filearray = subshift(fileArray.filearray,file_ind_start,file_ind_stop+1,OL.objectList[i][j+mvN].indexEnd-(file_ind_stop-file_ind_start))
+    #if mvN<0:
+      #FIXME fileArray.filearray = subshift(fileArray.filearray,file_ind_start,file_ind_stop+1,OL.objectList[i][j+mvN].indexStart)
   finally:
     fileArray.mutex.release()
     return fileArray.filearray
 
-# FIXME this method should change for a new OL technique
+# FIXME FIXME this method should change for a new OL technique
 def copy_filearray_menu(OL,fileArray,butMenu):
   fileArray.mutex.acquire()
   try:
     i,j = butMenu.indices
     copyN = butMenu.copyName
     copyFileArray = []
-    file_ind_start = OL.objectList[i][j].indexStart
-    file_ind_stop = OL.objectList[i][j].indexEnd
+    # FIXME file_ind_start = OL.objectList[i][j].indexStart
+    # FIXME file_ind_stop = OL.objectList[i][j].indexEnd
     #print("col {}, entry {}, copy newName = {}, start file ind {}, end file ind {}".format(i,j,copyN,file_ind_start,file_ind_stop))
     if copyN != None:
       for l in range(file_ind_start,file_ind_stop+1):
@@ -307,29 +311,29 @@ def copy_filearray_menu(OL,fileArray,butMenu):
     fileArray.mutex.release()
     return fileArray.filearray
 
-# FIXME this method should change for a new OL technique
+# FIXME FIXME this method should change for a new OL technique
 def delete_filearray_menu(OL,fileArray,butMenu):
   fileArray.mutex.acquire()
   try:
     i,j = butMenu.indices
-    file_ind_start = OL.objectList[i][j].indexStart
-    file_ind_stop = OL.objectList[i][j].indexEnd
+    # FIXME file_ind_start = OL.objectList[i][j].indexStart
+    # FIXME file_ind_stop = OL.objectList[i][j].indexEnd
     for k in range(file_ind_start,file_ind_stop+1): # +1 is so it will do the first one if both ==
       del fileArray.filearray[file_ind_start]
   finally:
     fileArray.mutex.release()
     return fileArray.filearray
 
-# FIXME this method should change for a new OL technique
+# FIXME FIXME this method should change for a new OL technique
 def add_filearray_menu(OL,fileArray,butMenu):
   fileArray.mutex.acquire()
   try:
     i,j = butMenu.indices
-    file_ind = OL.objectList[i][j].indexEnd+1
+    # FIXME file_ind = OL.objectList[i][j].indexEnd+1
     addedLine = []
-    for parent in range(0,i):
-      addedLine.append(OL.objectList[parent][OL.activeObjectColumnIndicesList[parent]].value)
-      #addedLine.append(OL.objectList[parent][OL.selectedButtonColumnIndicesList[parent]].value)
+    #for parent in range(0,i):
+      #addedLine.append(OL.objectList[parent][OL.activeObjectColumnIndicesList[parent]].value)
+      ######addedLine.append(OL.objectList[parent][OL.selectedButtonColumnIndicesList[parent]].value)
     for child in range(i,len(OL.objectList)):
       addedLine.append("NULL")
     fileArray.filearray.insert(file_ind,addedLine)
@@ -345,45 +349,47 @@ def write_filearray(fileArray):
     if len(fileArray.filearray)!=0:
       filearrayrows=zip(*fileArray.filearray)
       wr.writerows(fileArray.filearray)
-      print("Writing file array to disk")
+      print("Writing file array to disk - generic")
   finally:
     fileArray.mutex.release()
     return fileArray.filearray
 
-# FIXME FIXME this method needs to change a lot to use a streamlined object and OL definition
 def create_objects(fileArray,cooldownLength):
   ncolumns = 0
   if len(fileArray.filearray)>0: 
-    ncolumns = len(fileArray.filearray[len(fileArray.filearray)-1]) # FIXME should this just be hardcoded to 5 layers or should I keep it generic??
+    ncolumns = len(fileArray.filearray[len(fileArray.filearray)-1]) # FIXME should this just be hardcoded to 3 layers or should I keep it generic??
   nlines = len(fileArray.filearray)
   if fileArray.filearray == [] or fileArray.filearray == [[]] or fileArray.filearray == None:
     nlines = 0
     ncolumns = 0 # Sanity Check
     print("Error: Empty alarm file given to Parity Alarm Handler")
+    return None
   localObjectList = {}
   for lineN in range(0,nlines):
     line = fileArray.filearray[lineN]
     if len(line) != ncolumns:
       print("Error, line {} = {} has the wrong number of entries for alarm handling parsing".format(lineN,line))
       return None
-    if line[0] is not in localObjectList.keys():
+    if line[0] not in localObjectList.keys():
       newObject = alarm_object.ALARM_OBJECT() # call initializer
+      newObject.name = line[0]
       localObjectList[line[0]] = newObject
     localObjectList[line[0]].parameterList[line[1]]=line[2] # Set object named line[0] parameter named line[1] equal to value held in line[2]
   for key in localObjectList.keys():
-    # FIXME uses ALARM_OBJECT to declare an ALARM... why???
-    # FIXME FIXME should probably have a call to a method to polish alarm to read parameterList and fill the gaps based on alarm's necessary logics
     localObjectList[key].polish_alarm_object()
     #localObjectList[key].alarm = alarm_object.ALARM(localObjectList[key]) # NEW ALARM defined here per new object in middle column
   return localObjectList
 
-
 def create_objects_keys(fileArray):
+  ncolumns = 0
+  if len(fileArray.filearray)>0: 
+    ncolumns = len(fileArray.filearray[len(fileArray.filearray)-1]) # FIXME should this just be hardcoded to 3 layers or should I keep it generic??
   nlines = len(fileArray.filearray)
   if fileArray.filearray == [] or fileArray.filearray == [[]] or fileArray.filearray == None:
     nlines = 0
     ncolumns = 0 # Sanity Check
     print("Error: Empty alarm file given to Parity Alarm Handler")
+    return None
   localKeyDict = {}
   localKeyList = []
   for lineN in range(0,nlines):
@@ -391,7 +397,7 @@ def create_objects_keys(fileArray):
     if len(line) != ncolumns:
       print("Error, line {} = {} has the wrong number of entries for alarm handling parsing".format(lineN,line))
       return None
-    if line[0] is not in localKeyDict.keys():
+    if line[0] not in localKeyDict.keys():
       localKeyDict[line[0]] = line[0]
       localKeyList.append(line[0])
   return localKeyList
@@ -402,32 +408,33 @@ def update_extra_filearray(fileArray,extraFileArray):
   extraFileArray = alarm_object.FILE_ARRAY(extraFileArray.filename,extraFileArray.delim)
   fileArray.mutex.acquire()
   try: 
-
-    if extraFileArray != None: # Then we have the correct format
-      for i in range (0,len(extraFileArray.filearray)): # Check each line of extra array
-        print("Reading extra fileArray {}, line {} = {}".format(extraFileArray.filename,i,extraFileArray.filearray[i]))
-        # Check original file for contents matching comparison file, if first 4 columns can find a match then update, if not then append into the section with first 3/2/1 columns
-        edittedEntry = False
-        insertSpot = len(fileArray.filearray)
-        for j in range (0,len(extraFileArray.filearray[i])-1):
-          filled = [-1] * 4
-          for k in range (0,len(fileArray.filearray)): # Check each line of original array
-            if len(fileArray.filearray[k])>j and extraFileArray.filearray[i][j] == fileArray.filearray[k][j]: 
-              # Then this entry has already been included in the main object list
-              #print("Entry in extra fileArray {} being overwritten, line {} = {}".format(extraFileArray.filearray[i][j],i,extraFileArray.filearray[i]))
-              #print("fileArray.filearay[{}] contains {}".format(k,extraFileArray.filearray[i][j]))
-              if extraFileArray.filearray[i][0:4] == fileArray.filearray[k][0:4]: # only update for the case that I'm exactly replacing
-                fileArray.filearray[k][4] = extraFileArray.filearray[i][4] 
-                edittedEntry = True
-              if extraFileArray.filearray[i][0:3] == fileArray.filearray[k][0:3]:
-                insertSpot = k+1 # Update insertSpot for each entry with 3th level ana name matching
-          if edittedEntry == False:
-            if insertSpot == len(fileArray.filearray):
-              #print("Appending {} below {}".format(extraFileArray.filearray[i],fileArray.filearray[len(fileArray.filearray)-1]))
-              fileArray.filearray.append(extraFileArray.filearray[i])
-            else:
-              fileArray.filearray.insert(insertSpot,extraFileArray.filearray[i])
-              #print("Inserting {} below {}".format(extraFileArray.filearray[i],fileArray.filearray[indices[x]]))
+    if extraFileArray != None and len(extraFileArray.filearray) != 0:
+      nColumns = len(extraFileArray.filearray[0])
+      if nColumns != 0: # Then we have the correct format
+        for i in range (0,len(extraFileArray.filearray)): # Check each line of extra array
+          print("Reading extra fileArray {}, line {} = {}".format(extraFileArray.filename,i,extraFileArray.filearray[i]))
+          # Check original file for contents matching comparison file, if first (nColumns-1) columns can find a match then update, if not then append into the section with first (nColumns-2)/2/1 columns
+          edittedEntry = False
+          insertSpot = len(fileArray.filearray)
+          for j in range (0,len(extraFileArray.filearray[i])-1):
+            filled = [-1] * (nColumns-1)
+            for k in range (0,len(fileArray.filearray)): # Check each line of original array
+              if len(fileArray.filearray[k])>j and extraFileArray.filearray[i][j] == fileArray.filearray[k][j]: 
+                # Then this entry has already been included in the main object list
+                #print("Entry in extra fileArray {} being overwritten, line {} = {}".format(extraFileArray.filearray[i][j],i,extraFileArray.filearray[i]))
+                #print("fileArray.filearay[{}] contains {}".format(k,extraFileArray.filearray[i][j]))
+                if extraFileArray.filearray[i][0:(nColumns-1)] == fileArray.filearray[k][0:(nColumns-1)]: # only update for the case that I'm exactly replacing
+                  fileArray.filearray[k][(nColumns-1)] = extraFileArray.filearray[i][(nColumns-1)] 
+                  edittedEntry = True
+                if extraFileArray.filearray[i][0:(nColumns-2)] == fileArray.filearray[k][0:(nColumns-2)]:
+                  insertSpot = k+1 # Update insertSpot for each entry with (nColumns-2)th level ana name matching
+            if edittedEntry == False:
+              if insertSpot == len(fileArray.filearray):
+                #print("Appending {} below {}".format(extraFileArray.filearray[i],fileArray.filearray[len(fileArray.filearray)-1]))
+                fileArray.filearray.append(extraFileArray.filearray[i])
+              else:
+                fileArray.filearray.insert(insertSpot,extraFileArray.filearray[i])
+                #print("Inserting {} below {}".format(extraFileArray.filearray[i],fileArray.filearray[indices[x]]))
   finally:
     fileArray.mutex.release()
 
