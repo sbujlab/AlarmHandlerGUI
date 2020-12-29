@@ -149,8 +149,12 @@ def write_historyFile(HL):
 
 def backup_clear_hist(HL):
   tmpFileStore = HL.filename
+  tmpFolderName = ""
   # Make a new unique name
-  tmpFolderName = HL.filename[:HL.filename.rfind("/")+1] + "history_saves"
+  if HL.filename.rfind("/") == -1:
+    tmpFolderName = "history_saves/" + HL.filename[:HL.filename.find(".csv")]
+  else:
+    tmpFolderName = HL.filename[:HL.filename.rfind("/")+1] + "history_saves/"
   HL.filename = tmpFolderName + HL.filename[HL.filename.rfind("/"):HL.filename.find(".csv")] + "_Save_{}.csv".format(mktime(localtime())) 
   saveFileName = "Alarms Saved to {}".format(HL.filename)
   print(saveFileName)

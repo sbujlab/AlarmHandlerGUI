@@ -19,7 +19,7 @@ from threading import Thread, Lock
 
 # EPICS
 import logging
-import rcdb
+#import rcdb
 import subprocess
 import socket
 from datetime import datetime
@@ -384,6 +384,9 @@ class ALARM_OBJECT():
     #else:
     #  self.parameterList["User Notify Status"] = self.value
     self.userNotifyStatus = self.parameterList["User Notify Status"]
+    if "Alarm Type" not in self.parameterList:
+      self.parameterList["Alarm Type"] = "BASH"
+    self.alarmType = self.parameterList["Alarm Type"]
 
   def do_alarm_analysis(self):
     if "Camguin" in self.alarmType: # Alarm Type is the parameter (level 4 object) which keeps track of what analysis to do
@@ -395,16 +398,23 @@ class ALARM_OBJECT():
         #print("Checking Script = {}".format(self.parameterList.get("Script Name",u.defaultKey)))
         cmds = [self.parameterList.get("Script Name",u.defaultKey)]
         cond_out = "NULL"
-        cond_out = subprocess.Popen(cmds, stdout=subprocess.PIPE).stdout.read().strip().decode('ascii') # Needs to be decoded... be careful 
-        if "Command not found." in str(cond_out): # Then the Script was invalid
+        try:
+          cond_out = subprocess.Popen(cmds, stdout=subprocess.PIPE).stdout.read().strip().decode('ascii') # Needs to be decoded... be careful 
+        except:
+          print("Failed: {}".format(cmds))
+        print("TEST 1: {}".format(cond_out))
+        if "not found" in str(cond_out): # Then the Script was invalid
           print("Error: command {} not found".format(self.parameterList.get("Script Name",u.defaultKey)))
           cond_out = "NULL"
         self.parameterList["Value"] = cond_out
       if self.parameterList.get("Threshold Variable Name",u.defaultKey) != "NULL" and self.parameterList.get("Script Name",u.defaultKey) != "NULL":
         cmds = [self.parameterList.get("Script Name",u.defaultKey),self.parameterList.get("Threshold Variable Name",u.defaultKey)]
         cond_out = "NULL"
-        cond_out = subprocess.Popen(cmds, stdout=subprocess.PIPE).stdout.read().strip().decode('ascii') # Needs to be decoded... be careful 
-        if "Command not found." in str(cond_out): # Then the Script was invalid
+        try:
+          cond_out = subprocess.Popen(cmds, stdout=subprocess.PIPE).stdout.read().strip().decode('ascii') # Needs to be decoded... be careful 
+        except:
+          print("Failed: {}".format(cmds))
+        if "not found" in str(cond_out): # Then the Script was invalid
           print("Error: command {} not found".format(self.parameterList.get("Script Name",u.defaultKey)))
           cond_out = u.defaultKey
           
@@ -412,8 +422,11 @@ class ALARM_OBJECT():
       if self.parameterList.get("Threshold 2 Variable Name",u.defaultKey) != "NULL" and self.parameterList.get("Script Name",u.defaultKey) != "NULL":
         cmds = [self.parameterList.get("Script Name",u.defaultKey),self.parameterList.get("Threshold 2 Variable Name",u.defaultKey)]
         cond_out = "NULL"
-        cond_out = subprocess.Popen(cmds, stdout=subprocess.PIPE).stdout.read().strip().decode('ascii') # Needs to be decoded... be careful 
-        if "Command not found." in str(cond_out): # Then the Script was invalid
+        try:
+          cond_out = subprocess.Popen(cmds, stdout=subprocess.PIPE).stdout.read().strip().decode('ascii') # Needs to be decoded... be careful 
+        except:
+          print("Failed: {}".format(cmds))
+        if "not found" in str(cond_out): # Then the Script was invalid
           print("Error: command {} not found".format(self.parameterList.get("Script Name",u.defaultKey)))
           cond_out = u.defaultKey
           
@@ -421,8 +434,11 @@ class ALARM_OBJECT():
       if self.parameterList.get("Case Variable Name",u.defaultKey) != "NULL" and self.parameterList.get("Script Name",u.defaultKey) != "NULL":
         cmds = [self.parameterList.get("Script Name",u.defaultKey),self.parameterList.get("Case Variable Name",u.defaultKey)]
         cond_out = "NULL"
-        cond_out = subprocess.Popen(cmds, stdout=subprocess.PIPE).stdout.read().strip().decode('ascii') # Needs to be decoded... be careful 
-        if "Command not found." in str(cond_out): # Then the Script was invalid
+        try:
+          cond_out = subprocess.Popen(cmds, stdout=subprocess.PIPE).stdout.read().strip().decode('ascii') # Needs to be decoded... be careful 
+        except:
+          print("Failed: {}".format(cmds))
+        if "not found" in str(cond_out): # Then the Script was invalid
           print("Error: command {} not found".format(self.parameterList.get("Script Name",u.defaultKey)))
           cond_out = "BAD"
           
@@ -430,16 +446,22 @@ class ALARM_OBJECT():
       if self.parameterList.get("Double Case Variable Name",u.defaultKey) != "NULL" and self.parameterList.get("Script Name",u.defaultKey) != "NULL":
         cmds = [self.parameterList.get("Script Name",u.defaultKey),self.parameterList.get("Double Case Variable Name",u.defaultKey)]
         cond_out = "NULL"
-        cond_out = subprocess.Popen(cmds, stdout=subprocess.PIPE).stdout.read().strip().decode('ascii') # Needs to be decoded... be careful 
-        if "Command not found." in str(cond_out): # Then the epics Script was invalid
+        try:
+          cond_out = subprocess.Popen(cmds, stdout=subprocess.PIPE).stdout.read().strip().decode('ascii') # Needs to be decoded... be careful 
+        except:
+          print("Failed: {}".format(cmds))
+        if "not found" in str(cond_out): # Then the epics Script was invalid
           print("Error: command {} not found".format(self.parameterList.get("Script Name",u.defaultKey)))
           cond_out = "BAD"
         self.parameterList["Double Case Value"] = cond_out
       if (self.parameterList.get("Same Value Comparator",u.defaultKey) != "NULL" or self.parameterList.get("Same Value Comparator {}".format(self.parameterList.get("Case Value",u.defaultKey)),u.defaultKey) != "NULL" or self.parameterList.get("Same Value Comparator {}".format(self.parameterList.get("Double Case Value",u.defaultKey)),u.defaultKey) != "NULL") and self.parameterList.get("Script Name",u.defaultKey) != "NULL":
         cmds = [self.parameterList.get("Script Name",u.defaultKey)]
         cond_out = "NULL"
-        cond_out = subprocess.Popen(cmds, stdout=subprocess.PIPE).stdout.read().strip().decode('ascii') # Needs to be decoded... be careful 
-        if "Command not found." in str(cond_out): # Then the Script was invalid
+        try:
+          cond_out = subprocess.Popen(cmds, stdout=subprocess.PIPE).stdout.read().strip().decode('ascii') # Needs to be decoded... be careful 
+        except:
+          print("Failed: {}".format(cmds))
+        if "not found" in str(cond_out): # Then the Script was invalid
           print("Error: command {} not found".format(self.parameterList.get("Script Name",u.defaultKey)))
           cond_out = "BAD"
           
@@ -482,7 +504,10 @@ class ALARM_OBJECT():
       if self.parameterList.get("Variable Name",u.defaultKey) != "Run Start Time" and self.parameterList.get("Variable Name",u.defaultKey) != "Run Number": # Else update other alarms
         cmds = ['rcnd',self.runNumber,self.parameterList["Variable BName"]]
         cond_out = "NULL"
-        cond_out = subprocess.Popen(cmds, stdout=subprocess.PIPE).stdout.read().strip().decode('ascii') # Decoding...
+        try:
+          cond_out = subprocess.Popen(cmds, stdout=subprocess.PIPE).stdout.read().strip().decode('ascii') # Decoding...
+        except:
+          print("Failed: {}".format(cmds))
         self.parameterList["Value"] = cond_out
 
     if "EPICS" in self.alarmType:
@@ -490,10 +515,16 @@ class ALARM_OBJECT():
         #print("Checking EPICs variable = {}".format(self.parameterList.get("Variable Name",u.defaultKey)))
         cmds = ['caget', '-t', '-w 1', self.parameterList["Variable Name"]]
         cond_out = "NULL"
-        cond_out = subprocess.Popen(cmds, stdout=subprocess.PIPE).stdout.read().strip().decode('ascii') # Needs to be decoded... be careful 
+        try:
+          cond_out = subprocess.Popen(cmds, stdout=subprocess.PIPE).stdout.read().strip().decode('ascii') # Needs to be decoded... be careful 
+        except:
+          print("Failed: {}".format(cmds))
         #print("The epics output for variable {} is {}".format(self.parameterList["Variable Name"],cond_out))
         if "Invalid" in str(cond_out): # Then the epics variable was invalid
           print("ERROR Invalid epics channel, check with caget again:\t {}".format(self.parameterList["Variable Name"]))
+          cond_out = "NULL"
+        if "not found" in str(cond_out): # Then the epics variable was invalid
+          print("ERROR caget missing!!")
           cond_out = "NULL"
         self.parameterList["Value"] = cond_out
       elif self.parameterList.get("IOC Alarm List Name",u.defaultKey) != "NULL":
@@ -503,19 +534,31 @@ class ALARM_OBJECT():
         cmds = ["NULL"]
         if self.parameterList.get("Current Variable",u.defaultKey) != "NULL":
           cmds = ['caget', '-t', '-w 1', self.parameterList["Current Variable"]]
-          cond_out = subprocess.Popen(cmds, stdout=subprocess.PIPE).stdout.read().strip().decode('ascii') # Needs to be decoded... be careful 
+          try:
+            cond_out = subprocess.Popen(cmds, stdout=subprocess.PIPE).stdout.read().strip().decode('ascii') # Needs to be decoded... be careful 
+          except:
+            print("Failed: {}".format(cmds))
         if "Invalid" in str(cond_out): # Then the epics variable was invalid
           print("ERROR Invalid epics channel, check with caget again:\t {}".format(self.parameterList.get("Variable Name",u.defaultKey)))
+          cond_out = "NULL"
+        if "not found" in str(cond_out): # Then the epics variable was invalid
+          print("ERROR caget missing!!")
           cond_out = "NULL"
         elif u.is_number(cond_out) and Decimal(cond_out) > 35.0:
           for eachName in listNames:
             cmds = ['caget', '-t', '-w 1', self.parameterList["IOC Alarm List Name"]+eachName]
-            cond_out = subprocess.Popen(cmds, stdout=subprocess.PIPE).stdout.read().strip().decode('ascii') # Needs to be decoded... be careful 
+            try:
+              cond_out = subprocess.Popen(cmds, stdout=subprocess.PIPE).stdout.read().strip().decode('ascii') # Needs to be decoded... be careful 
+            except:
+              print("Failed: {}".format(cmds))
             if cond_out == "1":
               self.parameterList["Value"] = cond_out;
             #print("The epics output for variable {} is {}".format(self.parameterList["Variable Name"],cond_out))
           if "Invalid" in str(cond_out): # Then the epics variable was invalid
             print("ERROR Invalid epics channel, check with caget again:\t {}".format(self.parameterList.get("Variable Name",u.defaultKey)))
+            cond_out = "NULL"
+          if "not found" in str(cond_out): # Then the epics variable was invalid
+            print("ERROR caget missing!!")
             cond_out = "NULL"
           self.parameterList["Value"] = cond_out
         else: 
@@ -527,10 +570,16 @@ class ALARM_OBJECT():
         #print("Checking EPICs variable = {}".format(self.parameterList.get("Difference Reference Variable Name",u.defaultKey)))
         cmds = ['caget', '-t', '-w 1', self.parameterList["Difference Reference Variable Name"]]
         cond_out = "NULL"
-        cond_out = subprocess.Popen(cmds, stdout=subprocess.PIPE).stdout.read().strip().decode('ascii') # Needs to be decoded... be careful 
+        try:
+          cond_out = subprocess.Popen(cmds, stdout=subprocess.PIPE).stdout.read().strip().decode('ascii') # Needs to be decoded... be careful 
+        except:
+          print("Failed: {}".format(cmds))
         #print("The epics output for variable {} is {}".format(self.parameterList["Variable Name"],cond_out))
         if "Invalid" in str(cond_out): # Then the epics variable was invalid
           print("ERROR Invalid epics channel, check with caget again:\t {}".format(self.parameterList["Difference Reference Variable Name"]))
+          cond_out = "NULL"
+        if "not found" in str(cond_out): # Then the epics variable was invalid
+          print("ERROR caget missing!!")
           cond_out = "NULL"
         self.parameterList["Difference Reference Value"] = cond_out
         if self.parameterList.get("Value",u.defaultKey) != "NULL" and self.parameterList.get("Difference Reference Value") != "NULL":
@@ -542,26 +591,44 @@ class ALARM_OBJECT():
       if self.parameterList.get("Threshold Variable Name",u.defaultKey) != "NULL":
         cmds = ['caget', '-t', '-w 1', self.parameterList["Threshold Variable Name"]]
         cond_out = "NULL"
-        cond_out = subprocess.Popen(cmds, stdout=subprocess.PIPE).stdout.read().strip().decode('ascii') # Needs to be decoded... be careful 
+        try:
+          cond_out = subprocess.Popen(cmds, stdout=subprocess.PIPE).stdout.read().strip().decode('ascii') # Needs to be decoded... be careful 
+        except:
+          print("Failed: {}".format(cmds))
         if "Invalid" in str(cond_out): # Then the epics variable was invalid
           print("ERROR Invalid epics channel, check with caget again:\t {}".format(self.parameterList["Threshold Variable Name"]))
           cond_out = u.defaultKey
+        if "not found" in str(cond_out): # Then the epics variable was invalid
+          print("ERROR caget missing!!")
+          cond_out = "NULL"
         self.parameterList["Threshold Value"] = cond_out
       if self.parameterList.get("Threshold 2 Variable Name",u.defaultKey) != "NULL":
         cmds = ['caget', '-t', '-w 1', self.parameterList["Threshold 2 Variable Name"]]
         cond_out = "NULL"
-        cond_out = subprocess.Popen(cmds, stdout=subprocess.PIPE).stdout.read().strip().decode('ascii') # Needs to be decoded... be careful 
+        try:
+          cond_out = subprocess.Popen(cmds, stdout=subprocess.PIPE).stdout.read().strip().decode('ascii') # Needs to be decoded... be careful 
+        except:
+          print("Failed: {}".format(cmds))
         if "Invalid" in str(cond_out): # Then the epics variable was invalid
           print("ERROR Invalid epics channel, check with caget again:\t {}".format(self.parameterList["Threshold 2 Variable Name"]))
           cond_out = u.defaultKey
+        if "not found" in str(cond_out): # Then the epics variable was invalid
+          print("ERROR caget missing!!")
+          cond_out = "NULL"
         self.parameterList["Threshold 2 Value"] = cond_out
       if self.parameterList.get("Case Variable Name",u.defaultKey) != "NULL":
         cmds = ['caget', '-t', '-w 1', self.parameterList["Case Variable Name"]]
         cond_out = "NULL"
-        cond_out = subprocess.Popen(cmds, stdout=subprocess.PIPE).stdout.read().strip().decode('ascii') # Needs to be decoded... be careful 
+        try:
+          cond_out = subprocess.Popen(cmds, stdout=subprocess.PIPE).stdout.read().strip().decode('ascii') # Needs to be decoded... be careful 
+        except:
+          print("Failed: {}".format(cmds))
         if "Invalid" in str(cond_out): # Then the epics variable was invalid
           print("ERROR Invalid epics channel, check with caget again:\t {}".format(self.parameterList["Case Variable Name"]))
           cond_out = "BAD"
+        if "not found" in str(cond_out): # Then the epics variable was invalid
+          print("ERROR caget missing!!")
+          cond_out = "NULL"
         self.parameterList["Case Value"] = cond_out
       #else: # User didn't have "Value" in their parameter list, add it and make it init to NULL
       #  self.parameterList["Case Variable Name"] = "NULL"
@@ -569,10 +636,16 @@ class ALARM_OBJECT():
       if self.parameterList.get("Double Case Variable Name",u.defaultKey) != "NULL":
         cmds = ['caget', '-t', '-w 1', self.parameterList["Double Case Variable Name"]]
         cond_out = "NULL"
-        cond_out = subprocess.Popen(cmds, stdout=subprocess.PIPE).stdout.read().strip().decode('ascii') # Needs to be decoded... be careful 
+        try:
+          cond_out = subprocess.Popen(cmds, stdout=subprocess.PIPE).stdout.read().strip().decode('ascii') # Needs to be decoded... be careful 
+        except:
+          print("Failed: {}".format(cmds))
         if "Invalid" in str(cond_out): # Then the epics variable was invalid
           print("ERROR Invalid epics channel, check with caget again:\t {}".format(self.parameterList["Double Case Variable Name"]))
           cond_out = "BAD"
+        if "not found" in str(cond_out): # Then the epics variable was invalid
+          print("ERROR caget missing!!")
+          cond_out = "NULL"
         self.parameterList["Double Case Value"] = cond_out
       #else: # User didn't have "Value" in their parameter list, add it and make it init to NULL
       #  self.parameterList["Double Case Variable Name"] = "NULL"
@@ -587,7 +660,10 @@ class ALARM_OBJECT():
   def get_run_number(self):
     cmds = ['rcnd']
     cond_out = "NULL"
-    cond_out = subprocess.Popen(cmds, stdout=subprocess.PIPE).stdout.read().strip().decode('ascii') # Needs to be decoded... be careful 
+    try:
+      cond_out = subprocess.Popen(cmds, stdout=subprocess.PIPE).stdout.read().strip().decode('ascii') # Needs to be decoded... be careful 
+    except:
+      print("Failed: {}".format(cmds))
     lines = cond_out.split('\n')
     runNumber = 0
     for linei in lines:

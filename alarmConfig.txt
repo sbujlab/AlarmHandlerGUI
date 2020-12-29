@@ -1,7 +1,7 @@
-alarmConfig       = /adaqfs/home/apar/alarms/alarmConfig.txt
-alarmFilename     = /adaqfs/home/apar/alarms/alarm.csv
-historyFilename   = /adaqfs/home/apar/alarms/alarmHistory.csv
-externalFilename  = /adaqfs/home/apar/alarms/japanAlarms.csv
+alarmConfig       = alarmConfig.txt
+alarmFilename     = alarm.csv
+historyFilename   = alarmHistory.csv
+externalFilename  = japanAlarms.csv
 staleExternalTime = 300
 timeWaitHistory   = 600
 alarmCooldownTime = 60
