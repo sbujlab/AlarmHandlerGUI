@@ -277,22 +277,38 @@ def move_filearray_menu(OL,fileArray,butMenu):
     i,j = butMenu.indices
     mvN = butMenu.moveN
     # FIXME do some things here:
-    # 1) Shift OL.keys[j] to j+mvN
-    # 2) Shift Button Array entry j to j+mvN
+    # 1) Shift OL.keys[j] to j+mvN position, and set OL.objectList[key].index to j+mvN
+    # 2) Shift displayFrames and buttonMenus entry j to j+mvN
     # 3) Find filearray index q where j'th key'd OL item begins and how many elements it has for file_ind_start and stop
 
-    # Shift fileArray down by moveN, make it == the values at tmpFA[moveNind][i]
-    # Shift fileArray[+moveNind] up by size of moved bit
-    # FIXME file_ind_start = OL.objectList[i][j].indexStart
-    # FIXME file_ind_stop = OL.objectList[i][j].indexEnd
-    #print("col {}, entry {}, move by {}, start file ind {}, end file ind {}, position to plant into {}".format(i,j,mvN,file_ind_start,file_ind_stop,OL.objectList[i][j+mvN].indexEnd))
-    #if mvN>0:
-      #FIXME fileArray.filearray = subshift(fileArray.filearray,file_ind_start,file_ind_stop+1,OL.objectList[i][j+mvN].indexEnd-(file_ind_stop-file_ind_start))
-    #if mvN<0:
-      #FIXME fileArray.filearray = subshift(fileArray.filearray,file_ind_start,file_ind_stop+1,OL.objectList[i][j+mvN].indexStart)
+    OL.keys = subshift(OL.keys,j,j+1,j+mvN)
+    for k in range(0,len(OL.keys)):
+      OL.objectList[OL.keys[k]].index = k
+
+    replaced_start = -1
+    replaced_stop = 0
+    for q in range(0,len(fileArray.filearray)):
+      if fileArray.filearray[q][0] == OL.keys[j+mvN]: # Update the filearray too
+        if replaced_start == -1:
+          replaced_start = q
+        if replaced_stop < q:
+          replaced_stop = q
+    file_ind_start = -1
+    file_ind_stop = 0
+    for q in range(0,len(fileArray.filearray)):
+      if fileArray.filearray[q][0] == OL.keys[j]: # Update the filearray too
+        if file_ind_start == -1:
+          file_ind_start = q
+        if file_ind_stop < q:
+          file_ind_stop = q
+    if mvN>0:
+      fileArray.filearray = subshift(fileArray.filearray,file_ind_start,file_ind_stop+1,replaced_stop-(file_ind_stop-file_ind_start))
+    if mvN<0:
+      fileArray.filearray = subshift(fileArray.filearray,file_ind_start,file_ind_stop+1,replaced_start)
+
   finally:
     fileArray.mutex.release()
-    return fileArray.filearray
+    #return fileArray.filearray
 
 # FIXME FIXME this method should change for a new OL technique
 def copy_filearray_menu(OL,fileArray,butMenu):

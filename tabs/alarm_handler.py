@@ -264,7 +264,7 @@ class ALARM_HANDLER(tk.Frame):
   def initialize_cols(self,OL):
     for i in range(0, int(1.0*(len(OL.keys)+(self.NperCol-self.NperCol1))/(self.NperCol))+1):
       self.alarmCols.append(tk.LabelFrame(self.aFrame, text=self.colTitles.get(i,"ctd."), background=u.lightgrey_color))
-      self.alarmCols[i].grid(column=i,row=0,padx=5,pady=5,sticky='N')
+      self.alarmCols[i].grid(column=i*4,row=0,padx=5,pady=5,sticky='N')
 
   def update_displayFrame(self,OL,localBut):
     i,j = localBut.indices
@@ -384,12 +384,13 @@ class ALARM_HANDLER(tk.Frame):
           disp.userNotifyStatus = 0
         lgrid.append(disp)
 
-        disp.butt = tk.Button(lgrid[i], text="Value = {}".format(OL.objectList[key].parameterList.get("Value",u.defaultKey)), justify='center', background=u.lightgrey_color) # loop over displayFrames
+        disp.butt = tk.Button(lgrid[i], text="{}".format(OL.objectList[key].parameterList.get("Value",u.defaultKey)), justify='center', background=u.lightgrey_color) # loop over displayFrames
         #disp.butt = tk.Button(lgrid[i], text="{}".format(OL.objectList[key].parameterList.get("Value",u.defaultKey)), justify='center', background=u.lightgrey_color) # loop over displayFrames
         #disp.butt = tk.Button(lgrid[i], text="Value = {}".format(OL.objectList[key].parameterList.get("Value",u.defaultKey)), justify='center', background=OL.objectList[key].color) # loop over displayFrames
         disp.butt.indices = (2,i)
         disp.butt.config(command = lambda but=disp.butt: self.select_disp_button(OL,fileArray,but))
         disp.butt.grid(row=0,column=1,sticky='E')
+        #disp.butt.grid(row=0,column=1,sticky='E')
         disp.radioButRed = tk.Radiobutton(lgrid[i], text=OL.objectList[key].alarmStatus, indicatoron=False, justify='left', value=lgrid[i].alarmStatus, variable=lgrid[i].redStat, fg=u.white_color, bg=u.lightgrey_color,
             activebackground=u.grey_color, activeforeground=u.black_color, selectcolor = u.red_color, highlightbackground=u.red_color, highlightcolor=u.red_color, highlightthickness=1)
         disp.radioButRed.indices = (2,i)
@@ -432,6 +433,7 @@ class ALARM_HANDLER(tk.Frame):
   def initialize_menus(self,OL,fileArray):
     grid = []
     #print("Adding menus, len(self.alarmCols) = {} times".format(len(self.alarmCols)))
+    # FIXME there is probably a more OOP friendly way of doing this loop... for each in displayFrames? each in Keys?
     for i in range(0, len(self.displayFrames)):
       if len(OL.keys)>=i:
         buttMenu = tk.Menu(self.displayFrames[i].butt, tearoff=0) # Is having the owner be button correct?
@@ -439,6 +441,8 @@ class ALARM_HANDLER(tk.Frame):
         buttMenu.moveN = 0
         buttMenu.editValue = None
         buttMenu.add_command(label = 'Information', command = lambda butMenu = buttMenu: self.button_information_menu(OL,fileArray,butMenu))
+        buttMenu.add_command(label = 'Edit', command = lambda butMenu = buttMenu: self.button_edit_menu(OL,fileArray,butMenu))
+        buttMenu.add_command(label = 'Move', command = lambda butMenu = buttMenu: self.button_move_menu(OL,fileArray,butMenu))
         buttMenu.add_command(label = 'Acknowledge Alarm', command = lambda butMenu = buttMenu: self.button_notify_acknowledge_menu(OL,fileArray,butMenu))
         buttMenu.add_command(label = 'Silence', command = lambda butMenu = buttMenu: self.button_silence_menu(OL,fileArray,butMenu))
         self.displayFrames[i].butt.bind("<Button-3>",lambda event, butMenu = buttMenu: self.do_popup(event,butMenu))
@@ -603,6 +607,48 @@ class ALARM_HANDLER(tk.Frame):
     self.controlButtons[4].config(text="{}{}".format(self.controlButtonsText[4],self.CBTextSuffix2[4]))
     #self.controlButtons[4].grid(row = 0, column = 3,columnspan=1,padx=5,pady=5,sticky='W')
     ####self.update_GUI(OL,fileArray)
+
+  def button_edit_menu(self,OL,fileArray,butMenu):
+    # Open the display_paramater_list, but now with all parameters editable like config tab... may need to pause loops
+    # Also include a "Save", "Delete" (with a confirmation popup) and "Move" and "Copy" button on the bottom
+    i,j = butMenu.indices
+    self.select_button(OL,fileArray,self.displayFrames[j].butt)
+    #self.update_GUI(OL,fileArray)
+
+  def button_move_menu(self,OL,fileArray,butMenu):
+    i,j = butMenu.indices
+    butMenu.moveN = simpledialog.askinteger("Input", "Move amount (+ is down, wraps columns)",parent = butMenu, maxvalue=(len(self.displayFrames)-j-1), minvalue=-1*j)
+    if butMenu.moveN == None:
+      butMenu.moveN = 0
+    # FIXME in-place move j to j+moveN in displayFrames[] and in OL.objectList[] and OL.keys[]
+    # FIXME also requires butMenu indices to be updated... likely affects a lot of indices...
+    u.move_filearray_menu(OL,fileArray,butMenu)
+    butMenu.indices = (i,j+butMenu.moveN)
+
+    # This chunk plus select_button and that's it
+    #self.displayFrames = u.subshift(self.displayFrames,j,j+1,j+butMenu.moveN)
+    ###self.displayFrames[j+butMenu.moveN].indices = (i,j+butMenu.moveN)
+    #self.buttonMenus = u.subshift(self.buttonMenus,j,j+1,j+butMenu.moveN)
+    #for k in range(0,len(OL.keys)):
+      #self.displayFrames[k].butt.indices = (i,OL.objectList[OL.keys[k]].index)
+      #self.buttonMenus[k].indices = (i,OL.objectList[OL.keys[k]].index)
+    #self.erase_grid_all_col()
+
+    # Or this
+    #for i in range(0,len(self.alarmCols)):
+    #  self.alarmCols[i].destroy()
+    #self.alarmCols = []
+    #self.initialize_cols(OL)
+    for each in self.displayFrames:
+      each.destroy()
+    self.displayFrames = self.initialize_displayFrames(OL,fileArray)
+    for each in self.buttonMenus:
+      each.destroy()
+    self.buttonMenus = self.initialize_menus(OL,fileArray)
+
+    # Needed
+    self.layout_grid_all_col(OL,fileArray)
+    self.select_button(OL,fileArray,self.displayFrames[j+butMenu.moveN].butt)
 
   def button_silence_menu(self,OL,fileArray,butMenu):
     i,j = butMenu.indices
