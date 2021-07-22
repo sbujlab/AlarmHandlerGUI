@@ -35,8 +35,8 @@ import tabs.alarm_history as alarm_history
 import tabs.settings as settings
 ## TCP/IP software for communicating with a remove server
 import bclient as bclient
-## Communicating with PVDB/RCDB database
-import rcdb as rcdb
+## Communicating with PVDB/RCDB database - unused
+#import rcdb as rcdb
 import gc
 from distutils.util import strtobool
 # Multi-threating support
@@ -55,7 +55,7 @@ class AlarmHandler:
     self.pdelim = '='
 
     parser = ArgumentParser()
-    parser.add_argument("-f", "--file", dest="filename", help="Configuration File Location", metavar="FILE", default="/adaqfs/home/apar/alarms/alarmConfig.txt")
+    parser.add_argument("-f", "--file", dest="filename", help="Configuration File Location", metavar="FILE", default="alarmConfig.txt")
     args = vars(parser.parse_args())
     # File array is literally an array of data with methods for reading a writing to disk
     self.conf = alarm_object.FILE_ARRAY(args['filename'],self.pdelim)
@@ -67,6 +67,9 @@ class AlarmHandler:
 
     # This is the initial get of alarm handler data from disk
     self.fileArray = alarm_object.FILE_ARRAY(self.filename,self.delim)
+    if len(self.fileArray.filearray) == 0:
+      print("ERROR: Null alarm input file, please resolve in configure file")
+      self.quit()
     # This is the initial get of alarm handler's previous instance history data from disk
     self.HL = alarm_object.HISTORY_LIST(self.histfilename,self.delim,self.pdelim,self.timeWait)
     # This tacks on to the end of the alarm handler data and "external" alarm information - allows an online analyzer or standalone script to supplement alarms into this GUI
