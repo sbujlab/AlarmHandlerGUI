@@ -12,19 +12,34 @@ import os
 import webbrowser
 from argparse import ArgumentParser
 import csv
+
+# Header file for data storage objects
 import alarm_object
-import help_buttons
-import tabs.expert_alarm_handler as expert_alarm_handler
-import tabs.alarm_handler as alarm_handler
-import tabs.grid_alarm_handler as grid_alarm_handler
-import tabs.active_alarm_handler as active_alarm_handler
-import tabs.alarm_history as alarm_history
-import tabs.settings as settings
+# Header file for miscellaneous file management, etc.
 import utils as u
+# Header file for some text dump help buttons at the bottom
+import help_buttons
+# Different tabs handled separately
+## Expert mode tries to have a nested tree - never quite got the display settings to work perfectly
+## FIXME Features that this mode has that would be good to replicate later is the ability to change groupings/labels of alarms and change any paramter name or value
+import tabs.expert_alarm_handler as expert_alarm_handler
+## The main alarm handler tab
+import tabs.alarm_handler as alarm_handler
+## Another version with all alarms displayed efficiently, but less readable info
+import tabs.grid_alarm_handler as grid_alarm_handler
+## A tab that only shows alarms that aren't "good" green
+import tabs.active_alarm_handler as active_alarm_handler
+## A tab that tracks recent alarms - FIXME needs a feature for auto-deleting old alarms rather than just getting too large
+import tabs.alarm_history as alarm_history
+## A tab for seeing the settings, and editing them too (FIXME requires being paused... which isn't obvious and should become a default feature)
+import tabs.settings as settings
+## TCP/IP software for communicating with a remove server
 import bclient as bclient
-import rcdb as rcdb
+## Communicating with PVDB/RCDB database - unused
+#import rcdb as rcdb
 import gc
 from distutils.util import strtobool
+# Multi-threating support
 from threading import Thread, Lock
 
 
@@ -40,26 +55,42 @@ class AlarmHandler:
     self.pdelim = '='
 
     parser = ArgumentParser()
-    parser.add_argument("-f", "--file", dest="filename", help="Configuration File Location", metavar="FILE", default="/adaqfs/home/apar/alarms/alarmConfig.txt")
+    parser.add_argument("-f", "--file", dest="filename", help="Configuration File Location", metavar="FILE", default="alarmConfig.txt")
     args = vars(parser.parse_args())
+    # File array is literally an array of data with methods for reading a writing to disk
     self.conf = alarm_object.FILE_ARRAY(args['filename'],self.pdelim)
 
+    # This method gets config data from the array
     u.parse_config(self.conf)
+    # This update changes the config data for this instance of AlarmHandler (probably should be more like self.update_config(), but this works)
     u.update_config(self)
 
+    # This is the initial get of alarm handler data from disk
     self.fileArray = alarm_object.FILE_ARRAY(self.filename,self.delim)
+    if len(self.fileArray.filearray) == 0:
+      print("ERROR: Null alarm input file, please resolve in configure file")
+      self.quit()
+    # This is the initial get of alarm handler's previous instance history data from disk
     self.HL = alarm_object.HISTORY_LIST(self.histfilename,self.delim,self.pdelim,self.timeWait)
+    # This tacks on to the end of the alarm handler data and "external" alarm information - allows an online analyzer or standalone script to supplement alarms into this GUI
     if os.path.exists(self.externalFilename): # Special case for running in an external situation like Japan or camguin analysis
       self.externalFileArray = alarm_object.FILE_ARRAY(self.externalFilename,self.delim)
     else:
       self.externalFileArray = None
+    # FIXME here is the instantiation into memory of alarm data
     self.OL = alarm_object.OBJECT_LIST(self.fileArray,self.cooldownLength)
+    # Alarm indicator image, also serves as a sound checker and GUI refresh when clicked
     self.masterAlarmImage = tk.PhotoImage(file='ok.ppm').subsample(2)
     self.masterAlarmButton = tk.Label(self.win, image=self.masterAlarmImage, cursor="hand2", bg=u.lightgrey_color)
+    # This is the TCP/IP connection to the alarm sound server
     self.alarmClient = bclient.sockClient(self.remoteName)
+    # Loop checks alarms
     self.alarmLoop = alarm_object.ALARM_LOOP(self)
+    # Loop controls GUI refreshes
     self.alarmLoopGUI = alarm_object.ALARM_LOOP_GUI(self)
+    # Loop controls sound making in the background
     self.alarmLoopMonitor = alarm_object.ALARM_LOOP_MONITOR(self)
+    # Creates all GUI tabs
     self.tabs = self.create_widgets()
   
   def get_alarm_handler_style(self):
@@ -74,6 +105,7 @@ class AlarmHandler:
     self.win.destroy()
     exit()
 
+  # FIXME Depreciated method (as far as I can tell)
   def update_show_alarms(self, event):
     for key in self.tabs:
       if key == "Alarm Handler" and self.OL.currentlySelectedButton != -1:
@@ -113,8 +145,10 @@ class AlarmHandler:
     elif self.showGrid == True:
       tab_titles = [('Alarm Handler', alarm_handler.ALARM_HANDLER),('Grid Alarm Handler', grid_alarm_handler.GRID_ALARM_HANDLER),('Active Alarm Handler', active_alarm_handler.ACTIVE_ALARM_HANDLER),('Alarm History', alarm_history.ALARM_HISTORY),('Settings',settings.SETTINGS)]
     else:
+      # Default case here
       tab_titles = [('Alarm Handler', alarm_handler.ALARM_HANDLER),('Active Alarm Handler', active_alarm_handler.ACTIVE_ALARM_HANDLER),('Alarm History', alarm_history.ALARM_HISTORY),('Settings',settings.SETTINGS)]
     tabs = {}
+    # An elaborate loop over the tabs titles and calling their instantiations and attaching to the master GUI
     for title, fn in tab_titles:
       tab = ttk.Frame(tab_control, width=10, height=20, style="My.TFrame")
       tab_control.add(tab, text=title)
@@ -134,6 +168,7 @@ class AlarmHandler:
     tk.Button(self.win, text='QUIT', command=quit, font = ('Helvetica 24 bold'), background=u.grey_color, width=5, height=2).grid(rowspan=3, row=1, column=2, padx=10, pady=10)#, sticky='NESW')
     return tabs
 
+# Actually calls the above methods to set the alarm handler in motion - all are on loops
 alarm_handler_GUI = AlarmHandler()
 Thread(alarm_handler_GUI.alarmLoopMonitor.alarm_loop_monitor(alarm_handler_GUI)).start()
 Thread(alarm_handler_GUI.alarmLoop.alarm_loop(alarm_handler_GUI)).start()

@@ -61,11 +61,12 @@ class SETTINGS(tk.Frame):
     lk = but.index
     key = but.key
     localStr = simpledialog.askstring("Input", "New setting value: ",parent = self.buttons[lk]) 
-    conf[key] = localStr
-    u.write_conf(conf)
-    self.buttons[lk].button.config(text = localStr)
-    print(conf)
-    self.update_settings(alarmHandlerWindow)
+    if localStr != None:
+      conf[key] = localStr
+      u.write_conf(conf)
+      self.buttons[lk].button.config(text = localStr)
+      print(conf)
+      self.update_settings(alarmHandlerWindow)
     #self.make_screen()
     
   def refresh_screen(self,alarmHandlerWindow):
